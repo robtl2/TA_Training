@@ -3,3 +3,7 @@ Logs/
 Temp/
 UserSettings/
 .DS_Store
+*.csproj
+*.sln
+*.log
+.vscode/
