@@ -3,6 +3,7 @@ using UnityEngine.Splines;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
+
 [ExecuteInEditMode]
 public class PathDemorm : MonoBehaviour
 {
@@ -15,7 +16,6 @@ public class PathDemorm : MonoBehaviour
     public bool debug;
 
     List<Material> mats = new List<Material>();
-
     Vector4[] _PathKnots;
     Vector4[] _PathNormals;
     Vector4[] _PathTangentsIn;
@@ -57,37 +57,11 @@ public class PathDemorm : MonoBehaviour
     }
 
     void InitMaterials()
-    {
-        mats.Clear();
-        foreach (var renderer in GetComponentsInChildren<MeshRenderer>())
-        {
-            Material[] _mats;
-            if (Application.isPlaying)
-                _mats = renderer.materials;
-            else
-                _mats = renderer.sharedMaterials;
-
-            foreach (var mat in _mats)
-            {
-                if (mat != null && !mats.Contains(mat))
-                    mats.Add(mat);
-            }
-        }
-
-        foreach (var renderer in GetComponentsInChildren<SkinnedMeshRenderer>())
-        {
-            Material[] _mats;
-            if (Application.isPlaying)
-                _mats = renderer.materials;
-            else
-                _mats = renderer.sharedMaterials;
-
-            foreach (var mat in _mats)
-            {
-                if (mat != null && !mats.Contains(mat))
-                    mats.Add(mat);
-            }
-        }
+    { 
+        mats = GetComponentsInChildren<MeshRenderer>().SelectMany(r => r.sharedMaterials)
+            .Concat(GetComponentsInChildren<SkinnedMeshRenderer>().SelectMany(r => r.sharedMaterials))
+            .Where(m => m != null)
+            .Distinct().ToList();
     }
 
     void Refresh()
@@ -103,7 +77,7 @@ public class PathDemorm : MonoBehaviour
             var tangentIn = knot.TangentIn;
             var tangentOut = knot.TangentOut;
             var rotation = knot.Rotation;
-            float3 normal = math.mul(math.normalize(rotation), new float3(0, 1, 0));
+            float3 normal = math.mul(math.normalize(rotation), new float3(-1, 0, 0));
             tangentIn = pos + math.mul(math.normalize(rotation), tangentIn);
             tangentOut = pos + math.mul(math.normalize(rotation), tangentOut);
 
@@ -138,18 +112,21 @@ public class PathDemorm : MonoBehaviour
         for (int i = 0; i < _PathKnotCount; i++)
         {
             var knot = transform.TransformPoint(_PathKnots[i]);
-            var normal = transform.TransformPoint(_PathNormals[i]);
+            var normal = knot + transform.TransformPoint(_PathNormals[i])*0.5f;
             var tangentIn = transform.TransformPoint(_PathTangentsIn[i]);
             var tangentOut = transform.TransformPoint(_PathTangentsOut[i]);
 
-            Gizmos.color = Color.red;
+            Gizmos.color = Color.yellow;
             Gizmos.DrawSphere(new Vector3(knot.x, knot.y, knot.z), 0.1f);
-            
+
             Gizmos.color = Color.green;
             Gizmos.DrawSphere(new Vector3(tangentIn.x, tangentIn.y, tangentIn.z), 0.06f);
 
-            Gizmos.color = Color.blue;
+            Gizmos.color = Color.cyan;
             Gizmos.DrawSphere(new Vector3(tangentOut.x, tangentOut.y, tangentOut.z), 0.06f);
+            
+            Gizmos.color = Color.blue;
+            Gizmos.DrawSphere(new Vector3(normal.x, normal.y, normal.z), 0.06f);
         }
     }
 

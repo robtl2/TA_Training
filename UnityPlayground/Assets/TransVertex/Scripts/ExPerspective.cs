@@ -20,6 +20,10 @@ public class ExPerspective : MonoBehaviour
 
     Camera targetCamera;
     List<Material> mats = new List<Material>();
+
+    int vpMatrixID;
+    int perspectivePropsID;
+
     void OnEnable()
     {
         Init();
@@ -51,6 +55,9 @@ public class ExPerspective : MonoBehaviour
 
     void Init()
     {
+        vpMatrixID = Shader.PropertyToID("_EX_VP");
+        perspectivePropsID = Shader.PropertyToID("_EX_PerspectiveProps");
+
         InitMaterials();
         InitCamera();
     }
@@ -67,8 +74,8 @@ public class ExPerspective : MonoBehaviour
 
         foreach (var mat in mats)
         {
-            mat.SetMatrix("_EX_VP", ex_vp);
-            mat.SetVector("_EX_PerspectiveProps", new Vector4(factor, offset, smooth, range));
+            mat.SetMatrix(vpMatrixID, ex_vp);
+            mat.SetVector(perspectivePropsID, new Vector4(factor, offset, smooth, range));
 
             if (debug)
                 mat.EnableKeyword("_DEBUG_ON");

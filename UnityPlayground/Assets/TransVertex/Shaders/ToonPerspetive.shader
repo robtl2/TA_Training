@@ -56,8 +56,8 @@ Shader "Tut/ToonPerspective"
                 float4 clipPos = mul(GetViewToHClipMatrix(), viewPos);
                 float4 clipPivot = mul(GetViewToHClipMatrix(), viewPivot);
                 viewPivot.xy = 0;
-                float4 clipViewPivot = mul(GetViewToHClipMatrix(), viewPivot);
-                float2 offset = clipPivot.xy/clipPivot.w - clipViewPivot.xy/clipViewPivot.w;
+                float4 clipOffsetPivot = mul(GetViewToHClipMatrix(), viewPivot);
+                float2 offset = clipPivot.xy/clipPivot.w - clipOffsetPivot.xy/clipOffsetPivot.w;
                 clipPos.xy += offset*clipPos.w;
             #else
                 float4 clipPos = TransformObjectToHClip(v.positionOS.xyz);

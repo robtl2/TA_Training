@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 [ExecuteInEditMode]
 public class ToonPerspective : MonoBehaviour
@@ -31,36 +32,10 @@ public class ToonPerspective : MonoBehaviour
 
     void InitMaterials()
     {
-       mats.Clear();
-        foreach (var renderer in GetComponentsInChildren<MeshRenderer>())
-        {
-            Material[] _mats;
-            if (Application.isPlaying)
-                _mats = renderer.materials;
-            else
-                _mats = renderer.sharedMaterials;
-
-            foreach (var mat in _mats)
-            {
-                if (mat != null && !mats.Contains(mat))
-                    mats.Add(mat);
-            }
-        }
-
-        foreach (var renderer in GetComponentsInChildren<SkinnedMeshRenderer>())
-        {
-            Material[] _mats;
-            if (Application.isPlaying)
-                _mats = renderer.materials;
-            else
-                _mats = renderer.sharedMaterials;
-
-            foreach (var mat in _mats)
-            {
-                if (mat != null && !mats.Contains(mat))
-                    mats.Add(mat);
-            }
-        } 
+      mats = GetComponentsInChildren<MeshRenderer>().SelectMany(r => r.sharedMaterials)
+            .Concat(GetComponentsInChildren<SkinnedMeshRenderer>().SelectMany(r => r.sharedMaterials))
+            .Where(m => m != null)
+            .Distinct().ToList();
     }
 
     void Refresh()
