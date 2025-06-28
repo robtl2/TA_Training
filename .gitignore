@@ -4,6 +4,7 @@
 **/.vscode/
 **/UserSettings/
 **/.DS_Store
+**/.ProjectVersion.txt
 *.csproj
 *.sln
 *.log
