@@ -24,10 +24,20 @@ public class BlobShadow : MonoBehaviour
 
     void OnDisable()
     {
+        blobs.Remove(this);
+
         if (blobMan == this)
+        {
             blobMan = null;
 
-        blobs.Remove(this);
+            // blobMan被关了的话，其它blob就再抢一次
+            BlobShadow[] blobArray = blobs.ToArray(); //先复制一份出来再遍历，防患于未然
+            foreach (var blob in blobArray)
+            {
+                blob.OnDisable();
+                blob.OnEnable();
+            }
+        }
     }
 
     Vector4 CalculateRect()
