@@ -32,12 +32,27 @@ float _Length;
 float _TipScale;
 float4 _WindDirection;
 
+float4 _Debug;
+
+float2 hash2_2(float2 val)
+{
+    float2 h = frac(sin(float2(dot(val, float2(127.1,311.7)), dot(val, float2(269.5,183.3))))*43758.5453);
+
+    return h*2-1;
+}
+
 Varyings vert (Attributes v)
 {
     Varyings o;
     UNITY_SETUP_INSTANCE_ID(v);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
     float3 pivot = TransformObjectToWorld(v.positionOS.xyz);
+
+    float2 offset = floor(pivot.xz*_Debug.x);
+    offset = hash2_2(offset)*_Debug.y;
+
+    pivot.xz += offset;
+
     float3 nor = TransformObjectToWorldNormal(v.normalOS);
 
     float2 interactionUV = pivot.xz - _GrassCurrAABB.xy;
@@ -65,6 +80,7 @@ Varyings vert (Attributes v)
     
     float3 pos = pivot + nor * _Length * uv.y;
     pos += side * _Thickness * (uv.x-0.5);
+    
     o.positionCS = TransformWorldToHClip(pos);
     o.uv = TRANSFORM_TEX(v.uv, _MainTex);
     o.interaction = interaction;

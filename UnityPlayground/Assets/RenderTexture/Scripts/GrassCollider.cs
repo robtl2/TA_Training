@@ -4,7 +4,6 @@ using UnityEngine;
 public class GrassCollider : MonoBehaviour
 {
     public float radius = 1.0f;
-    public bool debug = false;
 
     void OnEnable()
     {

@@ -86,10 +86,15 @@ public class GrassInteractionRF : ScriptableRendererFeature
 
                 // 3. 设置新VP
                 cmd.SetViewProjectionMatrices(V, P);
+                
+                cmd.SetGlobalFloat("_DeltaTime", Time.deltaTime);
 
                 // 4. 绘制interactionRT
                 if (data.isFirstFrame)// 第一次绘制时填充底色，后继绘制接着上一帧的结果继续画
+                {
                     cmd.ClearRenderTarget(false, true, new Color(0.5f, 0.5f, 0f, 1f));
+                    Debug.Log("firstFrame clear");
+                }
 
                 // 5. 降低上一帧记录的方向的强度
                 // TODO: 用上一帧aabb左下角与当前aabb左下角的偏移量计算出uv偏移值传给材质
@@ -113,7 +118,7 @@ public class GrassInteractionRF : ScriptableRendererFeature
             const string passName = "GrassInteractionRT";
 
             // 计算 AABB
-            UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
+            // UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
             var cameraData = frameData.Get<UniversalCameraData>();
             float4 aabb = GrassInteractions.instance.AABB_Range;
 
@@ -210,8 +215,10 @@ public class GrassInteractionRF : ScriptableRendererFeature
 
     public override void Create()
     {
-        m_ScriptablePass = new GrassInteractionPass(this);
-        m_ScriptablePass.renderPassEvent = RenderPassEvent.BeforeRenderingOpaques;
+        m_ScriptablePass = new GrassInteractionPass(this)
+        {
+            renderPassEvent = RenderPassEvent.BeforeRenderingOpaques
+        };
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
@@ -225,7 +232,8 @@ public class GrassInteractionRF : ScriptableRendererFeature
     {
         // 调用基类的Dispose方法
         base.Dispose(disposing);
-        
+
+        Debug.Log("dispose");
         // 清理RenderTexture资源
         if (disposing && m_ScriptablePass != null)
         {

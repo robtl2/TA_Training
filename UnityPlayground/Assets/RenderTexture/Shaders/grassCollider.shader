@@ -54,9 +54,6 @@ Shader "Universal Render Pipeline/grassCollider"
                 
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
-
-                float3 pivot = unity_ObjectToWorld._m03_m13_m23;
-                float3 posWorld = input.positionOS.xyz + pivot;
                 
                 output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
                 output.uv = input.uv;

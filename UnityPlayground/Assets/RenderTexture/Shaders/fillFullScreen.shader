@@ -15,7 +15,7 @@ Shader "Universal Render Pipeline/fillFullScreen"
         }
         LOD 100
         
-        Blend SrcAlpha OneMinusSrcAlpha
+        // Blend One OneMinusSrcAlpha
         ZWrite Off
         ZTest Always
         Cull Back
@@ -46,6 +46,7 @@ Shader "Universal Render Pipeline/fillFullScreen"
             SAMPLER(sampler_GrassPrevRT);
 
             float _FadeOut;
+            float _DeltaTime;
 
             Varyings vert(Attributes input)
             {
@@ -65,11 +66,11 @@ Shader "Universal Render Pipeline/fillFullScreen"
                     uv.y = 1-uv.y;
                 #endif  
 
-                half4 col = SAMPLE_TEXTURE2D(_GrassPrevRT, sampler_GrassPrevRT, uv);
+                half2 col = SAMPLE_TEXTURE2D(_GrassPrevRT, sampler_GrassPrevRT, uv).rg;
                 half2 defautDir = float2(0.5,0.5);
-                half deltaTime = unity_DeltaTime.x*_FadeOut;
-                col.rg = lerp(defautDir,col.rg,1-deltaTime);
-                return col;
+                half delta = _DeltaTime*_FadeOut;
+                col = lerp(defautDir,col, 1-delta);
+                return half4(col,1,1);
             }
             ENDHLSL
         }

@@ -14,6 +14,8 @@ Shader "URP/Unlit/billboardGrass"
         _TipScale ("TipScale", Float) = 1
         _Thickness ("Thickness", Float) = 0.05
         _Length ("Length", Float) = 0.2
+
+        _Debug ("Debug", Vector) = (100, 0.1, 0, 0)
     }
     SubShader
     {

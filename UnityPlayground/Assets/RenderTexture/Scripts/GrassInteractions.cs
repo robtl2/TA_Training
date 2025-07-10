@@ -13,7 +13,9 @@ public class GrassInteractions : MonoBehaviour
     public Matrix4x4[] grassColliderMatrices = new Matrix4x4[64];
     public int grassColliderCount = 0;
     public Material material;
-    public Vector4 AABB_Range = new(-1,-1,1,1);
+    
+    // TODO: public 出去一个size,坐标依据transform.position.xz自动调整
+    public Vector4 AABB_Range = new(-1, -1, 1, 1);
 
     void Start()
     {

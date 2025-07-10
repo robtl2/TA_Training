@@ -67,7 +67,7 @@ Shader "Universal Render Pipeline/grassDebug"
                 #endif  
                 half4 col_curr = SAMPLE_TEXTURE2D(_GrassCurrRT, sampler_GrassCurrRT, uv);
                 half2 dir = col_curr.rg;
-                return col_curr;
+                // return col_curr;
                 return half4(dir,0, _Alpha);
             }
             ENDHLSL
