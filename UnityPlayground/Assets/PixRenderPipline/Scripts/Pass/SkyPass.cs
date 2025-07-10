@@ -1,0 +1,19 @@
+using UnityEngine;
+
+public class SkyPass : PixPassBase
+{
+    public SkyPass(PixRenderer renderer) : base("PixSkyPass", renderer) { }
+
+    public override void Execute()
+    {
+        var asset = renderer.asset;
+        asset.skyMaterial.SetFloat("_RotateSky", asset.rotateSky);
+        asset.skyMaterial.SetFloat("_SkyIntensity", asset.skyIntensity);
+        asset.skyMaterial.SetFloat("_SkyFovScale", asset.skyFovScale);
+
+        cmb.SetRenderTarget(DeferredPass.ColorBuff, EarlyZPass.depthID);
+        cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, asset.skyMaterial, 0, 0);
+        renderer.context.ExecuteCommandBuffer(cmb);
+        cmb.Clear();
+    }
+}
