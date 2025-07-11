@@ -122,8 +122,8 @@ public class PixPassBase
     #endregion
 
     
-    public PixRenderer renderer;
-    readonly string passName;
+    public PixRenderer renderer { get; private set; }
+    public  string passName { get; private set; }
     public PixPassBase(string passName, PixRenderer renderer)
     {
         this.renderer = renderer;

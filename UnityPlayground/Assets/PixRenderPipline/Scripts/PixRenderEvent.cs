@@ -32,7 +32,7 @@ public enum PixRenderEventName
 
 public class PixRenderEvent
 {
-    public static Dictionary<PixRenderEventName, Action<PixRenderer>> events = new();
+    static Dictionary<PixRenderEventName, Action<PixRenderer>> events = new();
 
     public static void AddEvent(PixRenderEventName name, Action<PixRenderer> action)
     {

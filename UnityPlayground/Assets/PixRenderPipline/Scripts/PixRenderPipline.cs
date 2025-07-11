@@ -7,8 +7,8 @@ using UnityEngine.Rendering;
 /// </summary>
 public class PixRenderPipline : RenderPipeline
 {
-    public PixRenderPiplineAsset asset;
-    public PixRenderer renderer;
+    public PixRenderPiplineAsset asset { get; private set; }
+    public PixRenderer renderer { get; private set; }
 
     public PixRenderPipline(PixRenderPiplineAsset asset)
     {

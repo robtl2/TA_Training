@@ -38,7 +38,7 @@ half ContactShadow(Light light, half3 positionWS){
     if(light.contactShadow == 0) return 1.0h;
 
     int sampleCount = light.contactSampleCount + 1; 
-    half step = light.contactShadow/sampleCount; //采样步长
+    half step = light.contactShadow; //采样步长
     half3 pos = positionWS; //ray的起点
 
     //遍历次数不定加[loop]，避免编译器unroll优化时报错

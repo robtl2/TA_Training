@@ -52,7 +52,7 @@ public class PixLight : MonoBehaviour
     [Range(0f, 0.25f)]
     public float contactRayLength = 0.25f;
 
-    [Range(1, 16)]
+    [Range(1, 8)]
     public int contactSampleCount = 1;
 
     [Header("Volume Light")]
@@ -100,6 +100,7 @@ public class PixLight : MonoBehaviour
         Shader.SetGlobalVector("_PixMainLightDirection", -transform.forward);
         Shader.SetGlobalColor("_PixMainLightColor", color * intensity);
         float contactShadow = enableContactShadow ? contactRayLength : 0;
+        contactShadow /= contactSampleCount;
         Shader.SetGlobalFloat("_PixMainLightContactShadow", contactShadow);
         Shader.SetGlobalInt("_PixMainLightContactSampleCount", contactSampleCount);
 

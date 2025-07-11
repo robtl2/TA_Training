@@ -12,54 +12,54 @@ public class PixRenderer
     /// <summary>
     /// 这就是那个菜单
     /// </summary>
-    public ScriptableRenderContext context;
+    public ScriptableRenderContext context { get; private set; }
 
     /// <summary>
     /// commandBuffer就像是写制作流程的笔
     /// pass通过这个commandBuffer把流程写到上面的菜单里 
     /// </summary>
-    public CommandBuffer cmb;
+    public CommandBuffer cmb { get; private set; }
 
     /// <summary>
     /// 当前客户
     /// </summary>
-    public Camera camera;
+    public Camera camera { get; private set; }
 
     /// <summary>
     /// 把asset拿手上才知道参数
     /// </summary>
-    public PixRenderPiplineAsset asset;
+    public PixRenderPiplineAsset asset { get; private set; }
 
     /// <summary>
     /// 是否是unityEditor中的Scene相机
     /// </summary>
-    public bool isSceneView = false;
+    public bool isSceneView { get; private set; }
 
     /// <summary>
     /// 绘制非UI元素时RenderTexture的色彩空间
     /// 这里可以切换纯为了讲课 
     /// </summary>
-    public RenderTextureReadWrite colorSpace = RenderTextureReadWrite.Linear;
+    public RenderTextureReadWrite colorSpace { get; private set; }
 
     /// <summary>
     /// 绘制尺寸
     /// </summary>
-    public int2 size;
+    public int2 size { get; private set; }
 
     /// <summary>
     /// TiledPass绘制尺寸
     /// </summary>
-    public int2 tiledSize;
+    public int2 tiledSize { get; private set; }
 
     /// <summary>
     /// 相机剔除结果
     /// </summary>
-    public CullingResults cullingResults;
+    public CullingResults cullingResults { get; private set; }
 
     /// <summary>
     /// 相机剔除是否成功
     /// </summary>
-    public bool cullingSuccess;
+    public bool cullingSuccess { get; private set; }
 
     public PixRenderer()
     {
