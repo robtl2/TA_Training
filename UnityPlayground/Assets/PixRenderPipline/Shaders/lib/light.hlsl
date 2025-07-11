@@ -9,6 +9,7 @@ half3 _PixMainLightPosition;
 half3 _PixMainLightDirection;
 half3 _PixMainLightColor;
 half _PixMainLightContactShadow;
+int _PixMainLightContactSampleCount;
 
 
 struct Light{
@@ -16,6 +17,8 @@ struct Light{
     half3 direction;
     half3 color;
     half contactShadow;
+    int contactSampleCount;
+
     half NoL;
     half shadow;
     half3 lit;
@@ -27,16 +30,19 @@ Light GetMainLight(){
     light.direction = _PixMainLightDirection;
     light.color = _PixMainLightColor;
     light.contactShadow = _PixMainLightContactShadow;
+    light.contactSampleCount = _PixMainLightContactSampleCount;
     return light;
 }
 
 half ContactShadow(Light light, half3 positionWS){
     if(light.contactShadow == 0) return 1.0h;
 
-    int sampleCount = 4; //事实采样次数为sampleCount-1
+    int sampleCount = light.contactSampleCount + 1; 
     half step = light.contactShadow/sampleCount; //采样步长
     half3 pos = positionWS; //ray的起点
 
+    //遍历次数不定加[loop]，避免编译器unroll优化时报错
+    [loop]
     for(int i = 1; i < sampleCount; i++){
         pos += light.direction * step; //ray的步进
 
