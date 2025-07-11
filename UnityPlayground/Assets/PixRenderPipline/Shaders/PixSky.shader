@@ -41,8 +41,8 @@ Shader "Pix/Sky"
             struct VaryingsDepth
             {
                 float4 positionCS : SV_POSITION;
-                float4 positionVS : TEXCOORD0;
                 float2 uv : TEXCOORD1;
+                float3 viewDir : TEXCOORD2;
             };
 
             TEXTURE2D(_SkyTex);SAMPLER(sampler_SkyTex);
@@ -58,9 +58,15 @@ Shader "Pix/Sky"
                 float3 positionVS = float3(pos, 0.001);  //留下V空间的坐标后面转世界空间方便些
                 float3 positionCS = mul(UNITY_MATRIX_P, positionVS);
 
+                positionVS.xy *= -positionVS.z;
+                positionVS.xy *= _SkyFovScale;
+                float4 posWorld = mul(UNITY_MATRIX_I_V, float4(positionVS, 1.0));
+                float3 viewDir = normalize(_WorldSpaceCameraPos - posWorld.xyz);
+                viewDir = rotate_y(viewDir, _RotateSky);
+
                 VaryingsDepth output;
                 output.positionCS = float4(positionCS, 1.0);
-                output.positionVS = float4(positionVS, 1.0);
+                output.viewDir = viewDir;
                 output.uv = uv;
                 return output;
             }
@@ -68,15 +74,7 @@ Shader "Pix/Sky"
             half4 frag(VaryingsDepth input) : SV_Target
             {
                 half2 uv = input.uv;
-                half4 positionVS = input.positionVS;
-                positionVS.xy *= -0.001;
-                positionVS.xy *= _SkyFovScale;
-
-                float4 posWorld = mul(UNITY_MATRIX_I_V, positionVS);
-                float3 viewDir = normalize(_WorldSpaceCameraPos - posWorld.xyz);
-
-                viewDir = rotate_y(viewDir, _RotateSky);
-                half2 thetaPhi = DirToThetaPhi(viewDir);
+                half2 thetaPhi = DirToThetaPhi(input.viewDir);
                 half3 sky = SAMPLE_TEXTURE2D_GRAD(_SkyTex, sampler_SkyTex, thetaPhi, ddx(uv), ddy(uv)).rgb;
                 sky *= _SkyIntensity;
                 

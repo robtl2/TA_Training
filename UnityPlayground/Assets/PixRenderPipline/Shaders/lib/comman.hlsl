@@ -19,7 +19,7 @@ half2 DirToThetaPhi(float3 dir)
 {
     dir = normalize(dir);
 
-#if MATH_ACC       
+#if MATH_ACC   
     half theta = fast_acos(dir.y);
     half phi = fast_atan2(dir.x, dir.z);
 #else

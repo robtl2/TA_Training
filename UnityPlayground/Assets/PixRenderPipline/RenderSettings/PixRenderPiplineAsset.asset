@@ -16,8 +16,7 @@ MonoBehaviour:
   colorSpace: 1
   skyMaterial: {fileID: 2100000, guid: 526b9f76b15ff40729f28a587e057800, type: 2}
   skyIntensity: 1.13
-  rotateSky: -0.02
+  rotateSky: 0.09
   skyFovScale: 1.54
   debugMode: 0
   debugSize: 1
-  debug: 0.1
