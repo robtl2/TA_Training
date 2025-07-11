@@ -36,21 +36,24 @@ public class PixLight : MonoBehaviour
     }
 
     public LightType lightType = LightType.MainDirectional;
-    public ShadowMapType shadowMapType = ShadowMapType.None;
-    public float shadowMapSize = 512;
-    public ShadowMapArea shadowMapArea = ShadowMapArea.Camera;
-
-    public bool enableContactShadow = false;
-
-    [Range(0f, 0.25f)]
-    public float contactRayLength = 0.25f;
-    public bool volumeLight = false;
 
     public Color color = Color.white;
     public float intensity = 10;
 
+    [Header("Shadow")]
+    public ShadowMapType shadowMapType = ShadowMapType.None;
+    public float shadowMapSize = 512;
+    public ShadowMapArea shadowMapArea = ShadowMapArea.Camera;
     public Transform AABB_LocaltionTarget;
-    public Bounds AABB_Bounds;
+    public Vector3 AABB_Size;
+    
+    public bool enableContactShadow = false;
+
+    [Range(0f, 0.25f)]
+    public float contactRayLength = 0.25f;
+
+    [Header("Volume Light")]
+    public bool volumeLight = false;
 
     [HideInInspector]
     [SerializeField]
