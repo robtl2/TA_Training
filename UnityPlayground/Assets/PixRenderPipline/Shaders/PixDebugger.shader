@@ -22,8 +22,8 @@ Shader "Pix/Debugger"
             #pragma vertex vert
             #pragma fragment frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "lib/gbuffer.hlsl"
-            
+            #include "lib/light.hlsl"
+
             struct AttributesDepth
             {
                 float4 positionOS : POSITION;
@@ -37,7 +37,6 @@ Shader "Pix/Debugger"
                 float4 tiled_id : TEXCOORD1;
             };
 
-            TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
             int _Channel;
             float _Size;
@@ -66,13 +65,18 @@ Shader "Pix/Debugger"
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
 
-                half3 debugColor[6] = {
+                half2 screenUV = posWorldToScreenUV(gbufferData.positionWS);
+
+                half3 test = sampleDepth(screenUV);
+
+                half3 debugColor[7] = {
                     gbufferData.albedo,
                     gbufferData.positionWS,
                     gbufferData.normalWS,
                     gbufferData.normalVS,
                     gbufferData.NoV.xxx,
                     gbufferData.depth.xxx,
+                    test,
                 };
                 
                 return half4(debugColor[_Channel], gbufferData.alpha);

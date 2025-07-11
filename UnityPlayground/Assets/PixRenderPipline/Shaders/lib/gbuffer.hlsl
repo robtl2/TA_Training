@@ -1,3 +1,7 @@
+#ifndef GBUFFER_INCLUDED
+#define GBUFFER_INCLUDED
+
+#include "comman.hlsl"
 
 struct GBufferData
 {
@@ -23,6 +27,7 @@ struct GBuffer
 
 TEXTURE2D(_PixGBuffer0);SAMPLER(sampler_PixGBuffer0);
 TEXTURE2D(_PixGBuffer1);SAMPLER(sampler_PixGBuffer1);
+TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 TEXTURE2D(_PixEarlyZDepth);SAMPLER(sampler_PixEarlyZDepth);
 
 half3 UnpackNormal(half2 nor)
@@ -78,6 +83,7 @@ GBufferData UnpackGBuffer(float2 uv)
     half3x3 viewToWorld = half3x3(right, up, viewDir);
     half3 normalWS = mul(normalVS, viewToWorld);
 
+
     GBufferData gbufferData;
     gbufferData.albedo = _color;
     gbufferData.alpha = gbuffer_0.a;
@@ -91,3 +97,14 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.depth = depth;
     return gbufferData;
 }
+
+half sampleDepth(float2 uv){
+    return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
+}
+
+half3 samplePositionWS(float2 uv){
+    half depth = sampleDepth(uv);
+    return ReconstructWorldPos(uv, depth);
+}
+
+#endif

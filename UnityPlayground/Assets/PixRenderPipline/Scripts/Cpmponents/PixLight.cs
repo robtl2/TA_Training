@@ -39,7 +39,11 @@ public class PixLight : MonoBehaviour
     public ShadowMapType shadowMapType = ShadowMapType.None;
     public float shadowMapSize = 512;
     public ShadowMapArea shadowMapArea = ShadowMapArea.Camera;
-    public bool controlShadow = false;
+
+    public bool enableContactShadow = false;
+
+    [Range(0f, 0.25f)]
+    public float contactRayLength = 0.25f;
     public bool volumeLight = false;
 
     public Color color = Color.white;
@@ -89,7 +93,9 @@ public class PixLight : MonoBehaviour
         Shader.SetGlobalVector("_PixMainLightPosition", transform.position);
         Shader.SetGlobalVector("_PixMainLightDirection", -transform.forward);
         Shader.SetGlobalColor("_PixMainLightColor", color * intensity);
-        
+        var contactShadow = enableContactShadow ? contactRayLength : 0;
+        Shader.SetGlobalFloat("_PixMainLightContactShadow", contactShadow);
+
         foreach (var light in lights)
         {
             if (light.lightType == LightType.Ambient)

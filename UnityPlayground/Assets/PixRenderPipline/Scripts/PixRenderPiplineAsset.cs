@@ -9,12 +9,14 @@ using Unity.Mathematics;
 [CreateAssetMenu(menuName = "Rendering/PixRenderPipline")]
 public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
 {
-#region main
+    #region main
     public enum RenderSize
     {
         _240p,
         _320p,
         _480p,
+        _640p,
+        _720p,
     }
     public RenderSize renderSize;
 
@@ -38,9 +40,9 @@ public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
 
     [Range(0, 3)]
     public float skyFovScale = 1;
-#endregion
+    #endregion
 
-#region GBuffer Debug
+    #region GBuffer Debug
     public enum DebugMode
     {
         None,
@@ -50,6 +52,7 @@ public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
         NormalVS,
         NdotV,
         Depth,
+        ScreenUV,
     }
 
     [Header("GBuffer Debug")]
@@ -57,6 +60,7 @@ public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
 
     [Range(0, 1)]
     public float debugSize = 1;
+
 #endregion
 
     protected override RenderPipeline CreatePipeline()
@@ -77,6 +81,12 @@ public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
                 break;
             case RenderSize._480p:
                 h = 480;
+                break;
+            case RenderSize._640p:
+                h = 640;
+                break;
+            case RenderSize._720p:
+                h = 720;
                 break;
         }
         int2 size = new((int)(h * aspect), h);

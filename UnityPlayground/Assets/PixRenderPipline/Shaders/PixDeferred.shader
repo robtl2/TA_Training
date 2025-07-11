@@ -3,6 +3,7 @@ Shader "Pix/Deferred"
 {
     Properties
     {
+        _Debug ("Debug", Float) = 0
     }
     SubShader
     {
@@ -28,6 +29,7 @@ Shader "Pix/Deferred"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/gbuffer.hlsl"
             #include "lib/light.hlsl"
+            #include "lib/comman.hlsl"
 
             struct AttributesDepth
             {
@@ -42,7 +44,7 @@ Shader "Pix/Deferred"
                 float4 tiled_id : TEXCOORD1;
             };
 
-            TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
+            
 
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -66,17 +68,11 @@ Shader "Pix/Deferred"
             {
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
-                MainLight mainLight = GetMainLight();
+                Light mainLight = GetMainLight();
 
-                half3 N = gbufferData.normalWS;
-                half3 L = mainLight.direction;
-
-                half3 NoL = saturate(dot(N, L));
-
-                NoL = smoothstep(0.0, 0.01, NoL);
-
-
-                half3 lit = mainLight.color * NoL + _PixAmbientLightColor;
+                CauclateLight(mainLight, gbufferData);
+                half3 lit = mainLight.lit;
+                lit += _PixAmbientLightColor;
 
                 half3 col = gbufferData.albedo * lit;
 
