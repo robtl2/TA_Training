@@ -65,7 +65,7 @@ Shader "Pix/Debugger"
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
 
-                half2 screenUV = posWorldToScreenUV(gbufferData.positionWS);
+                half2 screenUV = PosWorldToScreenUV(gbufferData.positionWS);
 
                 half3 test = sampleDepth(screenUV);
 

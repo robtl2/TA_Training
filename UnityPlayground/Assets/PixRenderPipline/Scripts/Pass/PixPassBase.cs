@@ -121,7 +121,6 @@ public class PixPassBase
     protected static Color black = new(0, 0, 0, 0);
     #endregion
 
-    
     public PixRenderer renderer { get; private set; }
     public  string passName { get; private set; }
     public PixPassBase(string passName, PixRenderer renderer)

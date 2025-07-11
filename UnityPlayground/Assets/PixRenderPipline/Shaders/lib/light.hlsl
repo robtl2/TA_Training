@@ -46,7 +46,7 @@ half ContactShadow(Light light, half3 positionWS){
     for(int i = 1; i < sampleCount; i++){
         pos += light.direction * step; //ray的步进
 
-        half2 uv = posWorldToScreenUV(pos);
+        half2 uv = PosWorldToScreenUV(pos);
         half depth = sampleDepth(uv);
         half4 ndcPos = TransformWorldToHClip(pos);
         half rayDepth = ndcPos.z/ndcPos.w;

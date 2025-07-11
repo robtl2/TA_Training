@@ -6,14 +6,14 @@ using UnityEngine.Rendering;
 /// </summary>
 public class PixDeferredRenderer : PixRenderer
 {
-    EarlyZPass earlyZPass;
-    GBufferPass gBufferPass;
-    TiledPass tiledPass;
-    DeferredPass deferredPass;
-    SkyPass skyPass;
-    TransparentPass transparentPass;
-    PostProcessPass postProcessPass;
-    FinalPass finalPass;
+    public EarlyZPass earlyZPass { get; private set; }
+    public GBufferPass gBufferPass { get; private set; }
+    public TiledPass tiledPass { get; private set; }
+    public DeferredPass deferredPass { get; private set; }
+    public SkyPass skyPass { get; private set; }
+    public TransparentPass transparentPass { get; private set; }
+    public PostProcessPass postProcessPass { get; private set; }
+    public FinalPass finalPass { get; private set; }
 
     public PixDeferredRenderer() { }
 
