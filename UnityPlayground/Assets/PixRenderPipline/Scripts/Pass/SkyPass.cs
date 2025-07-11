@@ -6,14 +6,15 @@ public class SkyPass : PixPassBase
 
     public override void Execute()
     {
+        base.Execute();
         var asset = renderer.asset;
         asset.skyMaterial.SetFloat("_RotateSky", asset.rotateSky);
         asset.skyMaterial.SetFloat("_SkyIntensity", asset.skyIntensity);
         asset.skyMaterial.SetFloat("_SkyFovScale", asset.skyFovScale);
 
-        cmb.SetRenderTarget(DeferredPass.ColorBuff, EarlyZPass.depthID);
-        cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, asset.skyMaterial, 0, 0);
-        renderer.context.ExecuteCommandBuffer(cmb);
-        cmb.Clear();
+        renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff, EarlyZPass.depthID);
+        renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, asset.skyMaterial, 0, 0);
+        renderer.context.ExecuteCommandBuffer(renderer.cmb);
+        renderer.cmb.Clear();
     }
 }

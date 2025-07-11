@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using UnityEngine.Rendering;
-using UnityEngine;
+using System;
 
 /// <summary>
 /// 渲染事件,方便为渲染管线不同阶段扩展流程
@@ -31,13 +30,11 @@ public enum PixRenderEventName
     BeforeFinal,
 }
 
-public delegate void PixRenderEventDelegate(PixRenderer renderer, PixPassBase pass);
-
 public class PixRenderEvent
 {
-    public static Dictionary<PixRenderEventName, PixRenderEventDelegate> events = new();
+    public static Dictionary<PixRenderEventName, Action<PixRenderer>> events = new();
 
-    public static void AddEvent(PixRenderEventName name, PixRenderEventDelegate action)
+    public static void AddEvent(PixRenderEventName name, Action<PixRenderer> action)
     {
         if (events.TryGetValue(name, out var existingAction))
             events[name] = existingAction + action;
@@ -45,18 +42,18 @@ public class PixRenderEvent
             events[name] = action;
     }
 
-    public static void RemoveEvent(PixRenderEventName name, PixRenderEventDelegate action)
+    public static void RemoveEvent(PixRenderEventName name, Action<PixRenderer> action)
     {
         if (events.TryGetValue(name, out var existingAction))
             events[name] = existingAction - action;
     }
 
-    public static void TriggerEvent(PixRenderEventName name, PixRenderer renderer, PixPassBase pass)
+    public static void TriggerEvent(PixRenderEventName name, PixRenderer renderer)
     {
         if (events.TryGetValue(name, out var action))
-            action?.Invoke(renderer, pass);
+            action?.Invoke(renderer);
 
-        pass.cmb.Clear();
+        renderer.cmb.Clear();
     }
 
     public static void Dispose()

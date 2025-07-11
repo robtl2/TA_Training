@@ -11,23 +11,23 @@ public class DeferredPass : PixPassBase
 
     public override void Execute()
     {
-        GetTemporaryColorRT(ColorBuff);
-        cmb.SetRenderTarget(ColorBuff);
-
-        cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
-        cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
-        cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
-        cmb.SetGlobalTexture(TiledPass.tileID, TiledPass.tileID);
+        base.Execute();
 
         if (material == null)
             material = new Material(Shader.Find("Pix/Deferred"));
 
-        cmb.DrawMesh(TiledFullScreenQuad, Matrix4x4.identity, material, 0, 0);
-
-        cmb.ReleaseTemporaryRT(TiledPass.tileID);
-
-        renderer.context.ExecuteCommandBuffer(cmb);
-        cmb.Clear();
+        GetTemporaryColorRT(ColorBuff);
+        // TiledPass搞好后用Tile来剔除多余的栅格化
+        // EarlyZpass画的深度下面要拿来用，所以不管是深度还是Stencil都不能在这个Pass拿来测试象素
+        renderer.cmb.SetRenderTarget(ColorBuff);
+        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
+        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
+        renderer.cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
+        renderer.cmb.SetGlobalTexture(TiledPass.tileID, TiledPass.tileID);
+        renderer.cmb.DrawMesh(TiledFullScreenQuad, Matrix4x4.identity, material, 0, 0);
+        renderer.cmb.ReleaseTemporaryRT(TiledPass.tileID);
+        renderer.context.ExecuteCommandBuffer(renderer.cmb);
+        renderer.cmb.Clear();
     }
     
 }

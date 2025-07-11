@@ -11,19 +11,18 @@ public class TiledPass : PixPassBase
 
     public override void Execute()
     {
+        base.Execute();
         if (material == null)
             material = new Material(Shader.Find("Pix/Tiled"));
 
-        int2 size = renderer.size;
-        size /= 8;
-
+        int2 size = renderer.tiledSize;
         GetTemporaryColorRT(tileID, size.x, size.y);
-        cmb.SetRenderTarget(tileID);
-        cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
-        // TODO: 计算PerTiled Light
-        cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
+        renderer.cmb.SetRenderTarget(tileID);
+        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
+        // TODO: 计算PerTiled Lights和ShadingModel的掩码
+        renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
 
-        renderer.context.ExecuteCommandBuffer(cmb);
-        cmb.Clear();
+        renderer.context.ExecuteCommandBuffer(renderer.cmb);
+        renderer.cmb.Clear();
     }
 }

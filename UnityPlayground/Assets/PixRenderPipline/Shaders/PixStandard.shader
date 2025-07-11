@@ -105,6 +105,13 @@ Shader "Pix/Standard"
             ZTest LEqual
             ColorMask 0
 
+            Stencil
+            {
+                Ref 15
+                Comp Always
+                Pass Replace
+            }
+
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag

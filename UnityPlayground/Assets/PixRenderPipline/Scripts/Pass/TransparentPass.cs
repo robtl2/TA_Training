@@ -11,24 +11,25 @@ public class TransparentPass : PixPassBase
     
     public override void Execute()
     {
+        base.Execute();
         GetTemporaryColorRT(ColorBuff);
 
         //先把之前Deferred渲染的结果拿来
-        cmb.Blit(DeferredPass.ColorBuff, ColorBuff);
+        renderer.cmb.Blit(DeferredPass.ColorBuff, ColorBuff);
 
-        cmb.SetRenderTarget(ColorBuff, EarlyZPass.depthID);
-        cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
-        cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
-        cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);
+        renderer.cmb.SetRenderTarget(ColorBuff, EarlyZPass.depthID);
+        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
+        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
+        renderer.cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);
 
         RendererList list = GetRendererList(tagID, SortingCriteria.CommonTransparent, RenderQueueRange.transparent);
 
         if (list.isValid)
-            cmb.DrawRendererList(list);
+            renderer.cmb.DrawRendererList(list);
 
-        cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
+        renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
-        renderer.context.ExecuteCommandBuffer(cmb);
-        cmb.Clear();
+        renderer.context.ExecuteCommandBuffer(renderer.cmb);
+        renderer.cmb.Clear();
     }
 }

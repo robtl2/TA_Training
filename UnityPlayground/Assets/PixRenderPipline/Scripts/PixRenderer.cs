@@ -15,6 +15,12 @@ public class PixRenderer
     public ScriptableRenderContext context;
 
     /// <summary>
+    /// commandBuffer就像是写制作流程的笔
+    /// pass通过这个commandBuffer把流程写到上面的菜单里 
+    /// </summary>
+    public CommandBuffer cmb;
+
+    /// <summary>
     /// 当前客户
     /// </summary>
     public Camera camera;
@@ -41,6 +47,11 @@ public class PixRenderer
     public int2 size;
 
     /// <summary>
+    /// TiledPass绘制尺寸
+    /// </summary>
+    public int2 tiledSize;
+
+    /// <summary>
     /// 相机剔除结果
     /// </summary>
     public CullingResults cullingResults;
@@ -50,7 +61,13 @@ public class PixRenderer
     /// </summary>
     public bool cullingSuccess;
 
-    public PixRenderer() { }
+    public PixRenderer()
+    {
+        cmb = new CommandBuffer
+        {
+            name = "PixRenderer"
+        };
+    }
 
     public void Setup(ScriptableRenderContext context, Camera camera, PixRenderPiplineAsset asset)
     {
@@ -65,6 +82,7 @@ public class PixRenderer
     public virtual void Render()
     {
         size = asset.GetRenderSize(camera.aspect);
+        tiledSize = size / 8;
 
         colorSpace = RenderTextureReadWrite.Linear;
         if (asset.colorSpace == PixRenderPiplineAsset.ColorSpace.Gamma)

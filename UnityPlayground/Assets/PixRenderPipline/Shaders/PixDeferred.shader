@@ -11,6 +11,12 @@ Shader "Pix/Deferred"
 
         ZWrite Off
         ZTest Always
+
+        // Stencil
+        // {
+        //     Ref 1
+        //     Comp Equal
+        // }
        
         Pass
         {
@@ -21,6 +27,7 @@ Shader "Pix/Deferred"
             #pragma fragment frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/gbuffer.hlsl"
+            #include "lib/light.hlsl"
 
             struct AttributesDepth
             {
@@ -59,8 +66,21 @@ Shader "Pix/Deferred"
             {
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
+                MainLight mainLight = GetMainLight();
 
-                return half4(gbufferData.albedo, 1);
+                half3 N = gbufferData.normalWS;
+                half3 L = mainLight.direction;
+
+                half3 NoL = saturate(dot(N, L));
+
+                NoL = smoothstep(0.0, 0.01, NoL);
+
+
+                half3 lit = mainLight.color * NoL + _PixAmbientLightColor;
+
+                half3 col = gbufferData.albedo * lit;
+
+                return half4(col, 1);
             }
             ENDHLSL
         }

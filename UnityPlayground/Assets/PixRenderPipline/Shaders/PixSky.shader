@@ -13,8 +13,14 @@ Shader "Pix/Sky"
         LOD 100
 
         ZWrite Off
-        ZTest LEqual
+        ZTest Always
         Cull Front
+
+        Stencil
+        {
+            Ref 0
+            Comp Equal
+        }
 
         Pass
         {

@@ -22,24 +22,24 @@ public class PixDeferredRenderer : PixRenderer
         base.Render();
 
         earlyZPass ??= new EarlyZPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeEarlyZ, this, earlyZPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeEarlyZ, this);
         earlyZPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterEarlyZ, this, earlyZPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterEarlyZ, this);
 
         gBufferPass ??= new GBufferPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeGBuffer, this, gBufferPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeGBuffer, this);
         gBufferPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterGBuffer, this, gBufferPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterGBuffer, this);
 
         tiledPass ??= new TiledPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTiled, this, tiledPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTiled, this);
         tiledPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTiled, this, tiledPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTiled, this);
 
         deferredPass ??= new DeferredPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeDeferred, this, deferredPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeDeferred, this);
         deferredPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterDeferred, this, deferredPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterDeferred, this);
 
         if (asset.skyMaterial != null)
         {
@@ -48,17 +48,17 @@ public class PixDeferredRenderer : PixRenderer
         }
 
         transparentPass ??= new TransparentPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTransparent, this, transparentPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTransparent, this);
         transparentPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTransparent, this, transparentPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTransparent, this);
 
         postProcessPass ??= new PostProcessPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforePostProcess, this, postProcessPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforePostProcess, this);
         postProcessPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterPostProcess, this, postProcessPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterPostProcess, this);
 
         finalPass ??= new FinalPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeFinal, this, finalPass);
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeFinal, this);
         finalPass.Execute();
 
 #if UNITY_EDITOR

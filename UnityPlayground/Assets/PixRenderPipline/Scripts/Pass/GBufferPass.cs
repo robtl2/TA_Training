@@ -19,18 +19,19 @@ public class GBufferPass : PixPassBase
 
     public override void Execute()
     {
+        base.Execute();
         GetTemporaryColorRT(GbufferID_0);
         GetTemporaryColorRT(GbufferID_1);
 
-        cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);
-        cmb.ClearRenderTarget(false, true, black);
+        renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);
+        renderer.cmb.ClearRenderTarget(false, true, black);
 
         RendererList list = GetRendererList(gBufferTag, SortingCriteria.CommonOpaque, RenderQueueRange.opaque);
 
         if (list.isValid)
-            cmb.DrawRendererList(list);
+            renderer.cmb.DrawRendererList(list);
 
-        renderer.context.ExecuteCommandBuffer(cmb);
-        cmb.Clear();
+        renderer.context.ExecuteCommandBuffer(renderer.cmb);
+        renderer.cmb.Clear();
     }
 }

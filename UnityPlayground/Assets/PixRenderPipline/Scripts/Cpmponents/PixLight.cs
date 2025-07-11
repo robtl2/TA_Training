@@ -1,0 +1,122 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+[ExecuteInEditMode]
+[RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshRenderer))]
+public class PixLight : MonoBehaviour
+{
+    public static PixLight MainDirectionalLight;
+    public static List<PixLight> lights = new();
+
+    public enum LightType
+    {
+        MainDirectional,
+        Ambient,
+        Directional,
+        Point,
+        Spot
+    }
+
+    /// <summary>
+    /// 主光源才有实时ShadowMap
+    /// </summary>
+    public enum ShadowMapType
+    {
+        None,
+        Hard,
+        PCF,
+        PCSS,
+    }
+
+    public enum ShadowMapArea
+    {
+        Camera,
+        AABB_Box,
+    }
+
+    public LightType lightType = LightType.MainDirectional;
+    public ShadowMapType shadowMapType = ShadowMapType.None;
+    public float shadowMapSize = 512;
+    public ShadowMapArea shadowMapArea = ShadowMapArea.Camera;
+    public bool controlShadow = false;
+    public bool volumeLight = false;
+
+    public Color color = Color.white;
+    public float intensity = 10;
+
+    public Transform AABB_LocaltionTarget;
+    public Bounds AABB_Bounds;
+
+    [HideInInspector]
+    [SerializeField]
+    public Texture2D bakedShadowMap;
+
+    MeshFilter meshFilter;
+    MeshRenderer meshRenderer;
+
+    void Start()
+    {   
+        meshFilter = GetComponent<MeshFilter>();
+        meshRenderer = GetComponent<MeshRenderer>();
+
+        meshFilter.hideFlags = HideFlags.HideInInspector;
+        meshRenderer.hideFlags = HideFlags.HideInInspector;
+    }
+
+    void OnEnable()
+    {
+        if (lightType == LightType.MainDirectional)
+        {
+            MainDirectionalLight = this;
+        }
+        lights.Add(this);
+    }
+
+    void OnDisable()
+    {
+        if (lightType == LightType.MainDirectional)
+        {
+            MainDirectionalLight = null;
+        }
+        lights.Remove(this);
+    }
+
+    void Update()
+    {
+        if (lightType != LightType.MainDirectional) return;
+
+        Shader.SetGlobalVector("_PixMainLightPosition", transform.position);
+        Shader.SetGlobalVector("_PixMainLightDirection", -transform.forward);
+        Shader.SetGlobalColor("_PixMainLightColor", color * intensity);
+        
+        foreach (var light in lights)
+        {
+            if (light.lightType == LightType.Ambient)
+            {
+                Shader.SetGlobalColor("_PixAmbientLightColor", light.color * light.intensity);
+            }
+        }
+    }
+
+    void OnDestroy()
+    {
+        DestroyImmediate(bakedShadowMap);
+        DestroyImmediate(meshFilter);
+        DestroyImmediate(meshRenderer);
+    }
+
+#if UNITY_EDITOR
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 0.1f);
+    }
+
+    public void BakeShadowMap()
+    {
+
+    }
+#endif
+
+}

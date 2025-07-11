@@ -121,30 +121,24 @@ public class PixPassBase
     protected static Color black = new(0, 0, 0, 0);
     #endregion
 
-    /// <summary>
-    /// commandBuffer就像是写制作流程的笔
-    /// pass通过commandBuffer把流程写到renderer的菜单里 
-    /// </summary>
-    public CommandBuffer cmb;
+    
     public PixRenderer renderer;
-    readonly string _passName;
+    readonly string passName;
     public PixPassBase(string passName, PixRenderer renderer)
     {
         this.renderer = renderer;
-
-        _passName = passName;
-        cmb = new CommandBuffer
-        {
-            name = _passName
-        };
+        this.passName = passName;
     }
 
-    public virtual void Execute() { }
+    public virtual void Execute()
+    {
+        renderer.cmb.name = passName;
+    }
 
     #region 这里放一些做菜时常用的技法
     public void GetTemporaryColorRT(int nameID, int width, int height)
     {
-        cmb.GetTemporaryRT(nameID, width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32, renderer.colorSpace);
+        renderer.cmb.GetTemporaryRT(nameID, width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32, renderer.colorSpace);
     }
 
     public void GetTemporaryColorRT(int nameID)
@@ -179,5 +173,4 @@ public class PixPassBase
     }
 
     #endregion
-
 }
