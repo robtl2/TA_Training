@@ -9,6 +9,9 @@ public class PostProcessPass : PixPassBase
     public override void Execute()
     {
         base.Execute();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforePostProcess, renderer);
+
         if (postMaterial == null)
             postMaterial = new Material(Shader.Find("Hidden/Pix/Post"));
 
@@ -21,5 +24,7 @@ public class PostProcessPass : PixPassBase
 
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterPostProcess, renderer);
     }
 }

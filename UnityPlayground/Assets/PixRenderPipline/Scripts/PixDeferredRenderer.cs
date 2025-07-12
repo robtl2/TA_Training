@@ -1,5 +1,4 @@
 using UnityEngine.Rendering;
-using UnityEngine;
 
 /// <summary>
 /// 呐，几乎干的所有事情就是写下来我给的菜品方案而已
@@ -12,54 +11,41 @@ public class PixDeferredRenderer : PixRenderer
     public TiledPass tiledPass { get; private set; }
     public DeferredPass deferredPass { get; private set; }
     public SkyPass skyPass { get; private set; }
+    public DecalPass decalPass { get; private set; }
     public TransparentPass transparentPass { get; private set; }
     public PostProcessPass postProcessPass { get; private set; }
     public FinalPass finalPass { get; private set; }
 
-    public PixDeferredRenderer() { }
+    public PixDeferredRenderer()
+    { 
+        earlyZPass = new(this);
+        gBufferPass = new(this);
+        tiledPass = new(this);
+        deferredPass = new(this);
+        skyPass = new(this);
+        decalPass = new(this);
+        transparentPass = new(this);
+        postProcessPass = new(this);
+        finalPass = new(this);
+    }
 
     public override void Render()
     {
         base.Render();
 
-        earlyZPass ??= new EarlyZPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeEarlyZ, this);
         earlyZPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterEarlyZ, this);
-
-        gBufferPass ??= new GBufferPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeGBuffer, this);
         gBufferPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterGBuffer, this);
-
-        tiledPass ??= new TiledPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTiled, this);
         tiledPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTiled, this);
-
-        deferredPass ??= new DeferredPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeDeferred, this);
         deferredPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterDeferred, this);
 
         if (PixSky.instance != null && PixSky.instance.skyType != PixSky.SkyType.None)
-        {
-            skyPass ??= new SkyPass(this);
             skyPass.Execute();
-        }
 
-        transparentPass ??= new TransparentPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTransparent, this);
+        if (PixDecal.decals.Count > 0)
+            decalPass.Execute();
+
         transparentPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTransparent, this);
-
-        postProcessPass ??= new PostProcessPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforePostProcess, this);
         postProcessPass.Execute();
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterPostProcess, this);
-
-        finalPass ??= new FinalPass(this);
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeFinal, this);
         finalPass.Execute();
 
 #if UNITY_EDITOR
@@ -71,6 +57,4 @@ public class PixDeferredRenderer : PixRenderer
         //菜单以及工艺都写完了，交还给厨房管事儿的
         context.Submit();
     }
-
-
 }

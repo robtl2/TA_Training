@@ -12,6 +12,9 @@ public class TiledPass : PixPassBase
     public override void Execute()
     {
         base.Execute();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTiled, renderer);
+
         if (material == null)
             material = new Material(Shader.Find("Hidden/Pix/Tiled"));
 
@@ -24,5 +27,7 @@ public class TiledPass : PixPassBase
 
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTiled, renderer);
     }
 }

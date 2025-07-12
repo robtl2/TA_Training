@@ -13,6 +13,8 @@ public class DeferredPass : PixPassBase
     {
         base.Execute();
 
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeDeferred, renderer);
+
         if (material == null)
             material = new Material(Shader.Find("Hidden/Pix/Deferred"));
 
@@ -28,6 +30,8 @@ public class DeferredPass : PixPassBase
         renderer.cmb.ReleaseTemporaryRT(TiledPass.tileID);
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterDeferred, renderer);
     }
     
 }

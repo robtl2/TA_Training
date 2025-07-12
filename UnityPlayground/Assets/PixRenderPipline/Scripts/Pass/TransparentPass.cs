@@ -12,6 +12,9 @@ public class TransparentPass : PixPassBase
     public override void Execute()
     {
         base.Execute();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTransparent, renderer);
+
         GetTemporaryColorRT(ColorBuff);
 
         //先把之前Deferred渲染的结果拿来
@@ -31,5 +34,7 @@ public class TransparentPass : PixPassBase
 
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTransparent, renderer);
     }
 }

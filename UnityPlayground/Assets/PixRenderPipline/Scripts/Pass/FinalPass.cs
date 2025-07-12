@@ -15,6 +15,9 @@ public class FinalPass : PixPassBase
     public override void Execute()
     {
         base.Execute();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeFinal, renderer);
+
         if (filterMaterial == null)
             filterMaterial = new Material(Shader.Find("Hidden/Pix/Filter"));
 

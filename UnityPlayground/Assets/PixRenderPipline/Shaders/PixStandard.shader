@@ -107,7 +107,7 @@ Shader "Pix/Standard"
 
             Stencil
             {
-                Ref 255
+                Ref 1
                 Comp Always
                 Pass Replace
             }

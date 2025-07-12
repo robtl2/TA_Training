@@ -20,6 +20,9 @@ public class GBufferPass : PixPassBase
     public override void Execute()
     {
         base.Execute();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeGBuffer, renderer);
+
         GetTemporaryColorRT(GbufferID_0);
         GetTemporaryColorRT(GbufferID_1);
 
@@ -33,5 +36,7 @@ public class GBufferPass : PixPassBase
 
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterGBuffer, renderer);
     }
 }

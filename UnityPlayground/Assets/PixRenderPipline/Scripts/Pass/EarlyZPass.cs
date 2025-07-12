@@ -10,6 +10,8 @@ public class EarlyZPass : PixPassBase
     {
         base.Execute();
 
+        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeEarlyZ, renderer);
+
         // 创建深度缓冲区
         renderer.cmb.GetTemporaryRT(nameID, renderer.size.x, renderer.size.y, 32, FilterMode.Point, RenderTextureFormat.Depth);
         renderer.cmb.SetRenderTarget(depthID);
@@ -24,5 +26,7 @@ public class EarlyZPass : PixPassBase
         // 把菜的配方和工艺也写到菜单里
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
+
+        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterEarlyZ, renderer);
     }
 }
