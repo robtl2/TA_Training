@@ -53,11 +53,11 @@ public class PixLight : MonoBehaviour
     [Range(0f, 0.25f)]
     public float contactRayLength = 0.25f;
 
-    [Range(1, 8)]
+    [Range(1, 16)]
     public int contactSampleCount = 1;
 
-    [Range(0f, 0.001f)]
-    public float contactBias = 0.00005f;
+    [Range(0f, 0.00002f)]
+    public float contactBias = 0.000005f;
 
     [Header("Volume Light")]
     public bool volumeLight = false;

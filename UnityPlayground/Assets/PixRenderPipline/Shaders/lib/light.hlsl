@@ -70,15 +70,12 @@ void CauclateLight(inout Light light, GBufferData gbufferData)
     half3 NoL = saturate(dot(N, L));
     light.NoL = NoL;
 
-    NoL = smoothstep(0.25, 0.26, NoL);
+    NoL = smoothstep(0.15, 0.16, NoL);
     
     half contactShadow = ContactShadow(light, gbufferData);
 
     light.shadow = contactShadow;
     light.lit = light.color * NoL * contactShadow;
 }
-
-
-
 
 #endif
