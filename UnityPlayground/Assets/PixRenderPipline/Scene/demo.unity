@@ -150,10 +150,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skyType: 2
   color: {r: 0.7042542, g: 0.7642411, b: 0.7735849, a: 1}
-  texture: {fileID: 2800000, guid: 09daabd73846b4845b41068698fb2180, type: 3}
-  rotateSky: 0
-  intensity: 1.26
-  fovScale: 1.14
+  texture: {fileID: 8900000, guid: 09daabd73846b4845b41068698fb2180, type: 3}
+  blurLevel: 4.3
+  intensity: 1.62
+  fovScale: 1.33
 --- !u!4 &602252877
 Transform:
   m_ObjectHideFlags: 0
@@ -162,13 +162,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 602252875}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.66270626, z: -0, w: 0.7488795}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 870345109}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -83.013, z: 0}
 --- !u!1 &870345105
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,8 +210,8 @@ MonoBehaviour:
   AABB_LocaltionTarget: {fileID: 0}
   AABB_Size: {x: 0, y: 0, z: 0}
   enableContactShadow: 1
-  contactRayLength: 0.038
-  contactSampleCount: 1
+  contactRayLength: 0.091
+  contactSampleCount: 2
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &870345107
@@ -274,13 +275,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 870345105}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.39999446, y: -0.75024694, z: 0.23435819, w: -0.4713917}
-  m_LocalPosition: {x: -0.022, y: 1.3419211, z: 1.495}
+  m_LocalRotation: {x: -0.14792785, y: -0.8122243, z: 0.4743539, w: 0.30560976}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 46.783, y: -229.389, z: 33.63}
+  m_Father: {fileID: 602252877}
+  m_LocalEulerAnglesHint: {x: 42.855, y: -119.698, z: 46.328}
 --- !u!1 &961739749
 GameObject:
   m_ObjectHideFlags: 0
@@ -478,13 +479,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2032307420}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.11980643, y: -0.80271655, z: 0.35308373, w: -0.4654293}
-  m_LocalPosition: {x: -0.42, y: 1.3419211, z: 1.495}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0.364}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 42.717, y: -244.40399, z: -10.693}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3444695109976925505
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -548,6 +549,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 961739753}
   - {fileID: 3444695109976925505}
-  - {fileID: 870345109}
   - {fileID: 2032307424}
   - {fileID: 602252877}

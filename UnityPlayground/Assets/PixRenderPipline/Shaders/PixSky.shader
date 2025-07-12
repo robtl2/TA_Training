@@ -4,7 +4,8 @@ Shader "Hidden/Pix/Sky"
     {
         _Color ("Color", Color) = (1, 1, 1, 1)
         _SkyType ("SkyType", Int) = 0
-        _SkyTex ("SkyTex", 2D) = "white" {}
+        _SkyTex ("SkyTex", Cube) = "white" {}
+        _BlurLevel ("BlurLevel", Float) = 0
         _RotateSky ("RotateSky", Float) = 0
         _FovScale ("FovScale", Float) = 1
     }
@@ -42,16 +43,16 @@ Shader "Hidden/Pix/Sky"
             struct VaryingsDepth
             {
                 float4 positionCS : SV_POSITION;
-                float2 uv : TEXCOORD1;
-                float3 viewDir : TEXCOORD2;
+                float3 viewDir : TEXCOORD0;
             };
 
             int _SkyType;
             half4 _Color;
             half _RotateSky;
             half _FovScale;
-            TEXTURE2D(_SkyTex);SAMPLER(sampler_SkyTex);
-            
+            half _BlurLevel;
+            TEXTURECUBE(_SkyTex);SAMPLER(sampler_SkyTex);
+
             VaryingsDepth vert(AttributesDepth input)
             {
                 float2 uv = input.uv;
@@ -69,18 +70,15 @@ Shader "Hidden/Pix/Sky"
                 VaryingsDepth output;
                 output.positionCS = float4(positionCS, 1.0);
                 output.viewDir = viewDir;
-                output.uv = uv;
                 return output;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
-                half2 uv = input.uv;
-                half2 thetaPhi = DirToThetaPhi(input.viewDir);
                 half3 sky = _Color.rgb;
 
                 if (_SkyType == 1)
-                    sky *= SAMPLE_TEXTURE2D_GRAD(_SkyTex, sampler_SkyTex, thetaPhi, ddx(uv), ddy(uv)).rgb;
+                    sky *= SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, input.viewDir, _BlurLevel).rgb;
                 
                 return half4(sky, 1);
             }

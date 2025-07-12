@@ -15,11 +15,10 @@ public class PixSky : MonoBehaviour
 
     public SkyType skyType = SkyType.None;
     public Color color;
-    public Texture2D texture;
+    public Cubemap texture;
 
-    [Range(-3.1416f, 3.1416f)]
-    public float rotateSky = 0;
-
+    [Range(0, 9)]
+    public float blurLevel = 0;
     [Range(0, 3)]
     public float intensity = 1;
 
@@ -31,7 +30,7 @@ public class PixSky : MonoBehaviour
     int _FovScale = Shader.PropertyToID("_FovScale");
     int _RotateSky = Shader.PropertyToID("_RotateSky");
     int _SkyTex = Shader.PropertyToID("_SkyTex");
-
+    int _BlurLevel = Shader.PropertyToID("_BlurLevel");
     void OnEnable()
     {
         instance = this;
@@ -52,10 +51,24 @@ public class PixSky : MonoBehaviour
         material.SetInt(_SkyType, (int)skyType - 1);
         material.SetColor(_Color, color * intensity);
         material.SetFloat(_FovScale, fovScale);
-        material.SetFloat(_RotateSky, rotateSky);
+        var yRotation = GetYRotationInRadians();
+        material.SetFloat(_RotateSky, yRotation);
+        material.SetFloat(_BlurLevel, blurLevel);
 
         if (skyType == SkyType.Texture && texture != null)
             material.SetTexture(_SkyTex, texture);
 
+    }
+
+    // 将 transform 的 y 轴旋转转换为 -π 到 π 之间的弧度值
+    float GetYRotationInRadians()
+    {
+        float yRotationDegrees = transform.eulerAngles.y;
+        float yRotationRadians = yRotationDegrees * Mathf.Deg2Rad;
+        
+        if (yRotationRadians > Mathf.PI)
+            yRotationRadians -= 2 * Mathf.PI;
+        
+        return yRotationRadians;
     }
 }
