@@ -148,12 +148,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ca80ab7b52cb40bca6f68780ad462f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skyType: 2
-  color: {r: 0.6476059, g: 0.7180311, b: 0.7264151, a: 1}
+  skyType: 1
+  color: {r: 0.25142398, g: 0.4014762, b: 0.4716981, a: 1}
   texture: {fileID: 8900000, guid: 09daabd73846b4845b41068698fb2180, type: 3}
-  blurLevel: 3.89
+  blurLevel: 0
   intensity: 1.62
-  fovScale: 1.33
+  fovScale: 1.3
 --- !u!4 &602252877
 Transform:
   m_ObjectHideFlags: 0
@@ -162,14 +162,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 602252875}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.73662674, z: -0, w: 0.6762996}
+  m_LocalRotation: {x: -0, y: -0.73662215, z: -0, w: 0.6763045}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 870345109}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -94.89, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -94.889, z: 0}
 --- !u!1 &870345105
 GameObject:
   m_ObjectHideFlags: 0
@@ -210,9 +210,9 @@ MonoBehaviour:
   AABB_LocaltionTarget: {fileID: 0}
   AABB_Size: {x: 0, y: 0, z: 0}
   enableContactShadow: 1
-  contactRayLength: 0.078
-  contactSampleCount: 6
-  contactBias: 0.000006
+  contactRayLength: 0.061
+  contactSampleCount: 1
+  contactBias: 0.0000121
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &870345107
@@ -417,7 +417,7 @@ MonoBehaviour:
   enableContactShadow: 0
   contactRayLength: 0.25
   contactSampleCount: 1
-  contactBias: 0.05
+  contactBias: 0.00002
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &2032307422

@@ -23,7 +23,6 @@ public class PixRenderPipline : RenderPipeline
     protected override void Render(ScriptableRenderContext context, Camera[] cameras)
     {
         renderer ??= new PixDeferredRenderer();
-        
 
         // 按照深度排序相机
         System.Array.Sort(cameras, (c1, c2) => c1.depth.CompareTo(c2.depth));

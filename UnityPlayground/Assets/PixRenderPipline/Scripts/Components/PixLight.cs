@@ -96,24 +96,32 @@ public class PixLight : MonoBehaviour
         lights.Remove(this);
     }
 
+    int _PixMainLightPosition = Shader.PropertyToID("_PixMainLightPosition");
+    int _PixMainLightDirection = Shader.PropertyToID("_PixMainLightDirection");
+    int _PixMainLightColor = Shader.PropertyToID("_PixMainLightColor");
+    int _PixMainLightContactShadow = Shader.PropertyToID("_PixMainLightContactShadow");
+    int _PixMainLightContactSampleCount = Shader.PropertyToID("_PixMainLightContactSampleCount");
+    int _PixMainLightContactBias = Shader.PropertyToID("_PixMainLightContactBias");
+    int _PixAmbientLightColor = Shader.PropertyToID("_PixAmbientLightColor");
+
     void Update()
     {
         if (lightType != LightType.MainDirectional) return;
 
-        Shader.SetGlobalVector("_PixMainLightPosition", transform.position);
-        Shader.SetGlobalVector("_PixMainLightDirection", -transform.forward);
-        Shader.SetGlobalColor("_PixMainLightColor", color * intensity);
+        Shader.SetGlobalVector(_PixMainLightPosition, transform.position);
+        Shader.SetGlobalVector(_PixMainLightDirection, -transform.forward);
+        Shader.SetGlobalColor(_PixMainLightColor, color * intensity);
         float contactShadow = enableContactShadow ? contactRayLength : 0;
         contactShadow /= contactSampleCount;
-        Shader.SetGlobalFloat("_PixMainLightContactShadow", contactShadow);
-        Shader.SetGlobalInt("_PixMainLightContactSampleCount", contactSampleCount);
-        Shader.SetGlobalFloat("_PixMainLightContactBias", contactBias);
+        Shader.SetGlobalFloat(_PixMainLightContactShadow, contactShadow);
+        Shader.SetGlobalInt(_PixMainLightContactSampleCount, contactSampleCount);
+        Shader.SetGlobalFloat(_PixMainLightContactBias, contactBias);
 
         foreach (var light in lights)
         {
             if (light.lightType == LightType.Ambient)
             {
-                Shader.SetGlobalColor("_PixAmbientLightColor", light.color * light.intensity);
+                Shader.SetGlobalColor(_PixAmbientLightColor, light.color * light.intensity);
             }
         }
     }
