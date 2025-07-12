@@ -119,6 +119,56 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &602252875
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 602252877}
+  - component: {fileID: 602252876}
+  m_Layer: 0
+  m_Name: PixSky
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &602252876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 602252875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ca80ab7b52cb40bca6f68780ad462f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skyType: 2
+  color: {r: 0.7042542, g: 0.7642411, b: 0.7735849, a: 1}
+  texture: {fileID: 2800000, guid: 09daabd73846b4845b41068698fb2180, type: 3}
+  rotateSky: 0
+  intensity: 1.26
+  fovScale: 1.14
+--- !u!4 &602252877
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 602252875}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &870345105
 GameObject:
   m_ObjectHideFlags: 0
@@ -355,7 +405,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 1
-  color: {r: 0.44313726, g: 0.35002008, b: 0.25490198, a: 1}
+  color: {r: 0.3490566, g: 0.31874394, b: 0.25849947, a: 1}
   intensity: 1
   shadowMapType: 0
   shadowMapSize: 512
@@ -500,3 +550,4 @@ SceneRoots:
   - {fileID: 3444695109976925505}
   - {fileID: 870345109}
   - {fileID: 2032307424}
+  - {fileID: 602252877}

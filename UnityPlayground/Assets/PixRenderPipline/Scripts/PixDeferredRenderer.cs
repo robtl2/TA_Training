@@ -1,4 +1,5 @@
 using UnityEngine.Rendering;
+using UnityEngine;
 
 /// <summary>
 /// 呐，几乎干的所有事情就是写下来我给的菜品方案而已
@@ -41,7 +42,7 @@ public class PixDeferredRenderer : PixRenderer
         deferredPass.Execute();
         PixRenderEvent.TriggerEvent(PixRenderEventName.AfterDeferred, this);
 
-        if (asset.skyMaterial != null)
+        if (PixSky.instance != null && PixSky.instance.skyType != PixSky.SkyType.None)
         {
             skyPass ??= new SkyPass(this);
             skyPass.Execute();

@@ -36,7 +36,7 @@ public class FinalPass : PixPassBase
             if (debugMode > 0)
             {
                 if (debugMaterial == null)
-                    debugMaterial = new Material(Shader.Find("Pix/Debugger"));
+                    debugMaterial = new Material(Shader.Find("Hidden/Pix/Debugger"));
 
                 debugMaterial.SetInt(CHANNEL_ID, debugMode - 1);
                 debugMaterial.SetFloat(SIZE_ID, renderer.asset.debugSize);

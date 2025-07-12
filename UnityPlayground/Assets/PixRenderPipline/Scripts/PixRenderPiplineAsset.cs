@@ -28,21 +28,7 @@ public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
     public ColorSpace colorSpace = ColorSpace.Linear;
 #endregion
 
-#region sky
-    [Header("Sky")]
-    public Material skyMaterial;
-
-    [Range(0, 7)]
-    public float skyIntensity = 1;
-
-    [Range(-3.1416f, 3.1416f)]
-    public float rotateSky = 0;
-
-    [Range(0, 3)]
-    public float skyFovScale = 1;
-    #endregion
-
-    #region GBuffer Debug
+#region GBuffer Debug
     public enum DebugMode
     {
         None,

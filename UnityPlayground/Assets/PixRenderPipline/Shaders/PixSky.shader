@@ -1,11 +1,12 @@
-Shader "Pix/Sky"
+Shader "Hidden/Pix/Sky"
 {
     Properties
     {
+        _Color ("Color", Color) = (1, 1, 1, 1)
+        _SkyType ("SkyType", Int) = 0
         _SkyTex ("SkyTex", 2D) = "white" {}
         _RotateSky ("RotateSky", Float) = 0
-        _SkyIntensity ("SkyIntensity", Float) = 1
-        _SkyFovScale ("SkyFovScale", Float) = 1
+        _FovScale ("FovScale", Float) = 1
     }
     SubShader
     {
@@ -45,10 +46,11 @@ Shader "Pix/Sky"
                 float3 viewDir : TEXCOORD2;
             };
 
-            TEXTURE2D(_SkyTex);SAMPLER(sampler_SkyTex);
+            int _SkyType;
+            half4 _Color;
             half _RotateSky;
-            half _SkyIntensity;
-            half _SkyFovScale;
+            half _FovScale;
+            TEXTURE2D(_SkyTex);SAMPLER(sampler_SkyTex);
             
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -59,7 +61,7 @@ Shader "Pix/Sky"
                 float3 positionCS = mul(UNITY_MATRIX_P, positionVS);
 
                 positionVS.xy *= -positionVS.z;
-                positionVS.xy *= _SkyFovScale;
+                positionVS.xy *= _FovScale;
                 float4 posWorld = mul(UNITY_MATRIX_I_V, float4(positionVS, 1.0));
                 float3 viewDir = normalize(_WorldSpaceCameraPos - posWorld.xyz);
                 viewDir = rotate_y(viewDir, _RotateSky);
@@ -75,8 +77,10 @@ Shader "Pix/Sky"
             {
                 half2 uv = input.uv;
                 half2 thetaPhi = DirToThetaPhi(input.viewDir);
-                half3 sky = SAMPLE_TEXTURE2D_GRAD(_SkyTex, sampler_SkyTex, thetaPhi, ddx(uv), ddy(uv)).rgb;
-                sky *= _SkyIntensity;
+                half3 sky = _Color.rgb;
+
+                if (_SkyType == 1)
+                    sky *= SAMPLE_TEXTURE2D_GRAD(_SkyTex, sampler_SkyTex, thetaPhi, ddx(uv), ddy(uv)).rgb;
                 
                 return half4(sky, 1);
             }
