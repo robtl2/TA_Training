@@ -40,13 +40,14 @@ public class PixLight : MonoBehaviour
     public Color color = Color.white;
     public float intensity = 10;
 
-    [Header("Shadow")]
+    [Header("ShadowMap")]
     public ShadowMapType shadowMapType = ShadowMapType.None;
     public float shadowMapSize = 512;
     public ShadowMapArea shadowMapArea = ShadowMapArea.Camera;
     public Transform AABB_LocaltionTarget;
     public Vector3 AABB_Size;
     
+    [Header("Contact Shadow")]
     public bool enableContactShadow = false;
 
     [Range(0f, 0.25f)]

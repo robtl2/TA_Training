@@ -1,6 +1,6 @@
 // 最后阶段的屏幕滤镜效果
 
-Shader "Pix/Post"
+Shader "Hidden/Pix/Post"
 {
     Properties
     {

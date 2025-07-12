@@ -1,5 +1,5 @@
 
-Shader "Pix/Deferred"
+Shader "Hidden/Pix/Deferred"
 {
     Properties
     {

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00f5f307b390d4092a669213bd0f27ae, type: 3}
   m_Name: PixRenderPiplineAsset
   m_EditorClassIdentifier: 
-  renderSize: 3
+  renderSize: 2
   colorSpace: 1
   skyMaterial: {fileID: 2100000, guid: 526b9f76b15ff40729f28a587e057800, type: 2}
   skyIntensity: 1.13
-  rotateSky: 0.09
-  skyFovScale: 1.54
+  rotateSky: 0
+  skyFovScale: 1.1
   debugMode: 0
   debugSize: 1

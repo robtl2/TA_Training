@@ -80,8 +80,8 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RotateSky: 0.09
-    - _SkyFovScale: 1.54
+    - _RotateSky: 0
+    - _SkyFovScale: 1.1
     - _SkyIntensity: 1.13
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1

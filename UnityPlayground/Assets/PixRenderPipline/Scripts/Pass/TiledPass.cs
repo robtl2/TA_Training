@@ -13,7 +13,7 @@ public class TiledPass : PixPassBase
     {
         base.Execute();
         if (material == null)
-            material = new Material(Shader.Find("Pix/Tiled"));
+            material = new Material(Shader.Find("Hidden/Pix/Tiled"));
 
         int2 size = renderer.tiledSize;
         GetTemporaryColorRT(tileID, size.x, size.y);

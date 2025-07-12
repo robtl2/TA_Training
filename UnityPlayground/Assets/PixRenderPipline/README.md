@@ -11,37 +11,45 @@
   
 ### GBufferPass
 将不透明物体Shading所需的参数写入到GBuffer中
-- GbufferID_0
-    - Color 16bit
-    - MaterialParams 12bit
-    - ShadingModel 4bit
-- GbufferID_1
+- _PixGBuffer_0
+    - Color 16bit (HSV_655)
     - Normal 16bit
-    - Depth  16bit
+    
+- _PixGBuffer_1
+    - ShadingModel 0~15 4bit
+    - MaterialParams 28bit
+    
 
 ### TiledPass
 将ShadingModel和光照范围的掩码写入到_PixTiledID贴图中
 尝试将没有对应shadingModel掩码的区块通过设置`positionCS=nan`来跳过栅格化
+- _PixTiledID
+    - LightMask
+    - ShadingModelMask
+
     
 ### DeferredPass
 基于8x8象素Tile的延迟光照
 作为RenderTarget的ColorBuff可用于TransparentPassr的读取
 
-- ColorBuff
+- _PixOpaqueTex
     - RGB 颜色
     - A   亮度增益 
   
 ### SkyPass
 天空盒
 全屏面片在fragment阶段由相机空间坐标转为世界坐标计算视线方向
+- _PixOpaqueTex
 
 ### TransparentPass
 Forward流程的半透明绘制
 因为有GBuffer,所以可以方便的做Decal与面片光源之类的效果
+- _PixColorTex
 
 ### PostProcessPass
 后处理效果
 延用DeferredPass中的ColorBuff作为写入目标
+- _PixOpaqueTex
 
 ### FinalPass
 象素化滤镜(扫描线风格之类)

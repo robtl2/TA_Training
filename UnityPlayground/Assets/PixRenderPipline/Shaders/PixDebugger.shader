@@ -1,4 +1,4 @@
-Shader "Pix/Debugger"
+Shader "Hidden/Pix/Debugger"
 {
     Properties
     {

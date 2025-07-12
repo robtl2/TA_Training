@@ -4,8 +4,8 @@ using UnityEngine;
 public class GBufferPass : PixPassBase
 {
     static readonly ShaderTagId gBufferTag = new("PixGBuffer");
-    public static readonly int GbufferID_0 = Shader.PropertyToID("_PixGBuffer0");
-    public static readonly int GbufferID_1 = Shader.PropertyToID("_PixGBuffer1");
+    public static readonly int GbufferID_0 = Shader.PropertyToID("_PixGBuffer_0");
+    public static readonly int GbufferID_1 = Shader.PropertyToID("_PixGBuffer_1");
 
     readonly RenderTargetIdentifier[] gbuffers;
 

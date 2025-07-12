@@ -16,7 +16,7 @@ public class FinalPass : PixPassBase
     {
         base.Execute();
         if (filterMaterial == null)
-            filterMaterial = new Material(Shader.Find("Pix/Filter"));
+            filterMaterial = new Material(Shader.Find("Hidden/Pix/Filter"));
 
         filterMaterial.SetFloat("_IsSceneView", renderer.isSceneView ? 1 : 0);
 

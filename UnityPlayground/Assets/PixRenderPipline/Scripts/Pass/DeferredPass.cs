@@ -14,7 +14,7 @@ public class DeferredPass : PixPassBase
         base.Execute();
 
         if (material == null)
-            material = new Material(Shader.Find("Pix/Deferred"));
+            material = new Material(Shader.Find("Hidden/Pix/Deferred"));
 
         GetTemporaryColorRT(ColorBuff);
         // TiledPass搞好后用Tile来剔除多余的栅格化

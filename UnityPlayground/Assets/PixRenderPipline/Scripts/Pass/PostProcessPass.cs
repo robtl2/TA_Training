@@ -10,7 +10,7 @@ public class PostProcessPass : PixPassBase
     {
         base.Execute();
         if (postMaterial == null)
-            postMaterial = new Material(Shader.Find("Pix/Post"));
+            postMaterial = new Material(Shader.Find("Hidden/Pix/Post"));
 
         renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
         renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
