@@ -52,7 +52,7 @@ Forward流程的半透明绘制
 - _PixOpaqueTex
 
 ### FinalPass
-象素化滤镜(扫描线风格之类)
+象素化滤镜(CRT风格之类)
 象素滤镜的写入目标为BackBuffer，因为低分辨率的RT已经无法制作扫描线这一类的滤镜效果了
 ToneMapping也应该在这里做
 

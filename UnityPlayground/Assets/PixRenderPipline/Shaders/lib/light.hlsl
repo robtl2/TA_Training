@@ -10,7 +10,7 @@ half3 _PixMainLightDirection;
 half3 _PixMainLightColor;
 half _PixMainLightContactShadow;
 int _PixMainLightContactSampleCount;
-
+half _PixMainLightContactBias;
 
 struct Light{
     half3 position;
@@ -18,6 +18,7 @@ struct Light{
     half3 color;
     half contactShadow;
     int contactSampleCount;
+    half contactBias;
 
     half NoL;
     half shadow;
@@ -31,14 +32,12 @@ Light GetMainLight(){
     light.color = _PixMainLightColor;
     light.contactShadow = _PixMainLightContactShadow;
     light.contactSampleCount = _PixMainLightContactSampleCount;
+    light.contactBias = _PixMainLightContactBias;
     return light;
 }
 
 half ContactShadow(Light light, GBufferData gbufferData){
     if(light.contactShadow == 0) return 1.0h;
-
-    half NoL = saturate(dot(light.direction, gbufferData.trueNormal));
-    // NoL = 1;
 
     int sampleCount = light.contactSampleCount + 1; 
     half step = light.contactShadow; //采样步长
@@ -53,14 +52,16 @@ half ContactShadow(Light light, GBufferData gbufferData){
         half depth = sampleDepth(uv);
         half4 ndcPos = TransformWorldToHClip(pos);
         half rayDepth = ndcPos.z/ndcPos.w;
+        rayDepth += light.contactBias;
         
-        if(depth > rayDepth && NoL > 0.15h){
+        if(depth > rayDepth){
             return 0.0h;
         }
     }
     return 1.0h;
 }
 
+// 后面ShadingModel计算的入口
 void CauclateLight(inout Light light, GBufferData gbufferData) 
 {
     half3 N = gbufferData.normalWS;

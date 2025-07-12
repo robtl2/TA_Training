@@ -35,10 +35,11 @@ public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
         Albedo,
         PositionWS,
         NormalWS,
+        // TrueNormal,
         NormalVS,
+        ViewDir,
         NdotV,
         Depth,
-        TrueNormal,
     }
 
     [Header("GBuffer Debug")]

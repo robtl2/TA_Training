@@ -10,13 +10,13 @@ struct GBufferData
 
     float3 positionWS;
     half3 normalWS;
+    // half3 trueNormal;
     half3 normalVS;
     half3 viewDir;
 
     half NoV;
     half ndcDepth;
     half depth;
-    half3 trueNormal;
 };
 
 struct GBuffer
@@ -62,32 +62,30 @@ half3 samplePositionWS(float2 uv){
     return ReconstructWorldPos(uv, depth);
 }
 
-half3 ReconstructTrueNormal_Tap2(float3 posWorld, float2 uv){
-    float3 posWorld_r = samplePositionWS(uv + float2(_PixGBuffer_0_TexelSize.x, 0));
-    float3 posWorld_u = samplePositionWS(uv + float2(0, _PixGBuffer_0_TexelSize.y));
+// ------------------------------------------------------------
+// Reconstruct True Normal
+// 通过采样紧邻象素的深度构建出世界坐标来计算几何体的真实法线
+// 虽然这些象素肯定都在L1缓存里，但多次重构世界坐标还是有点肉痛
+// ------------------------------------------------------------
+half3 ReconstructTrueNormal_Tap4(half3 posWorld, half2 uv){
+    half3 posWorld_l = samplePositionWS(uv - half2(_PixGBuffer_0_TexelSize.x, 0));
+    half3 posWorld_r = samplePositionWS(uv + half2(_PixGBuffer_0_TexelSize.x, 0));
+    half3 posWorld_d = samplePositionWS(uv - half2(0, _PixGBuffer_0_TexelSize.y));
+    half3 posWorld_u = samplePositionWS(uv + half2(0, _PixGBuffer_0_TexelSize.y));
 
-    float3 dx = posWorld_r - posWorld;
-    float3 dy = posWorld_u - posWorld;
+    half3 l = posWorld - posWorld_l;
+    half3 r = posWorld_r - posWorld;
+    half3 d = posWorld - posWorld_d;
+    half3 u = posWorld_u - posWorld;
 
-    return normalize(cross(dy, dx));
+    half3 dx = abs(l.z) < abs(r.z) ? l : r;
+    half3 dy = abs(d.z) < abs(u.z) ? d : u;
+
+    half3 normal = normalize(cross(dy, dx));
+
+    return normal;
 }
-
-half3 ReconstructTrueNormal_Tap4(float3 posWorld, float2 uv){
-    float3 posWorld_l = samplePositionWS(uv - float2(_PixGBuffer_0_TexelSize.x, 0));
-    float3 posWorld_r = samplePositionWS(uv + float2(_PixGBuffer_0_TexelSize.x, 0));
-    float3 posWorld_d = samplePositionWS(uv - float2(0, _PixGBuffer_0_TexelSize.y));
-    float3 posWorld_u = samplePositionWS(uv + float2(0, _PixGBuffer_0_TexelSize.y));
-
-    float3 l = posWorld - posWorld_l;
-    float3 r = posWorld_r - posWorld;
-    float3 d = posWorld - posWorld_d;
-    float3 u = posWorld_u - posWorld;
-
-    float3 dx = abs(l.z) < abs(r.z) ? l : r;
-    float3 dy = abs(d.z) < abs(u.z) ? d : u;
-
-    return normalize(cross(dy, dx));
-}
+// ------------------------------------------------------------
 
 GBuffer PackGBuffer(half4 color, int shadingModel, half2 normalVS){
     half2 rgb = PackToR5G6B5(color.rgb);
@@ -122,7 +120,7 @@ GBufferData UnpackGBuffer(float2 uv)
     half3x3 viewToWorld = half3x3(right, up, viewDir);
     half3 normalWS = mul(normalVS, viewToWorld);
 
-    half3 trueNormal = ReconstructTrueNormal_Tap4(worldPos, uv);
+    // half3 trueNormal = ReconstructTrueNormal_Tap4(worldPos, uv);
 
 
     GBufferData gbufferData;
@@ -136,7 +134,7 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.NoV = normalVS.z;
     gbufferData.ndcDepth = ndcDepth;
     gbufferData.depth = depth;
-    gbufferData.trueNormal = trueNormal;
+    // gbufferData.trueNormal = trueNormal;
     return gbufferData;
 }
 

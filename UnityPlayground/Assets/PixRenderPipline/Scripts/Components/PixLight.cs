@@ -56,6 +56,9 @@ public class PixLight : MonoBehaviour
     [Range(1, 8)]
     public int contactSampleCount = 1;
 
+    [Range(0f, 0.001f)]
+    public float contactBias = 0.00005f;
+
     [Header("Volume Light")]
     public bool volumeLight = false;
 
@@ -104,6 +107,7 @@ public class PixLight : MonoBehaviour
         contactShadow /= contactSampleCount;
         Shader.SetGlobalFloat("_PixMainLightContactShadow", contactShadow);
         Shader.SetGlobalInt("_PixMainLightContactSampleCount", contactSampleCount);
+        Shader.SetGlobalFloat("_PixMainLightContactBias", contactBias);
 
         foreach (var light in lights)
         {

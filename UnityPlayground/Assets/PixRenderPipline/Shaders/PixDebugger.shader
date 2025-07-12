@@ -69,10 +69,11 @@ Shader "Hidden/Pix/Debugger"
                     gbufferData.albedo,
                     gbufferData.positionWS,
                     gbufferData.normalWS,
+                    // gbufferData.trueNormal,
                     gbufferData.normalVS,
+                    gbufferData.viewDir,
                     gbufferData.NoV.xxx,
                     gbufferData.depth.xxx,
-                    gbufferData.trueNormal,
                 };
                 
                 return half4(debugColor[_Channel], gbufferData.alpha);
