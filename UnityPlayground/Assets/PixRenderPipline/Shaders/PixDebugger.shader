@@ -65,10 +65,6 @@ Shader "Hidden/Pix/Debugger"
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
 
-                half2 screenUV = PosWorldToScreenUV(gbufferData.positionWS);
-
-                half3 test = sampleDepth(screenUV);
-
                 half3 debugColor[7] = {
                     gbufferData.albedo,
                     gbufferData.positionWS,
@@ -76,7 +72,7 @@ Shader "Hidden/Pix/Debugger"
                     gbufferData.normalVS,
                     gbufferData.NoV.xxx,
                     gbufferData.depth.xxx,
-                    test,
+                    gbufferData.trueNormal,
                 };
                 
                 return half4(debugColor[_Channel], gbufferData.alpha);

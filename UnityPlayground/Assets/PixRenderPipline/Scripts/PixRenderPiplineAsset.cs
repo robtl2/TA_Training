@@ -38,7 +38,7 @@ public class PixRenderPiplineAsset : RenderPipelineAsset<PixRenderPipline>
         NormalVS,
         NdotV,
         Depth,
-        ScreenUV,
+        TrueNormal,
     }
 
     [Header("GBuffer Debug")]

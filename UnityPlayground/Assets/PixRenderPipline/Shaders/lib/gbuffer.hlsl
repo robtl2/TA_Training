@@ -16,6 +16,7 @@ struct GBufferData
     half NoV;
     half ndcDepth;
     half depth;
+    half3 trueNormal;
 };
 
 struct GBuffer
@@ -28,6 +29,8 @@ struct GBuffer
 TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);
 TEXTURE2D(_PixGBuffer_1);TEXTURE2D(_PixEarlyZDepth);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
+
+float2 _PixGBuffer_0_TexelSize;
 
 
 half3 UnpackNormal(half2 nor)
@@ -48,6 +51,42 @@ float3 ReconstructWorldPos(float2 uv, float ndcDepth)
 
     float4 worldPosH = mul(UNITY_MATRIX_I_VP, float4(ndc, 1.0));
     return worldPosH.xyz / worldPosH.w;
+}
+
+half sampleDepth(float2 uv){
+    return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixGBuffer_0, uv).r;
+}
+
+half3 samplePositionWS(float2 uv){
+    half depth = sampleDepth(uv);
+    return ReconstructWorldPos(uv, depth);
+}
+
+half3 ReconstructTrueNormal_Tap2(float3 posWorld, float2 uv){
+    float3 posWorld_r = samplePositionWS(uv + float2(_PixGBuffer_0_TexelSize.x, 0));
+    float3 posWorld_u = samplePositionWS(uv + float2(0, _PixGBuffer_0_TexelSize.y));
+
+    float3 dx = posWorld_r - posWorld;
+    float3 dy = posWorld_u - posWorld;
+
+    return normalize(cross(dy, dx));
+}
+
+half3 ReconstructTrueNormal_Tap4(float3 posWorld, float2 uv){
+    float3 posWorld_l = samplePositionWS(uv - float2(_PixGBuffer_0_TexelSize.x, 0));
+    float3 posWorld_r = samplePositionWS(uv + float2(_PixGBuffer_0_TexelSize.x, 0));
+    float3 posWorld_d = samplePositionWS(uv - float2(0, _PixGBuffer_0_TexelSize.y));
+    float3 posWorld_u = samplePositionWS(uv + float2(0, _PixGBuffer_0_TexelSize.y));
+
+    float3 l = posWorld - posWorld_l;
+    float3 r = posWorld_r - posWorld;
+    float3 d = posWorld - posWorld_d;
+    float3 u = posWorld_u - posWorld;
+
+    float3 dx = abs(l.z) < abs(r.z) ? l : r;
+    float3 dy = abs(d.z) < abs(u.z) ? d : u;
+
+    return normalize(cross(dy, dx));
 }
 
 GBuffer PackGBuffer(half4 color, int shadingModel, half2 normalVS){
@@ -83,6 +122,8 @@ GBufferData UnpackGBuffer(float2 uv)
     half3x3 viewToWorld = half3x3(right, up, viewDir);
     half3 normalWS = mul(normalVS, viewToWorld);
 
+    half3 trueNormal = ReconstructTrueNormal_Tap4(worldPos, uv);
+
 
     GBufferData gbufferData;
     gbufferData.albedo = _color;
@@ -95,16 +136,10 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.NoV = normalVS.z;
     gbufferData.ndcDepth = ndcDepth;
     gbufferData.depth = depth;
+    gbufferData.trueNormal = trueNormal;
     return gbufferData;
 }
 
-half sampleDepth(float2 uv){
-    return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixGBuffer_0, uv).r;
-}
 
-half3 samplePositionWS(float2 uv){
-    half depth = sampleDepth(uv);
-    return ReconstructWorldPos(uv, depth);
-}
 
 #endif

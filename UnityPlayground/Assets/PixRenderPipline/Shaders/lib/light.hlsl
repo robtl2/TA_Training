@@ -34,12 +34,15 @@ Light GetMainLight(){
     return light;
 }
 
-half ContactShadow(Light light, half3 positionWS){
+half ContactShadow(Light light, GBufferData gbufferData){
     if(light.contactShadow == 0) return 1.0h;
+
+    half NoL = saturate(dot(light.direction, gbufferData.trueNormal));
+    // NoL = 1;
 
     int sampleCount = light.contactSampleCount + 1; 
     half step = light.contactShadow; //采样步长
-    half3 pos = positionWS; //ray的起点
+    half3 pos = gbufferData.positionWS; //ray的起点
 
     //遍历次数不定加[loop]，避免编译器unroll优化时报错
     [loop]
@@ -51,7 +54,7 @@ half ContactShadow(Light light, half3 positionWS){
         half4 ndcPos = TransformWorldToHClip(pos);
         half rayDepth = ndcPos.z/ndcPos.w;
         
-        if(depth > rayDepth){
+        if(depth > rayDepth && NoL > 0.15h){
             return 0.0h;
         }
     }
@@ -68,7 +71,7 @@ void CauclateLight(inout Light light, GBufferData gbufferData)
 
     NoL = smoothstep(0.25, 0.26, NoL);
     
-    half contactShadow = ContactShadow(light, gbufferData.positionWS);
+    half contactShadow = ContactShadow(light, gbufferData);
 
     light.shadow = contactShadow;
     light.lit = light.color * NoL * contactShadow;

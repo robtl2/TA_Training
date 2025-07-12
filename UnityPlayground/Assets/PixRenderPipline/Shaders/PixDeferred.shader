@@ -74,6 +74,7 @@ Shader "Hidden/Pix/Deferred"
                 half3 lit = mainLight.lit;
                 lit += _PixAmbientLightColor;
 
+                // half3 col = lerp(1, gbufferData.albedo,1);
                 half3 col = gbufferData.albedo * lit;
 
                 return half4(col, 1);
