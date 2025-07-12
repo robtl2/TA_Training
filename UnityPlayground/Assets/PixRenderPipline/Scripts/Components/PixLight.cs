@@ -96,13 +96,13 @@ public class PixLight : MonoBehaviour
         lights.Remove(this);
     }
 
-    int _PixMainLightPosition = Shader.PropertyToID("_PixMainLightPosition");
-    int _PixMainLightDirection = Shader.PropertyToID("_PixMainLightDirection");
-    int _PixMainLightColor = Shader.PropertyToID("_PixMainLightColor");
-    int _PixMainLightContactShadow = Shader.PropertyToID("_PixMainLightContactShadow");
-    int _PixMainLightContactSampleCount = Shader.PropertyToID("_PixMainLightContactSampleCount");
-    int _PixMainLightContactBias = Shader.PropertyToID("_PixMainLightContactBias");
-    int _PixAmbientLightColor = Shader.PropertyToID("_PixAmbientLightColor");
+    readonly int _PixMainLightPosition = Shader.PropertyToID("_PixMainLightPosition");
+    readonly int _PixMainLightDirection = Shader.PropertyToID("_PixMainLightDirection");
+    readonly int _PixMainLightColor = Shader.PropertyToID("_PixMainLightColor");
+    readonly int _PixMainLightContactShadow = Shader.PropertyToID("_PixMainLightContactShadow");
+    readonly int _PixMainLightContactSampleCount = Shader.PropertyToID("_PixMainLightContactSampleCount");
+    readonly int _PixMainLightContactBias = Shader.PropertyToID("_PixMainLightContactBias");
+    readonly int _PixAmbientLightColor = Shader.PropertyToID("_PixAmbientLightColor");
 
     void Update()
     {

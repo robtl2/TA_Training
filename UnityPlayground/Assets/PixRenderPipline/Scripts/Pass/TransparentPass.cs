@@ -5,7 +5,7 @@ public class TransparentPass : PixPassBase
 {
     public TransparentPass(PixRenderer renderer) : base("PixTransparentPass", renderer) { }
 
-    static readonly ShaderTagId tagID = new("PixTransparent");
+    readonly ShaderTagId tagID = new("PixTransparent");
     
     public static readonly int ColorBuff = Shader.PropertyToID("_PixColorTex");
     

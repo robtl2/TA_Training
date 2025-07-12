@@ -109,7 +109,7 @@ public class PixRenderer
     /// VP矩阵的逆矩阵
     /// unity URP中的内置命名也是这个
     /// </summary>
-    static readonly int MATRIX_I_VP = Shader.PropertyToID("unity_MatrixInvVP");
+    readonly int MATRIX_I_VP = Shader.PropertyToID("unity_MatrixInvVP");
 
     protected virtual void SetupGlobalUniform()
     {

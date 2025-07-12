@@ -9,8 +9,8 @@ public class FinalPass : PixPassBase
 
     Material debugMaterial;
 
-    static readonly int CHANNEL_ID = Shader.PropertyToID("_Channel");
-    static readonly int SIZE_ID = Shader.PropertyToID("_Size");
+    readonly int CHANNEL_ID = Shader.PropertyToID("_Channel");
+    readonly int SIZE_ID = Shader.PropertyToID("_Size");
 
     public override void Execute()
     {

@@ -25,12 +25,12 @@ public class PixSky : MonoBehaviour
     [Range(0, 3)]
     public float fovScale = 1;
 
-    int _SkyType = Shader.PropertyToID("_SkyType");
-    int _Color = Shader.PropertyToID("_Color");
-    int _FovScale = Shader.PropertyToID("_FovScale");
-    int _RotateSky = Shader.PropertyToID("_RotateSky");
-    int _SkyTex = Shader.PropertyToID("_SkyTex");
-    int _BlurLevel = Shader.PropertyToID("_BlurLevel");
+    readonly int _SkyType = Shader.PropertyToID("_SkyType");
+    readonly int _Color = Shader.PropertyToID("_Color");
+    readonly int _FovScale = Shader.PropertyToID("_FovScale");
+    readonly int _RotateSky = Shader.PropertyToID("_RotateSky");
+    readonly int _SkyTex = Shader.PropertyToID("_SkyTex");
+    readonly int _BlurLevel = Shader.PropertyToID("_BlurLevel");
     void OnEnable()
     {
         instance = this;

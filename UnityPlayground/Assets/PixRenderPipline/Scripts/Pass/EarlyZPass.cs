@@ -3,7 +3,7 @@ using UnityEngine.Rendering;
 public class EarlyZPass : PixPassBase
 {
     public EarlyZPass(PixRenderer renderer) : base("PixEarlyZPass", renderer) { }
-    static readonly ShaderTagId earlyZTag = new("PixEarlyZ");
+    readonly ShaderTagId earlyZTag = new("PixEarlyZ");
     public static readonly int nameID = Shader.PropertyToID("_PixEarlyZDepth");
     public static readonly RenderTargetIdentifier depthID = new(nameID);
     public override void Execute()
