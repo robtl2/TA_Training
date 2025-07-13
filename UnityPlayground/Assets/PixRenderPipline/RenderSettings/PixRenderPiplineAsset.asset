@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00f5f307b390d4092a669213bd0f27ae, type: 3}
   m_Name: PixRenderPiplineAsset
   m_EditorClassIdentifier: 
-  renderSize: 2
+  renderSize: 4
   colorSpace: 1
   debugMode: 0
   debugSize: 0.365

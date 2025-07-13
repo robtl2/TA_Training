@@ -31,6 +31,7 @@ Varyings_Decal vert(Attributes_Decal input)
 
     output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
     half4 screenPos = ComputeScreenPos(output.positionCS);
+    screenPos.w = 1/screenPos.w;
     output.uv = screenPos;
 
     UNITY_TRANSFER_INSTANCE_ID(input, output);
@@ -50,12 +51,15 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     float4 mainTex_ST = UNITY_ACCESS_INSTANCED_PROP(Props, _MainTex_ST);
     float shadingModel = UNITY_ACCESS_INSTANCED_PROP(Props, _ShadingModel);
     
-    half2 screenUV = input.uv.xy / input.uv.w;
-
+    // 通过屏幕坐标UI拿取GBuffer数据
+    half2 screenUV = input.uv.xy * input.uv.w;
     GBufferData gbufferData = UnpackGBuffer(screenUV);
 
+    // 把原场景象素的世界坐标转换到Decal的局部坐标
     half3 pos = gbufferData.positionWS;
     half4 posLocal = mul(UNITY_MATRIX_I_M, half4(pos, 1));
+
+    // 把局部坐标转换到UV空间
     half2 uv = posLocal.xy+0.5;
     
     // 应用Atlas局部uv
