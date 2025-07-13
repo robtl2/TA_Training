@@ -6,6 +6,7 @@ Shader "Pix/Decal"
     Properties
     {
         _MainTex ("Main Tex", 2D) = "white" {}
+        _ShadingModel ("Shading Model", Int) = 0
     }
 
     SubShader
@@ -34,6 +35,7 @@ Shader "Pix/Decal"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag_stencil
+            #pragma multi_compile_instancing
             #include "lib/decal.hlsl"
             ENDHLSL
         }
@@ -57,28 +59,31 @@ Shader "Pix/Decal"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag_stencil
+            #pragma multi_compile_instancing
             #include "lib/decal.hlsl"
             ENDHLSL
         }
 
         // 最后把Stencil比1大的象素画出来(Less是问的ref 1是不是比stencilBuff中的值小)
-        // 画完了再把Stencil变回1，别的Decal可以继续画
         Pass
         {
             Tags { "LightMode" = "PixDecal_Main" }
 
+            ZTest Always
+
             Cull Back
+            Blend SrcAlpha OneMinusSrcAlpha
 
             Stencil
             {
                 Ref 1
                 Comp Less
-                Pass Replace
             }
 
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag_decal
+            #pragma multi_compile_instancing
             #include "lib/decal.hlsl"
             ENDHLSL
         }
