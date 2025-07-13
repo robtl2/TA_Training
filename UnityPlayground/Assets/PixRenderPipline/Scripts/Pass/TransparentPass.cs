@@ -13,11 +13,11 @@ public class TransparentPass : PixPassBase
     {
         base.Execute();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTransparent, renderer);
+        TriggerEvent(PixRenderEventName.BeforeTransparent);
 
         GetTemporaryColorRT(ColorBuff);
 
-        //先把之前Deferred渲染的结果拿来
+        //先把之前Deferred渲染的结果复制过来
         renderer.cmb.Blit(DeferredPass.ColorBuff, ColorBuff);
 
         renderer.cmb.SetRenderTarget(ColorBuff, EarlyZPass.depthID);
@@ -35,6 +35,6 @@ public class TransparentPass : PixPassBase
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTransparent, renderer);
+        TriggerEvent(PixRenderEventName.AfterTransparent);
     }
 }

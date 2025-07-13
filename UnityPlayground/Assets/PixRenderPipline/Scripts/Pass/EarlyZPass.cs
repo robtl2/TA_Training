@@ -10,7 +10,7 @@ public class EarlyZPass : PixPassBase
     {
         base.Execute();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeEarlyZ, renderer);
+        TriggerEvent(PixRenderEventName.BeforeEarlyZ);
 
         // 创建深度缓冲区
         renderer.cmb.GetTemporaryRT(nameID, renderer.size.x, renderer.size.y, 32, FilterMode.Point, RenderTextureFormat.Depth);
@@ -27,6 +27,6 @@ public class EarlyZPass : PixPassBase
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterEarlyZ, renderer);
+        TriggerEvent(PixRenderEventName.AfterEarlyZ);
     }
 }

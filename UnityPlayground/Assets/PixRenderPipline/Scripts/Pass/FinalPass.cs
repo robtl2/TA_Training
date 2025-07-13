@@ -3,30 +3,28 @@ using UnityEngine.Rendering;
 
 public class FinalPass : PixPassBase
 {
-    public FinalPass(PixRenderer renderer) : base("PixFinalPass", renderer) { }
-
-    Material filterMaterial;
-
-    Material debugMaterial;
-
     readonly int CHANNEL_ID = Shader.PropertyToID("_Channel");
     readonly int SIZE_ID = Shader.PropertyToID("_Size");
+    Material filterMaterial;
+    Material debugMaterial;
+    
+    public FinalPass(PixRenderer renderer) : base("PixFinalPass", renderer)
+    {
+        filterMaterial = new Material(Shader.Find("Hidden/Pix/Filter"));
+        debugMaterial = new Material(Shader.Find("Hidden/Pix/Debugger"));
+    }
 
     public override void Execute()
     {
         base.Execute();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeFinal, renderer);
-
-        if (filterMaterial == null)
-            filterMaterial = new Material(Shader.Find("Hidden/Pix/Filter"));
+        TriggerEvent(PixRenderEventName.BeforeFinal);
 
         filterMaterial.SetFloat("_IsSceneView", renderer.isSceneView ? 1 : 0);
 
         renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, DeferredPass.ColorBuff);
         renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
         renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
-
 
 #if UNITY_EDITOR
         // 如果是Editor中的场景视图，不能使用Blit来画，反正我画不出来
@@ -38,9 +36,6 @@ public class FinalPass : PixPassBase
             int debugMode = (int)renderer.asset.debugMode;
             if (debugMode > 0)
             {
-                if (debugMaterial == null)
-                    debugMaterial = new Material(Shader.Find("Hidden/Pix/Debugger"));
-
                 debugMaterial.SetInt(CHANNEL_ID, debugMode - 1);
                 debugMaterial.SetFloat(SIZE_ID, renderer.asset.debugSize);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, debugMaterial, 0, 0);

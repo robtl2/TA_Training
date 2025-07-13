@@ -3,20 +3,18 @@ using UnityEngine.Rendering;
 
 public class DeferredPass : PixPassBase
 {
-    public DeferredPass(PixRenderer renderer) : base("PixDeferredPass", renderer) { }
-
     public static readonly int ColorBuff = Shader.PropertyToID("_PixOpaqueTex");
-
     public Material material;
+    public DeferredPass(PixRenderer renderer) : base("PixDeferredPass", renderer)
+    { 
+        material = new Material(Shader.Find("Hidden/Pix/Deferred"));
+    }
 
     public override void Execute()
     {
         base.Execute();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeDeferred, renderer);
-
-        if (material == null)
-            material = new Material(Shader.Find("Hidden/Pix/Deferred"));
+        TriggerEvent(PixRenderEventName.BeforeDeferred);
 
         GetTemporaryColorRT(ColorBuff);
         // TiledPass搞好后用Tile来剔除多余的栅格化
@@ -31,7 +29,7 @@ public class DeferredPass : PixPassBase
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterDeferred, renderer);
+        TriggerEvent(PixRenderEventName.AfterDeferred);
     }
     
 }

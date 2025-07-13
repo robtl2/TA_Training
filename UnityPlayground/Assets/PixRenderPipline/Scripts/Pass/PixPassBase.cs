@@ -135,6 +135,12 @@ public class PixPassBase
     }
 
     #region 这里放一些做菜时常用的技法
+
+    public void TriggerEvent(PixRenderEventName eventName)
+    {
+        PixRenderEvent.TriggerEvent(eventName, renderer);
+    }
+
     public void GetTemporaryColorRT(int nameID, int width, int height)
     {
         renderer.cmb.GetTemporaryRT(nameID, width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32, renderer.colorSpace);

@@ -26,8 +26,8 @@ struct GBuffer
 };
 
 
-TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);
-TEXTURE2D(_PixGBuffer_1);TEXTURE2D(_PixEarlyZDepth);
+TEXTURE2D(_PixGBuffer_1);SAMPLER(sampler_PixGBuffer_1);
+TEXTURE2D(_PixGBuffer_0);TEXTURE2D(_PixEarlyZDepth);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
 float2 _PixGBuffer_0_TexelSize;
@@ -54,7 +54,7 @@ float3 ReconstructWorldPos(float2 uv, float ndcDepth)
 }
 
 half sampleDepth(float2 uv){
-    return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixGBuffer_0, uv).r;
+    return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixGBuffer_1, uv).r;
 }
 
 half3 samplePositionWS(float2 uv){
@@ -100,9 +100,9 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half2 normalVS){
 
 GBufferData UnpackGBuffer(float2 uv)
 {
-    half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
-    half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_0, uv);
-    float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixGBuffer_0, uv).r;
+    half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_1, uv);
+    half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
+    float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixGBuffer_1, uv).r;
 
     half3 _color = UnpackFromR5G6B5(gbuffer_0.rg);
     half3 normalVS = UnpackNormal(gbuffer_1.xy);

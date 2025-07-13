@@ -13,12 +13,6 @@ Shader "Hidden/Pix/Deferred"
         ZWrite Off
         ZTest Always
 
-        // Stencil
-        // {
-        //     Ref 1
-        //     Comp Equal
-        // }
-       
         Pass
         {
             Name "PixDeferred"
@@ -43,8 +37,6 @@ Shader "Hidden/Pix/Deferred"
                 float2 uv : TEXCOORD0;
                 float4 tiled_id : TEXCOORD1;
             };
-
-            
 
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -74,7 +66,6 @@ Shader "Hidden/Pix/Deferred"
                 half3 lit = mainLight.lit;
                 lit += _PixAmbientLightColor;
 
-                // half3 col = lerp(1, gbufferData.albedo,1);
                 half3 col = gbufferData.albedo * lit;
 
                 return half4(col, 1);

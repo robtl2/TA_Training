@@ -2,18 +2,17 @@ using UnityEngine;
 
 public class PostProcessPass : PixPassBase
 {
-    public PostProcessPass(PixRenderer renderer) : base("PixPostProcessPass", renderer) { }
-
     Material postMaterial;
+    public PostProcessPass(PixRenderer renderer) : base("PixPostProcessPass", renderer)
+    {
+        postMaterial = new Material(Shader.Find("Hidden/Pix/Post"));
+    }
 
     public override void Execute()
     {
         base.Execute();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforePostProcess, renderer);
-
-        if (postMaterial == null)
-            postMaterial = new Material(Shader.Find("Hidden/Pix/Post"));
+        TriggerEvent(PixRenderEventName.BeforePostProcess);
 
         renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
         renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
@@ -25,6 +24,6 @@ public class PostProcessPass : PixPassBase
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterPostProcess, renderer);
+        TriggerEvent(PixRenderEventName.AfterPostProcess);
     }
 }

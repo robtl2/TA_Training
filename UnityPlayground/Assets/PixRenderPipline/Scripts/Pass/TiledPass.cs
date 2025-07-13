@@ -3,20 +3,18 @@ using Unity.Mathematics;
 
 public class TiledPass : PixPassBase
 {
-    public TiledPass(PixRenderer renderer) : base("PixTiledPass", renderer) { }
-
     public static readonly int tileID = Shader.PropertyToID("_PixTiledID");
-
     Material material;
+    public TiledPass(PixRenderer renderer) : base("PixTiledPass", renderer)
+    {
+        material = new Material(Shader.Find("Hidden/Pix/Tiled"));
+    }
 
     public override void Execute()
     {
         base.Execute();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeTiled, renderer);
-
-        if (material == null)
-            material = new Material(Shader.Find("Hidden/Pix/Tiled"));
+        TriggerEvent(PixRenderEventName.BeforeTiled);
 
         int2 size = renderer.tiledSize;
         GetTemporaryColorRT(tileID, size.x, size.y);
@@ -28,6 +26,6 @@ public class TiledPass : PixPassBase
         renderer.context.ExecuteCommandBuffer(renderer.cmb);
         renderer.cmb.Clear();
 
-        PixRenderEvent.TriggerEvent(PixRenderEventName.AfterTiled, renderer);
+        TriggerEvent(PixRenderEventName.AfterTiled);
     }
 }
