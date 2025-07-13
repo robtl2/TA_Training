@@ -402,13 +402,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 836327894}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.24474804, y: -0.04028471, z: 0.040045295, w: 0.9679215}
-  m_LocalPosition: {x: -0.208, y: 2.165, z: 0.366}
+  m_LocalRotation: {x: -0.31320426, y: -0.1838071, z: 0.059884217, w: 0.9298021}
+  m_LocalPosition: {x: -0.196, y: 2.141, z: 0.391}
   m_LocalScale: {x: 0.2282685, y: 0.2282685, z: 0.2282685}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -28.071, y: -6.35, z: 6.327}
+  m_LocalEulerAnglesHint: {x: -34.085, y: -27.258, z: 15.872}
 --- !u!21 &837222502
 Material:
   serializedVersion: 8
@@ -849,7 +849,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shadingModel: 0
   spriteAtlas: {fileID: 100100200, guid: 7f227cf7088454d069b9fea8f7d13a34, type: 3}
-  spriteName: testDecal2
+  spriteName: testDecal3
   order: 0
 --- !u!23 &1754247456
 MeshRenderer:
@@ -912,13 +912,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1754247454}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.25244898, y: -0.06842312, z: 0.08010311, w: 0.9618583}
-  m_LocalPosition: {x: -0.019, y: 2.125, z: 0.444}
-  m_LocalScale: {x: 0.2282685, y: 0.2282685, z: 0.2282685}
+  m_LocalRotation: {x: -0.18241966, y: 0.070112586, z: 0.4317336, w: 0.88057566}
+  m_LocalPosition: {x: 0.081, y: 2.103, z: 0.477}
+  m_LocalScale: {x: 0.2282685, y: 0.3534053, z: 0.2282685}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -28.338, y: -11.274, z: 12.376}
+  m_LocalEulerAnglesHint: {x: -22.446, y: -2.11, z: 52.655}
 --- !u!1 &2032307420
 GameObject:
   m_ObjectHideFlags: 0

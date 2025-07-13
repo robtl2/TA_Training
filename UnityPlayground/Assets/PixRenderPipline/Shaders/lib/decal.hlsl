@@ -14,7 +14,6 @@ struct Varyings_Decal
 {
     float4 positionCS : SV_POSITION;
     float4 uv : TEXCOORD0;
-    UNITY_VERTEX_OUTPUT_STEREO
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -23,18 +22,17 @@ TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
 UNITY_INSTANCING_BUFFER_START(Props)
     UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
     UNITY_DEFINE_INSTANCED_PROP(float, _ShadingModel)
-    // UNITY_DEFINE_INSTANCED_PROP(float4x4, _WorldToObject)
 UNITY_INSTANCING_BUFFER_END(Props)
 
 Varyings_Decal vert(Attributes_Decal input)
 {
     Varyings_Decal output;
     UNITY_SETUP_INSTANCE_ID(input);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
     output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
     half4 screenPos = ComputeScreenPos(output.positionCS);
     output.uv = screenPos;
+
     UNITY_TRANSFER_INSTANCE_ID(input, output);
     return output;
 }
@@ -51,7 +49,6 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     // 使用实例化数据
     float4 mainTex_ST = UNITY_ACCESS_INSTANCED_PROP(Props, _MainTex_ST);
     float shadingModel = UNITY_ACCESS_INSTANCED_PROP(Props, _ShadingModel);
-    // float4x4 worldToObject = UNITY_ACCESS_INSTANCED_PROP(Props, _WorldToObject);
     
     half2 screenUV = input.uv.xy / input.uv.w;
 

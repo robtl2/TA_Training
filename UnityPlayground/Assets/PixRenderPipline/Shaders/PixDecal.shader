@@ -20,7 +20,7 @@ Shader "Pix/Decal"
         // 先把CubeMesh的正面通过Ztest的部分并且Stencil不为0的部分找出来+1(0是画天空盒的区域)
         Pass
         {
-            Tags { "LightMode" = "PixDecal_Stencil_Front" }
+            Name "PixDecal_Stencil_Front"
 
             Cull Back
             ColorMask 0
@@ -44,7 +44,7 @@ Shader "Pix/Decal"
         // 这样剩下的stencil比1大的象素就是Decal需要画的象素
         Pass
         {
-            Tags { "LightMode" = "PixDecal_Stencil_Back" }
+            Name "PixDecal_Stencil_Back"
 
             Cull Front
             ColorMask 0
@@ -64,13 +64,12 @@ Shader "Pix/Decal"
             ENDHLSL
         }
 
-        // 最后把Stencil比1大的象素画出来(Less是问的ref 1是不是比stencilBuff中的值小)
+        // 最后把Stencil比1大的象素画出来(Comp Less是问的ref 1是不是比stencilBuff中的值小)
         Pass
         {
-            Tags { "LightMode" = "PixDecal_Main" }
+            Name "PixDecal_Main"
 
-            ZTest Always
-
+            ZTest Always //到这里就只需要Stencil Test了
             Cull Back
             Blend SrcAlpha OneMinusSrcAlpha
 
