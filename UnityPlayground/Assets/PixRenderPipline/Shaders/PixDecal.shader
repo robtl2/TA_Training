@@ -1,7 +1,7 @@
 // 这个Shader是用来画Decal的
 // 演示Stencil的经典用法
 
-Shader "Pix/Decal"
+Shader "Hidden/Pix/Decal"
 {
     Properties
     {

@@ -16,9 +16,8 @@ public class FinalPass : PixPassBase
 
     public override void Execute()
     {
-        base.Execute();
-
         TriggerEvent(PixRenderEventName.BeforeFinal);
+        base.Execute();
 
         filterMaterial.SetFloat("_IsSceneView", renderer.isSceneView ? 1 : 0);
 

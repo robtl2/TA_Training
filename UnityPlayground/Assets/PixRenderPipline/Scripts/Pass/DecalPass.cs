@@ -5,7 +5,7 @@ public class DecalPass : PixPassBase
 {
     public DecalPass(PixRenderer renderer) : base("DecalPass", renderer)
     {
-        material = new Material(Shader.Find("Pix/Decal"));
+        material = new Material(Shader.Find("Hidden/Pix/Decal"));
         material.enableInstancing = true;
     }
 
@@ -35,8 +35,6 @@ public class DecalPass : PixPassBase
 
         // 手动进行视锥体剔除，使用Unity的GeometryUtility
         var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(renderer.camera);
-        
-        // 收集可见的Decal
         for (int i = 0; i < PixDecal.decals.Count; i++)
         {
             var decal = PixDecal.decals[i];

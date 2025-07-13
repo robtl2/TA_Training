@@ -11,9 +11,8 @@ public class TransparentPass : PixPassBase
     
     public override void Execute()
     {
-        base.Execute();
-
         TriggerEvent(PixRenderEventName.BeforeTransparent);
+        base.Execute();
 
         GetTemporaryColorRT(ColorBuff);
 

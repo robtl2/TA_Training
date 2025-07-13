@@ -10,9 +10,8 @@ public class PostProcessPass : PixPassBase
 
     public override void Execute()
     {
-        base.Execute();
-
         TriggerEvent(PixRenderEventName.BeforePostProcess);
+        base.Execute();
 
         renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
         renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);

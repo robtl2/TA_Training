@@ -12,9 +12,8 @@ public class TiledPass : PixPassBase
 
     public override void Execute()
     {
-        base.Execute();
-
         TriggerEvent(PixRenderEventName.BeforeTiled);
+        base.Execute();
 
         int2 size = renderer.tiledSize;
         GetTemporaryColorRT(tileID, size.x, size.y);

@@ -8,9 +8,8 @@ public class EarlyZPass : PixPassBase
     public static readonly RenderTargetIdentifier depthID = new(nameID);
     public override void Execute()
     {
-        base.Execute();
-
         TriggerEvent(PixRenderEventName.BeforeEarlyZ);
+        base.Execute();
 
         // 创建深度缓冲区
         renderer.cmb.GetTemporaryRT(nameID, renderer.size.x, renderer.size.y, 32, FilterMode.Point, RenderTextureFormat.Depth);

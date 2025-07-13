@@ -12,9 +12,8 @@ public class DeferredPass : PixPassBase
 
     public override void Execute()
     {
-        base.Execute();
-
         TriggerEvent(PixRenderEventName.BeforeDeferred);
+        base.Execute();
 
         GetTemporaryColorRT(ColorBuff);
         // TiledPass搞好后用Tile来剔除多余的栅格化
