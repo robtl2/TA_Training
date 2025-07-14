@@ -1,39 +1,42 @@
 using UnityEngine.Rendering;
 using UnityEngine;
 
-public class TransparentPass : PixPassBase
+namespace PixRenderPipline
 {
-    public TransparentPass(PixRenderer renderer) : base("PixTransparentPass", renderer) { }
-
-    readonly ShaderTagId tagID = new("PixTransparent");
-    
-    public static readonly int ColorBuff = Shader.PropertyToID("_PixColorTex");
-    
-    public override void Execute()
+    public class TransparentPass : PixPassBase
     {
-        TriggerEvent(PixRenderEventName.BeforeTransparent);
-        base.Execute();
+        public TransparentPass(PixRenderer renderer) : base("PixTransparentPass", renderer) { }
 
-        GetTemporaryColorRT(ColorBuff);
+        readonly ShaderTagId tagID = new("PixTransparent");
+        
+        public static readonly int ColorBuff = Shader.PropertyToID("_PixColorTex");
+        
+        public override void Execute()
+        {
+            TriggerEvent(PixRenderEventName.BeforeTransparent);
+            base.Execute();
 
-        //先把之前Deferred渲染的结果复制过来
-        renderer.cmb.Blit(DeferredPass.ColorBuff, ColorBuff);
+            GetTemporaryColorRT(ColorBuff);
 
-        renderer.cmb.SetRenderTarget(ColorBuff, EarlyZPass.depthID);
-        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
-        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
-        renderer.cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);
+            //先把之前Deferred渲染的结果复制过来
+            renderer.cmb.Blit(DeferredPass.ColorBuff, ColorBuff);
 
-        RendererList list = GetRendererList(tagID, SortingCriteria.CommonTransparent, RenderQueueRange.transparent);
+            renderer.cmb.SetRenderTarget(ColorBuff, EarlyZPass.depthID);
+            renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
+            renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
+            renderer.cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);
 
-        if (list.isValid)
-            renderer.cmb.DrawRendererList(list);
+            RendererList list = GetRendererList(tagID, SortingCriteria.CommonTransparent, RenderQueueRange.transparent);
 
-        renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
+            if (list.isValid)
+                renderer.cmb.DrawRendererList(list);
 
-        renderer.context.ExecuteCommandBuffer(renderer.cmb);
-        renderer.cmb.Clear();
+            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
-        TriggerEvent(PixRenderEventName.AfterTransparent);
+            renderer.context.ExecuteCommandBuffer(renderer.cmb);
+            renderer.cmb.Clear();
+
+            TriggerEvent(PixRenderEventName.AfterTransparent);
+        }
     }
 }

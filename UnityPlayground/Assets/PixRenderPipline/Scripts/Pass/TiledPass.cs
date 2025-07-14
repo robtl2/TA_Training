@@ -1,30 +1,33 @@
 using UnityEngine;
 using Unity.Mathematics;
 
-public class TiledPass : PixPassBase
+namespace PixRenderPipline
 {
-    public static readonly int tileID = Shader.PropertyToID("_PixTiledID");
-    Material material;
-    public TiledPass(PixRenderer renderer) : base("PixTiledPass", renderer)
+    public class TiledPass : PixPassBase
     {
-        material = new Material(Shader.Find("Hidden/Pix/Tiled"));
-    }
+        public static readonly int tileID = Shader.PropertyToID("_PixTiledID");
+        Material material;
+        public TiledPass(PixRenderer renderer) : base("PixTiledPass", renderer)
+        {
+            material = new Material(Shader.Find("Hidden/Pix/Tiled"));
+        }
 
-    public override void Execute()
-    {
-        TriggerEvent(PixRenderEventName.BeforeTiled);
-        base.Execute();
+        public override void Execute()
+        {
+            TriggerEvent(PixRenderEventName.BeforeTiled);
+            base.Execute();
 
-        int2 size = renderer.tiledSize;
-        GetTemporaryColorRT(tileID, size.x, size.y);
-        renderer.cmb.SetRenderTarget(tileID);
-        renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
-        // TODO: 计算PerTiled Lights和ShadingModel的掩码
-        renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
+            int2 size = renderer.tiledSize;
+            GetTemporaryColorRT(tileID, size.x, size.y);
+            renderer.cmb.SetRenderTarget(tileID);
+            renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
+            // TODO: 计算PerTiled Lights和ShadingModel的掩码
+            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
 
-        renderer.context.ExecuteCommandBuffer(renderer.cmb);
-        renderer.cmb.Clear();
+            renderer.context.ExecuteCommandBuffer(renderer.cmb);
+            renderer.cmb.Clear();
 
-        TriggerEvent(PixRenderEventName.AfterTiled);
+            TriggerEvent(PixRenderEventName.AfterTiled);
+        }
     }
 }

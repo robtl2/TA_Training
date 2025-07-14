@@ -7,6 +7,9 @@ Shader "Hidden/Pix/Decal"
     {
         _MainTex ("Main Tex", 2D) = "white" {}
         _ShadingModel ("Shading Model", Int) = 0
+        _BlendMode ("Blend Mode", Int) = 0
+        _BlendSrc ("Blend Src", Int) = 5 // SrcAlpha
+        _BlendDst ("Blend Dst", Int) = 10 // OneMinusSrcAlpha
     }
 
     SubShader
@@ -71,7 +74,7 @@ Shader "Hidden/Pix/Decal"
 
             ZTest Always //到这里就只需要Stencil Test了
             Cull Back
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend [_BlendSrc] [_BlendDst]
 
             Stencil
             {

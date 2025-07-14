@@ -22,6 +22,7 @@ TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
 UNITY_INSTANCING_BUFFER_START(Props)
     UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
     UNITY_DEFINE_INSTANCED_PROP(float, _ShadingModel)
+    UNITY_DEFINE_INSTANCED_PROP(float, _BlendMode)
 UNITY_INSTANCING_BUFFER_END(Props)
 
 Varyings_Decal vert(Attributes_Decal input)
@@ -50,6 +51,7 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     // 使用实例化数据
     float4 mainTex_ST = UNITY_ACCESS_INSTANCED_PROP(Props, _MainTex_ST);
     float shadingModel = UNITY_ACCESS_INSTANCED_PROP(Props, _ShadingModel);
+    float blendMode = UNITY_ACCESS_INSTANCED_PROP(Props, _BlendMode);
     
     // 通过屏幕坐标UI拿取GBuffer数据
     half2 screenUV = input.uv.xy * input.uv.w;
@@ -66,6 +68,10 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     uv = uv * mainTex_ST.xy + mainTex_ST.zw;
 
     half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+
+    // 正片叠底颜色调整
+    if (blendMode == 2)
+        col.rgb = lerp(1,col.rgb, col.a);
 
     return col;
 }

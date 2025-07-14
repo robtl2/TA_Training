@@ -6,59 +6,62 @@ using System;
 /// 相当于极简版的RenderFeature
 /// 就是起个问外面的人还要不要加菜的作用
 /// </summary>
-
-public enum PixRenderEventName
+namespace PixRenderPipline
 {
-    BeforeEarlyZ,
-    AfterEarlyZ,
 
-    BeforeGBuffer,
-    AfterGBuffer,
+    public enum PixRenderEventName
+    {
+        BeforeEarlyZ,
+        AfterEarlyZ,
 
-    BeforeTiled,
-    AfterTiled,
+        BeforeGBuffer,
+        AfterGBuffer,
 
-    BeforeDeferred,
-    AfterDeferred,
+        BeforeTiled,
+        AfterTiled,
 
-    BeforeTransparent,
-    AfterTransparent,
+        BeforeDeferred,
+        AfterDeferred,
 
-    BeforePostProcess,
-    AfterPostProcess,
+        BeforeTransparent,
+        AfterTransparent,
 
-    BeforeFinal,
+        BeforePostProcess,
+        AfterPostProcess,
+
+        BeforeFinal,
+    }
+
+    public class PixRenderEvent
+    {
+        static Dictionary<PixRenderEventName, Action<PixRenderer>> events = new();
+
+        public static void AddEvent(PixRenderEventName name, Action<PixRenderer> action)
+        {
+            if (events.TryGetValue(name, out var existingAction))
+                events[name] = existingAction + action;
+            else
+                events[name] = action;
+        }
+
+        public static void RemoveEvent(PixRenderEventName name, Action<PixRenderer> action)
+        {
+            if (events.TryGetValue(name, out var existingAction))
+                events[name] = existingAction - action;
+        }
+
+        public static void TriggerEvent(PixRenderEventName name, PixRenderer renderer)
+        {
+            if (events.TryGetValue(name, out var action))
+                action?.Invoke(renderer);
+
+            renderer.cmb.Clear();
+        }
+
+        public static void Dispose()
+        {
+            events.Clear();
+        }
+    }
+
 }
-
-public class PixRenderEvent
-{
-    static Dictionary<PixRenderEventName, Action<PixRenderer>> events = new();
-
-    public static void AddEvent(PixRenderEventName name, Action<PixRenderer> action)
-    {
-        if (events.TryGetValue(name, out var existingAction))
-            events[name] = existingAction + action;
-        else
-            events[name] = action;
-    }
-
-    public static void RemoveEvent(PixRenderEventName name, Action<PixRenderer> action)
-    {
-        if (events.TryGetValue(name, out var existingAction))
-            events[name] = existingAction - action;
-    }
-
-    public static void TriggerEvent(PixRenderEventName name, PixRenderer renderer)
-    {
-        if (events.TryGetValue(name, out var action))
-            action?.Invoke(renderer);
-
-        renderer.cmb.Clear();
-    }
-
-    public static void Dispose()
-    {
-        events.Clear();
-    }
-}
-
