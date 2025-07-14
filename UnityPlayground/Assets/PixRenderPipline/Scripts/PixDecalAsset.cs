@@ -6,14 +6,7 @@ namespace PixRenderPipline
     [CreateAssetMenu(fileName = "PixDecalAsset", menuName = "Pix/DecalAsset")]
     public class PixDecalAsset : ScriptableObject
     {
-        public enum BlendMode
-        {
-            Transparent,
-            Additive,
-            Multiply
-        }
-
-        public BlendMode blendMode;
+        public PixDecal.BlendMode blendMode;
 
         public SpriteAtlas spriteAtlas;
     }

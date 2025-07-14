@@ -54,8 +54,6 @@ namespace PixRenderPipline
         {
             if (events.TryGetValue(name, out var action))
                 action?.Invoke(renderer);
-
-            renderer.cmb.Clear();
         }
 
         public static void Dispose()

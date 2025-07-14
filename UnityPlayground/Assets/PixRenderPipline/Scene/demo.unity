@@ -149,9 +149,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   skyType: 1
-  color: {r: 0.25142398, g: 0.4014762, b: 0.4716981, a: 1}
+  color: {r: 0.5, g: 0.2287736, b: 0.26345637, a: 1}
   texture: {fileID: 8900000, guid: 09daabd73846b4845b41068698fb2180, type: 3}
-  blurLevel: 0
+  blurLevel: 2.05
   intensity: 1.62
   fovScale: 1.3
 --- !u!4 &602252877
@@ -219,6 +219,138 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 72.267, y: 169.123, z: -31.42}
+--- !u!21 &735833602
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Barbarian (Instance)
+  m_Shader: {fileID: 4800000, guid: 3e1a5a8e4d2c146a496a4831a4f42b73, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 2000
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: c45c0a81ed3a44d5da8a46e6633e26d0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - Group#BackHull: 1
+    - Group#Lit: 1
+    - Group#Main: 1
+    - _AddPrecomputedVelocity: 0
+    - _AlphaClip: 0
+    - _AlphaToMask: 0
+    - _Blend: 0
+    - _BlendModePreserveSpecular: 1
+    - _BumpScale: 1
+    - _ClearCoatMask: 0
+    - _ClearCoatSmoothness: 0
+    - _Cull: 2
+    - _Cutoff: 0.5
+    - _DetailAlbedoMapScale: 1
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _DstBlendAlpha: 0
+    - _EnvironmentReflections: 1
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 0
+    - _Metallic: 0
+    - _OcclusionStrength: 1
+    - _OutLineWidth: 0.36
+    - _OutLineZOffset: 0
+    - _OutlineWidth: 0.36
+    - _OutlineZOffset: 0
+    - _Parallax: 0.005
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _Rim: 0
+    - _ShadingModel: 1
+    - _Smoothness: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _Specular: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
+    - _Surface: 0
+    - _WorkflowMode: 1
+    - _ZWrite: 1
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _OutLineColor: {r: 0.9716981, g: 0.9716981, b: 0.9716981, a: 1}
+    - _OutlineColor: {r: 0.31132078, g: 0.15125492, b: 0.15125492, a: 1}
+    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &836327894
 GameObject:
   m_ObjectHideFlags: 0
@@ -310,7 +442,7 @@ MonoBehaviour:
   enableContactShadow: 1
   contactRayLength: 0.066
   contactSampleCount: 2
-  contactBias: 0.00000791
+  contactBias: 0.000018
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &870345107
@@ -571,6 +703,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -30.528, y: 5.18, z: 49.392}
+--- !u!1 &1867847265 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2815020797356974666, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+  m_PrefabInstance: {fileID: 3444695109976925505}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1867847267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1867847265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b6985768462f4498a248bf2924cf2d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: {r: 0.31132078, g: 0.15125492, b: 0.15125492, a: 1}
+  width: 0.21
+  zOffset: 0
 --- !u!1 &2032307420
 GameObject:
   m_ObjectHideFlags: 0
@@ -692,6 +844,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 151536711949309246, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 735833602}
+    - target: {fileID: 256246209072222686, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7f20b3d3e354dd2928e4c133ae9ba5, type: 2}
+    - target: {fileID: 995517155921126827, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7f20b3d3e354dd2928e4c133ae9ba5, type: 2}
+    - target: {fileID: 2374813208264002171, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7f20b3d3e354dd2928e4c133ae9ba5, type: 2}
     - target: {fileID: 2815020797356974666, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
       propertyPath: m_Name
       value: Barbarian
@@ -736,10 +904,29 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4560835658551583263, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7f20b3d3e354dd2928e4c133ae9ba5, type: 2}
+    - target: {fileID: 4913886160265986380, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7f20b3d3e354dd2928e4c133ae9ba5, type: 2}
+    - target: {fileID: 7526909591965437939, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7f20b3d3e354dd2928e4c133ae9ba5, type: 2}
+    - target: {fileID: 7721565615993662254, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7f20b3d3e354dd2928e4c133ae9ba5, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2815020797356974666, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1867847267}
   m_SourcePrefab: {fileID: 100100000, guid: a746b9dae29af4afca01949ad12441bf, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

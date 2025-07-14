@@ -14,5 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   renderSize: 4
   colorSpace: 1
+  outLineDepthThreshold: 1
+  outLineNormalThreshold: 2
   debugMode: 0
-  debugSize: 0.365
+  debugSize: 1

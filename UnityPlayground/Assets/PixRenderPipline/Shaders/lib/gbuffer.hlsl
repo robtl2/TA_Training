@@ -1,6 +1,7 @@
 #ifndef GBUFFER_INCLUDED
 #define GBUFFER_INCLUDED
 
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 #include "comman.hlsl"
 
 struct GBufferData
@@ -26,7 +27,7 @@ struct GBuffer
 };
 
 
-TEXTURE2D(_PixGBuffer_0);
+TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);
 TEXTURE2D(_PixGBuffer_1);SAMPLER(sampler_PixGBuffer_1);
 TEXTURE2D(_PixEarlyZDepth);SAMPLER(sampler_PixEarlyZDepth);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
@@ -89,24 +90,24 @@ half3 ReconstructTrueNormal_Tap4(half3 posWorld, half2 uv){
 // ------------------------------------------------------------
 
 GBuffer PackGBuffer(half4 color, int shadingModel, half2 normalVS){
-    half2 rgb = PackToR5G6B5(color.rgb);
-
-    half4 _color = half4(rgb, 0, 1);
+    half3 hsv = RgbToHsv(color.rgb);
+    half2 rgb = PackToR5G6B5(hsv.yxz);
 
     GBuffer gbuffer;
-    gbuffer.gbuffer_0 = _color;
-    gbuffer.gbuffer_1 = half4(normalVS, 0, 0);
+    gbuffer.gbuffer_0 = half4(rgb,normalVS);
+    gbuffer.gbuffer_1 = half4(0,0, 0, 0);
     return gbuffer;
 }
 
 GBufferData UnpackGBuffer(float2 uv)
 {
-    half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_1, uv);
+    half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
     half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
     float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
 
-    half3 _color = UnpackFromR5G6B5(gbuffer_0.rg);
-    half3 normalVS = UnpackNormal(gbuffer_1.xy);
+    half3 shv = UnpackFromR5G6B5(gbuffer_0.xy);
+    half3 rgb = HsvToRgb(shv.yxz);
+    half3 normalVS = UnpackNormal(gbuffer_0.zw);
     float3 worldPos = ReconstructWorldPos(uv, ndcDepth);
 
     half3 cameraPos = _WorldSpaceCameraPos;
@@ -125,7 +126,7 @@ GBufferData UnpackGBuffer(float2 uv)
 
 
     GBufferData gbufferData;
-    gbufferData.albedo = _color;
+    gbufferData.albedo = rgb;
     gbufferData.alpha = gbuffer_0.a;
 
     gbufferData.positionWS = worldPos;

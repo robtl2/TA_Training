@@ -12,8 +12,11 @@ Shader "Pix/Standard"
             _Specular("Specular[Lit,_ShadingModel_1]", Range(0,1)) = 0
             _Rim("Rim[Lit,_ShadingModel_1]", Range(0,1)) = 0
 
-
+        _OutlineColor("OutlineColor", Color) = (0,0,0,1)
+        _OutlineWidth("OutlineWidth", Float) = 0.05
+        _OutlineZOffset("OutlineZOffset", Float) = 0
     }
+
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue"="Geometry" }
@@ -158,6 +161,66 @@ Shader "Pix/Standard"
             #endif
 
                 return 0;
+            }
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "PixBackHull"
+            Tags { "LightMode"="PixBackHull" }
+
+            ZWrite Off
+            ZTest LEqual
+            Cull Front
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            struct AttributesDepth
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+            };
+
+            struct VaryingsDepth
+            {
+                float4 positionCS : SV_POSITION;
+                float4 uv : TEXCOORD0;
+            };
+
+            float4 _OutlineColor;
+            float _OutlineWidth;
+            float _OutlineZOffset;
+
+            TEXTURE2D(_PixOpaqueTex);SAMPLER(sampler_PixOpaqueTex);
+
+            VaryingsDepth vert(AttributesDepth input)
+            {
+                half4 positionCS = TransformObjectToHClip(input.positionOS.xyz); 
+                half4 screenPos = ComputeScreenPos(positionCS);
+                screenPos.w = 1/screenPos.w;
+                
+                half3 positionOS = input.positionOS.xyz + input.normalOS * _OutlineWidth;
+                positionCS = TransformObjectToHClip(positionOS);  
+                positionCS.z += _OutlineZOffset*_ProjectionParams.w;
+                
+                VaryingsDepth output;
+                output.uv = screenPos;
+                output.positionCS = positionCS;
+                return output;
+            }
+
+            half4 frag(VaryingsDepth input) : SV_Target
+            {
+                half2 uv = input.uv.xy * input.uv.w;
+
+                // 这个Pass是由PixOutLine组件在Transparent阶段画的，所以能拿到deferredPass的输出_PixOpaqueTex
+                half4 color = SAMPLE_TEXTURE2D(_PixOpaqueTex, sampler_PixOpaqueTex, uv);
+
+                return color * _OutlineColor;
             }
             ENDHLSL
         }

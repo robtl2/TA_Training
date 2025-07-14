@@ -5,7 +5,10 @@ namespace PixRenderPipline
 {
     public class GBufferPass : PixPassBase
     {
-        readonly ShaderTagId gBufferTag = new("PixGBuffer");
+        readonly ShaderTagId[] gBufferTags = new ShaderTagId[] {
+            new("PixGBuffer"),
+        };
+
         public static readonly int GbufferID_0 = Shader.PropertyToID("_PixGBuffer_0");
         public static readonly int GbufferID_1 = Shader.PropertyToID("_PixGBuffer_1");
 
@@ -30,7 +33,7 @@ namespace PixRenderPipline
             renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);
             renderer.cmb.ClearRenderTarget(false, true, black);
 
-            RendererList list = GetRendererList(gBufferTag, SortingCriteria.CommonOpaque, RenderQueueRange.opaque);
+            RendererList list = GetRendererList(gBufferTags, SortingCriteria.CommonOpaque, RenderQueueRange.opaque);
 
             if (list.isValid)
                 renderer.cmb.DrawRendererList(list);

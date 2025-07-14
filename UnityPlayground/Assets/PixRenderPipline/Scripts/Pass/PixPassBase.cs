@@ -124,7 +124,7 @@ namespace PixRenderPipline
         #endregion
 
         public PixRenderer renderer { get; private set; }
-        public  string passName { get; private set; }
+        public string passName { get; private set; }
         public PixPassBase(string passName, PixRenderer renderer)
         {
             this.renderer = renderer;
@@ -161,9 +161,14 @@ namespace PixRenderPipline
         /// <param name="renderQueueRange">渲染队列范围</param>
         public RendererList GetRendererList(ShaderTagId tag, SortingCriteria sortingCriteria, RenderQueueRange renderQueueRange)
         {
+            return GetRendererList(new ShaderTagId[] { tag }, sortingCriteria, renderQueueRange);
+        }
+        
+        public RendererList GetRendererList(ShaderTagId[] tags, SortingCriteria sortingCriteria, RenderQueueRange renderQueueRange)
+        {
             if (renderer.cullingSuccess)
             {
-                RendererListDesc rendererListDesc = new(tag, renderer.cullingResults, renderer.camera)
+                RendererListDesc rendererListDesc = new(tags, renderer.cullingResults, renderer.camera)
                 {
                     renderQueueRange = renderQueueRange,
                     sortingCriteria = sortingCriteria

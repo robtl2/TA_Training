@@ -33,6 +33,13 @@ namespace PixRenderPipline
             Lit,
         }
 
+        public enum BlendMode
+        {
+            Transparent,
+            Additive,
+            Multiply
+        }
+
         public DecalShadingModel shadingModel;
         public PixDecalAsset asset;
         public string spriteName;

@@ -33,6 +33,7 @@ Varyings_Decal vert(Attributes_Decal input)
 
     output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
     half4 screenPos = ComputeScreenPos(output.positionCS);
+    // 把除法放顶点里，象素里计算能快一丢丢
     screenPos.w = 1/screenPos.w;
     output.uv = screenPos;
 

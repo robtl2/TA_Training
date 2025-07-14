@@ -13,6 +13,12 @@ Shader "Hidden/Pix/Deferred"
         ZWrite Off
         ZTest Always
 
+        Stencil
+        {
+            Ref 1
+            Comp Equal
+        }
+
         Pass
         {
             Name "PixDeferred"

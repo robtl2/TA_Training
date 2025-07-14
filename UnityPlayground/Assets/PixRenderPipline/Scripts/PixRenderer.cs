@@ -27,6 +27,8 @@ namespace PixRenderPipline
         /// </summary>
         public Camera camera { get; private set; }
 
+        public Plane[] frustum { get; private set; }
+
         /// <summary>
         /// 把asset拿手上才知道参数
         /// </summary>
@@ -76,6 +78,8 @@ namespace PixRenderPipline
             this.context = context;
             this.camera = camera;
             this.asset = asset;
+
+            frustum = GeometryUtility.CalculateFrustumPlanes(camera);
         }
 
         /// <summary>

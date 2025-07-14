@@ -39,11 +39,10 @@ namespace PixRenderPipline
             visibleDecals.Clear();
 
             // 手动进行视锥体剔除，使用Unity的GeometryUtility
-            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(renderer.camera);
             for (int i = 0; i < PixDecal.decals.Count; i++)
             {
                 var decal = PixDecal.decals[i];
-                if (GeometryUtility.TestPlanesAABB(frustumPlanes, decal.WorldBounds))
+                if (GeometryUtility.TestPlanesAABB(renderer.frustum, decal.WorldBounds))
                     visibleDecals.Add(decal);
             }
 
@@ -101,15 +100,15 @@ namespace PixRenderPipline
                 material.SetInt("_BlendMode", (int)blendMode);
                 switch (blendMode)
                 {
-                    case PixDecalAsset.BlendMode.Transparent:
+                    case PixDecal.BlendMode.Transparent:
                         material.SetInt("_BlendSrc", (int)BlendMode.SrcAlpha);
                         material.SetInt("_BlendDst", (int)BlendMode.OneMinusSrcAlpha);
                         break;
-                    case PixDecalAsset.BlendMode.Additive:
+                    case PixDecal.BlendMode.Additive:
                         material.SetInt("_BlendSrc", (int)BlendMode.SrcAlpha);
                         material.SetInt("_BlendDst", (int)BlendMode.One);
                         break;
-                    case PixDecalAsset.BlendMode.Multiply:
+                    case PixDecal.BlendMode.Multiply:
                         material.SetInt("_BlendSrc", (int)BlendMode.DstColor);
                         material.SetInt("_BlendDst", (int)BlendMode.Zero);
                         break;

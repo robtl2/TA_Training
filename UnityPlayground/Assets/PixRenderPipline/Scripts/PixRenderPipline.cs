@@ -39,7 +39,6 @@ namespace PixRenderPipline
         {
             base.Dispose(disposing);
 
-            PixRenderEvent.Dispose();
         }
     }
 }
