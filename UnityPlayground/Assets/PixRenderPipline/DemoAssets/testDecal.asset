@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f768e1c71c3af4999a38fb9be6b63c85, type: 3}
   m_Name: testDecal
   m_EditorClassIdentifier: 
-  blendMode: 0
+  blendMode: 2
   spriteAtlas: {fileID: 100100200, guid: 7f227cf7088454d069b9fea8f7d13a34, type: 3}

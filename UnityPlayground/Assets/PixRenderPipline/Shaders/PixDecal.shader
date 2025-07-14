@@ -6,6 +6,7 @@ Shader "Hidden/Pix/Decal"
     Properties
     {
         _MainTex ("Main Tex", 2D) = "white" {}
+        _Alpha ("Alpha", Range(0, 1)) = 1
         _ShadingModel ("Shading Model", Int) = 0
         _BlendMode ("Blend Mode", Int) = 0
         _BlendSrc ("Blend Src", Int) = 5 // SrcAlpha

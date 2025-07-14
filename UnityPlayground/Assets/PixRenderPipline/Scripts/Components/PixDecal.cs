@@ -36,6 +36,9 @@ namespace PixRenderPipline
         public DecalShadingModel shadingModel;
         public PixDecalAsset asset;
         public string spriteName;
+
+        [Range(0, 1)]
+        public float alpha = 1;
         public uint order = 0;
 
         /// <summary>

@@ -23,6 +23,7 @@ UNITY_INSTANCING_BUFFER_START(Props)
     UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
     UNITY_DEFINE_INSTANCED_PROP(float, _ShadingModel)
     UNITY_DEFINE_INSTANCED_PROP(float, _BlendMode)
+    UNITY_DEFINE_INSTANCED_PROP(float, _Alpha)
 UNITY_INSTANCING_BUFFER_END(Props)
 
 Varyings_Decal vert(Attributes_Decal input)
@@ -52,6 +53,7 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     float4 mainTex_ST = UNITY_ACCESS_INSTANCED_PROP(Props, _MainTex_ST);
     float shadingModel = UNITY_ACCESS_INSTANCED_PROP(Props, _ShadingModel);
     float blendMode = UNITY_ACCESS_INSTANCED_PROP(Props, _BlendMode);
+    float alpha = UNITY_ACCESS_INSTANCED_PROP(Props, _Alpha);
     
     // 通过屏幕坐标UI拿取GBuffer数据
     half2 screenUV = input.uv.xy * input.uv.w;
@@ -65,9 +67,14 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     half2 uv = posLocal.xy+0.5;
     
     // 应用Atlas局部uv
-    uv = uv * mainTex_ST.xy + mainTex_ST.zw;
+    half2 local_uv = uv * mainTex_ST.xy + mainTex_ST.zw;
 
-    half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+    half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, local_uv);
+    col.a *= alpha;
+
+    // 清理uv超过象限的部分
+    if(any(uv < 0.001 || uv > 0.999))
+        col.a = 0;
 
     // 正片叠底颜色调整
     if (blendMode == 2)

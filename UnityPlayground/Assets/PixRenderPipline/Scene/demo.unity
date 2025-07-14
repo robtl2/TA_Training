@@ -202,6 +202,7 @@ MonoBehaviour:
   shadingModel: 0
   asset: {fileID: 11400000, guid: b06941a6f7e544561853bb48a9eb3b51, type: 2}
   spriteName: testDecal2
+  alpha: 1
   order: 2
 --- !u!4 &611045766
 Transform:
@@ -250,6 +251,7 @@ MonoBehaviour:
   shadingModel: 0
   asset: {fileID: 11400000, guid: b06941a6f7e544561853bb48a9eb3b51, type: 2}
   spriteName: testDecal2
+  alpha: 1
   order: 3
 --- !u!4 &836327898
 Transform:
@@ -518,6 +520,7 @@ MonoBehaviour:
   shadingModel: 0
   asset: {fileID: 11400000, guid: b06941a6f7e544561853bb48a9eb3b51, type: 2}
   spriteName: testDecal1
+  alpha: 1
   order: 1
 --- !u!1 &1754247454
 GameObject:
@@ -551,6 +554,7 @@ MonoBehaviour:
   shadingModel: 0
   asset: {fileID: 11400000, guid: b06941a6f7e544561853bb48a9eb3b51, type: 2}
   spriteName: testDecal3
+  alpha: 1
   order: 0
 --- !u!4 &1754247458
 Transform:

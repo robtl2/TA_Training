@@ -18,11 +18,13 @@ namespace PixRenderPipline
         Material material;
         List<Vector4> rects = new();
         List<float> shadingModels = new();
+        List<float> alphas = new();
         List<PixDecal> visibleDecals = new();
         
         int _MainTex = Shader.PropertyToID("_MainTex");
         int _MainTex_ST = Shader.PropertyToID("_MainTex_ST");
         int _ShadingModel = Shader.PropertyToID("_ShadingModel");
+        int _Alpha = Shader.PropertyToID("_Alpha");
         
         /// 没有使用SRP batch, 因为我感觉SRP batch的性能不如直接DrawMeshInstanced
         /// 如果我感觉错了, 那就亏大了
@@ -33,7 +35,7 @@ namespace PixRenderPipline
         public override void Execute()
         {
             base.Execute();
-            
+
             visibleDecals.Clear();
 
             // 手动进行视锥体剔除，使用Unity的GeometryUtility
@@ -62,6 +64,7 @@ namespace PixRenderPipline
                 decalsPropertyBlock.Clear();
                 rects.Clear();
                 shadingModels.Clear();
+                alphas.Clear();
 
                 Texture2D texture = Texture2D.whiteTexture;
                 var decals = PixDecal.decalsBySpriteAtlas[atlas];
@@ -73,7 +76,7 @@ namespace PixRenderPipline
                     if (visibleDecals.Contains(decal))
                         visibleDecalsInAtlas.Add(decal);
                 }
-                
+
                 if (visibleDecalsInAtlas.Count == 0)
                     continue;
 
@@ -90,8 +93,9 @@ namespace PixRenderPipline
 
                     rects.Add(decal.UV_ST);
                     shadingModels.Add((int)decal.shadingModel);
+                    alphas.Add(decal.alpha);
                 }
-                
+
                 // 设置blend mode
                 var blendMode = decals[0].asset.blendMode;
                 material.SetInt("_BlendMode", (int)blendMode);
@@ -114,7 +118,7 @@ namespace PixRenderPipline
                 material.SetTexture(_MainTex, texture);
                 decalsPropertyBlock.SetVectorArray(_MainTex_ST, rects.ToArray());
                 decalsPropertyBlock.SetFloatArray(_ShadingModel, shadingModels.ToArray());
-
+                decalsPropertyBlock.SetFloatArray(_Alpha, alphas.ToArray());
                 renderer.cmb.DrawMeshInstanced(PixDecal.mesh, 0, material, 2, decalsMatrix, decalsCount, decalsPropertyBlock);
             }
 
