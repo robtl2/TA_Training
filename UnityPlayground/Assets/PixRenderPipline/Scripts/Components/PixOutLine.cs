@@ -33,7 +33,7 @@ namespace PixRenderPipline
             {
                 var mat = r.sharedMaterial;
 
-                if (GeometryUtility.TestPlanesAABB(renderer.frustum, r.bounds))
+                if (renderer.FrustumCull(r.bounds))
                     renderer.cmb.DrawRenderer(r, mat, 0, passIDs[mat]);
             }
         }

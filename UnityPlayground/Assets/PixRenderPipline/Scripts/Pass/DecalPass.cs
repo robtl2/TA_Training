@@ -42,7 +42,7 @@ namespace PixRenderPipline
             for (int i = 0; i < PixDecal.decals.Count; i++)
             {
                 var decal = PixDecal.decals[i];
-                if (GeometryUtility.TestPlanesAABB(renderer.frustum, decal.WorldBounds))
+                if (renderer.FrustumCull(decal.WorldBounds))
                     visibleDecals.Add(decal);
             }
 

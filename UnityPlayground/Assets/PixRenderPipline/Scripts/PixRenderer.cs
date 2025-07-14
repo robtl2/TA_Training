@@ -67,10 +67,8 @@ namespace PixRenderPipline
 
         public PixRenderer()
         {
-            cmb = new CommandBuffer
-            {
-                name = "PixRenderer"
-            };
+            cmb = new();
+            cmb.name = "PixRenderer";
         }
 
         public void Setup(ScriptableRenderContext context, Camera camera, PixRenderPiplineAsset asset)
@@ -80,6 +78,14 @@ namespace PixRenderPipline
             this.asset = asset;
 
             frustum = GeometryUtility.CalculateFrustumPlanes(camera);
+        }
+        
+        /// <summary>
+        /// 相机剔除
+        /// </summary>
+        public bool FrustumCull(Bounds bounds)
+        {
+            return GeometryUtility.TestPlanesAABB(frustum, bounds);
         }
 
         /// <summary>
@@ -94,9 +100,9 @@ namespace PixRenderPipline
             if (asset.colorSpace == PixRenderPiplineAsset.ColorSpace.Gamma)
                 colorSpace = RenderTextureReadWrite.sRGB;
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
             isSceneView = camera.cameraType == CameraType.SceneView;
-    #endif
+#endif
 
             // 计算相机剔除结果
             cullingSuccess = false;
