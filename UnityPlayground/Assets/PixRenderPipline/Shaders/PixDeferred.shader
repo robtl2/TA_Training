@@ -79,7 +79,7 @@ Shader "Hidden/Pix/Deferred"
                 half3 result = half3(0, 0, 0);
 
                 PixLight light = GetPixLight(0);
-                evaluateLight(light, gbufferData, result);
+                evaluateLight(light, gbufferData, uv, result);
                 
                 evaluateIBL(gbufferData, uv, result);
 

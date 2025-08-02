@@ -19,6 +19,7 @@ namespace PixRenderPipline
             _480p,
             _640p,
             _720p,
+            _1080p,
         }
 
         public enum Style
@@ -111,6 +112,9 @@ namespace PixRenderPipline
                     break;
                 case RenderSize._720p:
                     h = 720;
+                    break;
+                case RenderSize._1080p:
+                    h = 1080;
                     break;
             }
             int2 size = new((int)(h * aspect), h);

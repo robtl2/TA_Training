@@ -4,6 +4,7 @@
 
 #include "common.hlsl"
 #include "gbuffer.hlsl"
+#include "random.hlsl"
 
 
 #define MAX_PIX_LIGHT_COUNT 64
@@ -24,18 +25,18 @@ TEXTURE2D(_PixShadowMap_1);SAMPLER(sampler_PixShadowMap_1);
 TEXTURE2D(_PixShadowMap_2);SAMPLER(sampler_PixShadowMap_2);
 TEXTURE2D(_PixShadowMap_3);SAMPLER(sampler_PixShadowMap_3);
 
-half4 SampleShadowMap(int index, float2 uv)
+half SampleShadowMap(int index, float2 uv)
 {
     switch(index)
     {
         case 0:
-            return SAMPLE_TEXTURE2D(_PixShadowMap_0,sampler_PixShadowMap_0, uv);
+            return SAMPLE_TEXTURE2D(_PixShadowMap_0,sampler_PixShadowMap_0, uv).r;
         case 1:
-            return SAMPLE_TEXTURE2D(_PixShadowMap_1,sampler_PixShadowMap_1, uv);
+            return SAMPLE_TEXTURE2D(_PixShadowMap_1,sampler_PixShadowMap_1, uv).r;
         case 2:
-            return SAMPLE_TEXTURE2D(_PixShadowMap_2,sampler_PixShadowMap_2, uv);
+            return SAMPLE_TEXTURE2D(_PixShadowMap_2,sampler_PixShadowMap_2, uv).r;
         case 3:
-            return SAMPLE_TEXTURE2D(_PixShadowMap_3,sampler_PixShadowMap_3, uv);
+            return SAMPLE_TEXTURE2D(_PixShadowMap_3,sampler_PixShadowMap_3, uv).r;
         default:
             return 1.0;
     }
@@ -62,11 +63,12 @@ PixLight GetPixLight(int index)
     light.shadowMapBias = _PixLightsShadowMap[index].x;
     light.shadowMapType = (int)_PixLightsShadowMap[index].y;
     light.shadowMapQuality = (int)_PixLightsShadowMap[index].z;
+    light.shadowMapJitter = _PixLightsShadowMap[index].w > 0;
     
     return light;
 }
 
-half ShadowMap(PixLight light, GBufferData gbufferData){
+half ShadowMap(PixLight light, half2 screenUV, GBufferData gbufferData){
     if(light.shadowMapBias==0.0)return 1.0h;
 
     float4 clipPos = mul(light.VP, float4(gbufferData.positionWS,1));
@@ -74,13 +76,15 @@ half ShadowMap(PixLight light, GBufferData gbufferData){
     float2 uv = ndcPos.xy * 0.5 + 0.5;
     uv.y = 1-uv.y;
 
+    if(any(uv<0 || uv>1))return 1.0h;
+
+    if(light.shadowMapJitter)
+        uv += hash22(screenUV).xy*light.shadowMapSize.y;
+
     float depthSrc = saturate(ndcPos.z + light.shadowMapBias);
 
     int index = light.shadowMapIndex;
-    half2 depthDestRaw = SampleShadowMap(index, uv).rg;
-    half depthDest = UnpackFloatFromR8G8(depthDestRaw);
-
-    // return depthDest;
+    half depthDest = SampleShadowMap(index, uv);
 
     return depthSrc>depthDest;
 }

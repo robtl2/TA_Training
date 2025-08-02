@@ -98,7 +98,7 @@ Material:
     - _OutlineZOffset: 0
     - _Parallax: 0.02
     - _Rim: 0
-    - _RoughnessOffset: 0.11
+    - _RoughnessOffset: 0.17
     - _Rule1: 2
     - _ShadingModel: 2
     - _SmoothnessTextureChannel: 0

@@ -75,6 +75,7 @@ namespace PixRenderPipline
         [Header("ShadowMap")]
         public ShadowMapType shadowMapType = ShadowMapType.None;
         public int shadowMapSize = 512;
+        public bool shadowMapJitter = false;
 
         [Range(0.00001f, 0.03f)]
         public float shadowMapBias = 0.0001f;
@@ -321,6 +322,7 @@ namespace PixRenderPipline
             shadowMapParam.x = bias;
             shadowMapParam.y = (int)shadowMapType;
             shadowMapParam.z = (int)shadowMapQuality;
+            shadowMapParam.w = shadowMapJitter ? 1 : 0;
             shadowMapPropList[i] = shadowMapParam;
 
             shadowMapMatrixVP[i] = matrixVP_gpu;

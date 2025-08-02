@@ -52,7 +52,7 @@ half3 diffuseLobe(GBufferData gbufferData,  float NoV, float NoL, float LoH) {
 }
 
 // 后面ShadingModel计算的入口
-void evaluateLight(PixLight light, GBufferData gbufferData, inout half3 result) 
+void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inout half3 result) 
 {
     half3 N = gbufferData.normalWS;
     half3 V = gbufferData.viewDir;
@@ -68,7 +68,7 @@ void evaluateLight(PixLight light, GBufferData gbufferData, inout half3 result)
     half3 diffuse = diffuseLobe(gbufferData, NoV, NoL, LoH);
     half shadow = 1;
     shadow *= ContactShadow(light, gbufferData);
-    shadow *= ShadowMap(light, gbufferData);
+    shadow *= ShadowMap(light, srceenUV, gbufferData);
 
     half occ = selfOcclusion(gbufferData, H, gbufferData.roughness);
 

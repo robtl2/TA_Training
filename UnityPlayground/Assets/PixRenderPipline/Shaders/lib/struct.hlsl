@@ -38,6 +38,7 @@ struct PixLight{
     half shadowMapBias;
     int shadowMapType;
     int shadowMapQuality;
+    bool shadowMapJitter;
     
 };
 
