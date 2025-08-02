@@ -3,6 +3,16 @@
 
 #define EPS 1e-5
 
+half pow5(half val){
+    half p2 = val*val;
+    half p3 = p2*val;
+    return p2*p3;
+}
+
+half sq(half x) {
+    return x * x;
+}
+
 half fast_cos(half x){
     half s = sign(x);
     half a = fmod(x , TWO_PI);

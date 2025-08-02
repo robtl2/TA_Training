@@ -9,6 +9,7 @@ namespace PixRenderPipline
     public class PixDeferredRenderer : PixRenderer
     {
         public EarlyZPass earlyZPass { get; private set; }
+        public OcclusionCullingPass occlusionCullingPass { get; private set; }
         public GBufferPass gBufferPass { get; private set; }
         public TiledPass tiledPass { get; private set; }
         public DeferredPass deferredPass { get; private set; }
@@ -21,6 +22,7 @@ namespace PixRenderPipline
         public PixDeferredRenderer()
         { 
             earlyZPass = new(this);
+            occlusionCullingPass = new(this);
             gBufferPass = new(this);
             tiledPass = new(this);
             deferredPass = new(this);
@@ -34,18 +36,14 @@ namespace PixRenderPipline
         public override void Render()
         {
             base.Render();
-
+            
             earlyZPass.Execute();
+            occlusionCullingPass.Execute();
             gBufferPass.Execute();
             tiledPass.Execute();
             deferredPass.Execute();
-
-            if (PixSky.instance != null && PixSky.instance.skyType != PixSky.SkyType.None)
-                skyPass.Execute();
-
-            if (PixDecal.decals.Count > 0)
-                decalPass.Execute();
-
+            skyPass.Execute();
+            decalPass.Execute();
             transparentPass.Execute();
             postProcessPass.Execute();
             finalPass.Execute();

@@ -1,42 +1,92 @@
 #ifndef LIGHT_INCLUDED
 #define LIGHT_INCLUDED
 
+
+#include "common.hlsl"
 #include "gbuffer.hlsl"
 
-half3 _PixAmbientLightColor;
 
-half3 _PixMainLightPosition;
-half3 _PixMainLightDirection;
-half3 _PixMainLightColor;
-half _PixMainLightContactShadow;
-int _PixMainLightContactSampleCount;
-half _PixMainLightContactBias;
+#define MAX_PIX_LIGHT_COUNT 64
+#define PIX_LIGHT_COUNT     _PixLightCount
 
-struct Light{
-    half3 position;
-    half3 direction;
-    half3 color;
-    half contactShadow;
-    int contactSampleCount;
-    half contactBias;
+int         _PixLightCount;
+half4       _PixLightsShadowMapSize[MAX_PIX_LIGHT_COUNT];
+half4       _PixLightsPosition[MAX_PIX_LIGHT_COUNT];
+half4       _PixLightsDirection[MAX_PIX_LIGHT_COUNT];
+half3       _PixLightsColor[MAX_PIX_LIGHT_COUNT];
+half4       _PixLightsContactShadow[MAX_PIX_LIGHT_COUNT];
+half4       _PixLightsShadowMap[MAX_PIX_LIGHT_COUNT];
+float4x4    _PixLights_VP[MAX_PIX_LIGHT_COUNT];
 
-    half NoL;
-    half shadow;
-    half3 lit;
-};
+// 最多4盏灯可以用shadowMap
+TEXTURE2D(_PixShadowMap_0);SAMPLER(sampler_PixShadowMap_0);
+TEXTURE2D(_PixShadowMap_1);SAMPLER(sampler_PixShadowMap_1);
+TEXTURE2D(_PixShadowMap_2);SAMPLER(sampler_PixShadowMap_2);
+TEXTURE2D(_PixShadowMap_3);SAMPLER(sampler_PixShadowMap_3);
 
-Light GetMainLight(){
-    Light light;
-    light.position = _PixMainLightPosition;
-    light.direction = _PixMainLightDirection;
-    light.color = _PixMainLightColor;
-    light.contactShadow = _PixMainLightContactShadow;
-    light.contactSampleCount = _PixMainLightContactSampleCount;
-    light.contactBias = _PixMainLightContactBias;
+half4 SampleShadowMap(int index, float2 uv)
+{
+    switch(index)
+    {
+        case 0:
+            return SAMPLE_TEXTURE2D(_PixShadowMap_0,sampler_PixShadowMap_0, uv);
+        case 1:
+            return SAMPLE_TEXTURE2D(_PixShadowMap_1,sampler_PixShadowMap_1, uv);
+        case 2:
+            return SAMPLE_TEXTURE2D(_PixShadowMap_2,sampler_PixShadowMap_2, uv);
+        case 3:
+            return SAMPLE_TEXTURE2D(_PixShadowMap_3,sampler_PixShadowMap_3, uv);
+        default:
+            return 1.0;
+    }
+}
+
+PixLight GetPixLight(int index)
+{
+    index = min(index, PIX_LIGHT_COUNT-1);
+
+    PixLight light;
+    light.lightType = (int)_PixLightsPosition[index].w;
+    light.shadowMapIndex = (int)_PixLightsDirection[index].w;
+    light.shadowMapSize = _PixLightsShadowMapSize[index].xy;
+
+    light.VP = _PixLights_VP[index];
+    light.position = _PixLightsPosition[index].xyz;
+    light.direction = _PixLightsDirection[index].xyz;
+    light.color = _PixLightsColor[index];
+
+    light.contactShadow = _PixLightsContactShadow[index].x;
+    light.contactSampleCount = (int)_PixLightsContactShadow[index].y;
+    light.contactBias = _PixLightsContactShadow[index].z;
+
+    light.shadowMapBias = _PixLightsShadowMap[index].x;
+    light.shadowMapType = (int)_PixLightsShadowMap[index].y;
+    light.shadowMapQuality = (int)_PixLightsShadowMap[index].z;
+    
     return light;
 }
 
-half ContactShadow(Light light, GBufferData gbufferData){
+half ShadowMap(PixLight light, GBufferData gbufferData){
+    if(light.shadowMapBias==0.0)return 1.0h;
+
+    float4 clipPos = mul(light.VP, float4(gbufferData.positionWS,1));
+    float3 ndcPos = clipPos.xyz / clipPos.w;
+    float2 uv = ndcPos.xy * 0.5 + 0.5;
+    uv.y = 1-uv.y;
+
+    float depthSrc = saturate(ndcPos.z + light.shadowMapBias);
+
+    int index = light.shadowMapIndex;
+    half2 depthDestRaw = SampleShadowMap(index, uv).rg;
+    half depthDest = UnpackFloatFromR8G8(depthDestRaw);
+
+    // return depthDest;
+
+    return depthSrc>depthDest;
+}
+
+// TODO: 改成在灯光的local空间进行对比
+half ContactShadow(PixLight light, GBufferData gbufferData){
     if(light.contactShadow == 0) return 1.0h;
 
     int sampleCount = light.contactSampleCount + 1; 
@@ -59,23 +109,6 @@ half ContactShadow(Light light, GBufferData gbufferData){
         }
     }
     return 1.0h;
-}
-
-// 后面ShadingModel计算的入口
-void CauclateLight(inout Light light, GBufferData gbufferData) 
-{
-    half3 N = gbufferData.normalWS;
-    half3 L = light.direction;
-
-    half3 NoL = saturate(dot(N, L));
-    light.NoL = NoL;
-
-    NoL = smoothstep(0.15, 0.16, NoL);
-    
-    half contactShadow = ContactShadow(light, gbufferData);
-
-    light.shadow = contactShadow;
-    light.lit = light.color * NoL * contactShadow;
 }
 
 #endif

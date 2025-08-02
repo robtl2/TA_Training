@@ -5,8 +5,9 @@ namespace PixRenderPipline
 {
     public class FinalPass : PixPassBase
     {
-        readonly int CHANNEL_ID = Shader.PropertyToID("_Channel");
-        readonly int SIZE_ID = Shader.PropertyToID("_Size");
+        readonly int _Channel = Shader.PropertyToID("_Channel");
+        readonly int _Size = Shader.PropertyToID("_Size");
+        readonly int _IsSceneView = Shader.PropertyToID("_IsSceneView");
         Material filterMaterial;
         Material debugMaterial;
         
@@ -19,9 +20,10 @@ namespace PixRenderPipline
         public override void Execute()
         {
             TriggerEvent(PixRenderEventName.BeforeFinal);
+
             base.Execute();
 
-            filterMaterial.SetFloat("_IsSceneView", renderer.isSceneView ? 1 : 0);
+            filterMaterial.SetFloat(_IsSceneView, renderer.isSceneView ? 1 : 0);
 
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, DeferredPass.ColorBuff);
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
@@ -37,8 +39,8 @@ namespace PixRenderPipline
                 int debugMode = (int)renderer.asset.debugMode;
                 if (debugMode > 0)
                 {
-                    debugMaterial.SetInt(CHANNEL_ID, debugMode - 1);
-                    debugMaterial.SetFloat(SIZE_ID, renderer.asset.debugSize);
+                    debugMaterial.SetInt(_Channel, debugMode - 1);
+                    debugMaterial.SetFloat(_Size, renderer.asset.debugSize);
                     renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, debugMaterial, 0, 0);
                 }
             }
@@ -49,6 +51,7 @@ namespace PixRenderPipline
             renderer.cmb.ReleaseTemporaryRT(DeferredPass.ColorBuff);
             renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_0);
             renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_1);
+            renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_2);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

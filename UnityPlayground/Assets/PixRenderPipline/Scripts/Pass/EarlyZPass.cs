@@ -11,7 +11,8 @@ namespace PixRenderPipline
         public static readonly RenderTargetIdentifier depthID = new(nameID);
         public override void Execute()
         {
-            TriggerEvent(PixRenderEventName.BeforeEarlyZ);
+            TriggerEvent(PixRenderEventName.BeforeAll);
+
             base.Execute();
 
             // 创建深度缓冲区
@@ -19,17 +20,19 @@ namespace PixRenderPipline
             renderer.cmb.SetRenderTarget(depthID);
             renderer.cmb.ClearRenderTarget(true, true, black);
 
+            TriggerEvent(PixRenderEventName.BeforeEarlyZ);
+
             // 获取渲染列表并绘制
             RendererList list = GetRendererList(earlyZTag, SortingCriteria.CommonOpaque, RenderQueueRange.opaque);
             if (list.isValid)
                 renderer.cmb.DrawRendererList(list);
 
+            TriggerEvent(PixRenderEventName.AfterEarlyZ);
+
             // 执行CommandBuffer
             // 把菜的配方和工艺也写到菜单里
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
-
-            TriggerEvent(PixRenderEventName.AfterEarlyZ);
         }
     }
 }

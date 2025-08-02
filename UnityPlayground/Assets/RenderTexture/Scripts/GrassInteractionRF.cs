@@ -118,7 +118,6 @@ public class GrassInteractionRF : ScriptableRendererFeature
             const string passName = "GrassInteractionRT";
 
             // 计算 AABB
-            // UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
             var cameraData = frameData.Get<UniversalCameraData>();
             float4 aabb = GrassInteractions.instance.AABB_Range;
 

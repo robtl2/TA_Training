@@ -93,6 +93,17 @@ namespace PixRenderPipline
         /// </summary>
         public virtual void Render()
         {
+            if (asset.style == PixRenderPiplineAsset.Style.PBR)
+            {
+                Shader.EnableKeyword("PIX_STYLE_PBR");
+                Shader.DisableKeyword("PIX_STYLE_NPR");
+            }
+            else
+            {
+                Shader.EnableKeyword("PIX_STYLE_NPR");
+                Shader.DisableKeyword("PIX_STYLE_PBR");
+            }
+
             size = asset.GetRenderSize(camera.aspect);
             tiledSize = size / 8;
 

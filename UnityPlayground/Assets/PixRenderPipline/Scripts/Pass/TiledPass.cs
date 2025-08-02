@@ -14,20 +14,18 @@ namespace PixRenderPipline
 
         public override void Execute()
         {
-            TriggerEvent(PixRenderEventName.BeforeTiled);
             base.Execute();
 
             int2 size = renderer.tiledSize;
             GetTemporaryColorRT(tileID, size.x, size.y);
             renderer.cmb.SetRenderTarget(tileID);
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
+
             // TODO: 计算PerTiled Lights和ShadingModel的掩码
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
-
-            TriggerEvent(PixRenderEventName.AfterTiled);
         }
     }
 }

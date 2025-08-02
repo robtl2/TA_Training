@@ -81,6 +81,8 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     if (blendMode == 2)
         col.rgb = lerp(1,col.rgb, col.a);
 
+    col.rgb = HDR2LDR(col.rgb);
+
     return col;
 }
 

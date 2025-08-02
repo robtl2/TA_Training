@@ -1,47 +1,21 @@
 #ifndef GBUFFER_INCLUDED
 #define GBUFFER_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-#include "comman.hlsl"
+#include "common.hlsl"
 
-struct GBufferData
-{
-    half3 albedo;
-    half alpha;
+#define MIN_PERCEPTUAL_ROUGHNESS 0.089
+#define MIN_ROUGHNESS            0.007921
 
-    float3 positionWS;
-    half3 normalWS;
-    // half3 trueNormal;
-    half3 normalVS;
-    half3 viewDir;
+static half IOR  = half(2.0);
 
-    half NoV;
-    half ndcDepth;
-    half depth;
-};
-
-struct GBuffer
-{
-    half4 gbuffer_0;
-    half4 gbuffer_1;
-};
-
-
-TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);
+TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);float2 _PixGBuffer_0_TexelSize;
 TEXTURE2D(_PixGBuffer_1);SAMPLER(sampler_PixGBuffer_1);
+TEXTURE2D(_PixGBuffer_2);SAMPLER(sampler_PixGBuffer_2);
 TEXTURE2D(_PixEarlyZDepth);SAMPLER(sampler_PixEarlyZDepth);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
-float2 _PixGBuffer_0_TexelSize;
+TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);half2 _PixDepthDownSample_TexelSize;
 
-
-half3 UnpackNormal(half2 nor)
-{
-    half2 xy = nor*2-1;
-    half z = sqrt(1.0 - dot(xy, xy));
-    z = max(z, 0.01);
-    return half3(xy, z);
-}
 
 float3 ReconstructWorldPos(float2 uv, float ndcDepth) 
 {
@@ -59,43 +33,76 @@ half sampleDepth(float2 uv){
     return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
 }
 
+half sampleDepthDownSample(float2 uv){
+    half2 depthRaw = SAMPLE_TEXTURE2D(_PixDepthDownSample, sampler_PixDepthDownSample, uv).rg;
+    // return depthRaw.r;
+
+    return PackFloat2To8(depthRaw);
+}
+
 half3 samplePositionWS(float2 uv){
     half depth = sampleDepth(uv);
     return ReconstructWorldPos(uv, depth);
 }
 
-// ------------------------------------------------------------
-// Reconstruct True Normal
-// 通过采样紧邻象素的深度构建出世界坐标来计算几何体的真实法线
-// 虽然这些象素肯定都在L1缓存里，但多次重构世界坐标还是有点肉痛
-// ------------------------------------------------------------
-half3 ReconstructTrueNormal_Tap4(half3 posWorld, half2 uv){
-    half3 posWorld_l = samplePositionWS(uv - half2(_PixGBuffer_0_TexelSize.x, 0));
-    half3 posWorld_r = samplePositionWS(uv + half2(_PixGBuffer_0_TexelSize.x, 0));
-    half3 posWorld_d = samplePositionWS(uv - half2(0, _PixGBuffer_0_TexelSize.y));
-    half3 posWorld_u = samplePositionWS(uv + half2(0, _PixGBuffer_0_TexelSize.y));
-
-    half3 l = posWorld - posWorld_l;
-    half3 r = posWorld_r - posWorld;
-    half3 d = posWorld - posWorld_d;
-    half3 u = posWorld_u - posWorld;
-
-    half3 dx = abs(l.z) < abs(r.z) ? l : r;
-    half3 dy = abs(d.z) < abs(u.z) ? d : u;
-
-    half3 normal = normalize(cross(dy, dx));
-
-    return normal;
+half3 computeDiffuseColor(const half3 albedo, half metallic) {
+    return albedo * (1.0 - metallic);
 }
-// ------------------------------------------------------------
 
-GBuffer PackGBuffer(half4 color, int shadingModel, half2 normalVS){
-    half3 hsv = RgbToHsv(color.rgb);
-    half2 rgb = PackToR5G6B5(hsv.yxz);
+half3 computeF0(const half3 albedo, half metallic, half reflectance) {
+    return albedo * (metallic + (2*reflectance * (1.0 - metallic)));
+}
+
+half computeDielectricF0(half reflectance) {
+    return 0.16 * reflectance * reflectance;
+}
+
+half iorToF0(half transmittedIor, half incidentIor) {
+    return sq((transmittedIor - incidentIor) / (transmittedIor + incidentIor));
+}
+
+
+GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalWS,
+                    half3 tangentWS, half roughness, half metallic, half anisotropy){
+    
+    // 没有考虑各向异性的金属
+    anisotropy = anisotropy*0.5 + 0.5;
+    if (shadingModel == SHADING_MODEL_HAIR){
+        metallic = anisotropy;
+    }
+
+    half2 nor = normalVS.xy*0.5+0.5;
+    half2 tan = tangentWS.xy*0.5+0.5;
+
+    half3 bnor = bentNormalWS.xyz;
+    half ao = bentNormalWS.w;
+
+    half bnlen = length(bnor);
+    ao *= bnlen;
+    bnor /= bnlen;
+
+    ao = saturate(ao*20);
+    ao = 1-ao;
+    ao = pow5(ao);
+    ao = 1-ao;
+
+    int metallicInt = (int)(metallic*31);
+    float packedMetallicShadingModel = PackTwoIntToFloat(metallicInt,shadingModel);
 
     GBuffer gbuffer;
-    gbuffer.gbuffer_0 = half4(rgb,normalVS);
-    gbuffer.gbuffer_1 = half4(0,0, 0, 0);
+#ifdef PIX_STYLE_NPR
+    half3 hsv = RgbToHsv(color.rgb);
+    half2 rgb = PackToR5G6B5(hsv.yxz);
+    gbuffer.gbuffer_0 = half4(rgb,nor);
+    gbuffer.gbuffer_1 = half4(packedMetallicShadingModel,0, roughness, packedMetallicShadingModel);
+#else
+    gbuffer.gbuffer_0 = half4(color.rgb, ao);
+    gbuffer.gbuffer_1 = half4(nor, roughness, packedMetallicShadingModel);
+    #if defined EXPORT_TANGENT || defined ENABLE_BENTNORMAL
+    gbuffer.gbuffer_2 = half4(tan, bnor.xy*0.5+0.5);
+    #endif
+#endif
+    
     return gbuffer;
 }
 
@@ -103,11 +110,21 @@ GBufferData UnpackGBuffer(float2 uv)
 {
     half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
     half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
+    half4 gbuffer_2 = SAMPLE_TEXTURE2D(_PixGBuffer_2, sampler_PixGBuffer_2, uv);
     float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
 
+#ifdef PIX_STYLE_NPR
     half3 shv = UnpackFromR5G6B5(gbuffer_0.xy);
-    half3 rgb = HsvToRgb(shv.yxz);
+    half3 albedo = HsvToRgb(shv.yxz);
     half3 normalVS = UnpackNormal(gbuffer_0.zw);
+    // TODO:
+    half3 tangentWS = half3(0,0,0);
+#else
+    half3 albedo = gbuffer_0.rgb;
+    half3 normalVS = UnpackNormal(gbuffer_1.xy);
+    half3 tangentWS = UnpackNormal(gbuffer_2.xy);
+#endif
+
     float3 worldPos = ReconstructWorldPos(uv, ndcDepth);
 
     half3 cameraPos = _WorldSpaceCameraPos;
@@ -121,25 +138,62 @@ GBufferData UnpackGBuffer(float2 uv)
     up = cross(right, viewDir);
     half3x3 viewToWorld = half3x3(right, up, viewDir);
     half3 normalWS = mul(normalVS, viewToWorld);
+    half3 bitangentWS = cross(normalWS, tangentWS);
 
-    // half3 trueNormal = ReconstructTrueNormal_Tap4(worldPos, uv);
+    half2 params = gbuffer_1.zw;
+    half perceptualRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, params.x);
+    half roughness = perceptualRoughness*perceptualRoughness;
+    half packedMetallicShadingModel = params.y;
+    int metallicInt, shadingModel;
+    UnpackFloatToTwoInt(packedMetallicShadingModel, metallicInt, shadingModel);
+    half metallic = (half)metallicInt/31.0;
 
+    half ior = IOR;
+
+    // shadingModel是Hair时，是用metallic来装的anisotropy
+    half anisotropy = metallic*2 - 1;
+    if (shadingModel == SHADING_MODEL_HAIR){
+        metallic = 0;
+        ior *= 1.5;
+    }
+    
+    half reflectance = iorToF0(max(1.0, ior), 1.0);
+    half3 f0 = computeF0(albedo, metallic, reflectance);
+
+    if (shadingModel == SHADING_MODEL_HAIR)
+        f0*=1.5;
+
+    half3 diffuse = computeDiffuseColor(albedo, metallic);
+
+    half ao = gbuffer_0.a;
+    half3 bentNormal = UnpackNormal(gbuffer_2.zw);
+
+    half fresnel = 1-normalVS.z;
+    fresnel = pow5(fresnel);
 
     GBufferData gbufferData;
-    gbufferData.albedo = rgb;
-    gbufferData.alpha = gbuffer_0.a;
-
+    gbufferData.shadingModel = shadingModel;
+    gbufferData.albedo = albedo;
+    gbufferData.diffuse = diffuse;
+    gbufferData.f0 = f0;
+    gbufferData.ao = ao;
+    gbufferData.bentNormal = bentNormal;
     gbufferData.positionWS = worldPos;
     gbufferData.normalWS = normalWS;
+    gbufferData.tangentWS = tangentWS;
+    gbufferData.bitangentWS = bitangentWS;
     gbufferData.normalVS = normalVS;
     gbufferData.viewDir = viewDir;
+    gbufferData.reflectDir = reflect(-viewDir, normalWS);
     gbufferData.NoV = normalVS.z;
+    gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
     gbufferData.ndcDepth = ndcDepth;
     gbufferData.depth = depth;
-    // gbufferData.trueNormal = trueNormal;
+    gbufferData.perceptualRoughness = perceptualRoughness;
+    gbufferData.roughness = roughness;
+    gbufferData.metallic = metallic;
+    gbufferData.anisotropy = anisotropy;
     return gbufferData;
 }
-
-
 
 #endif

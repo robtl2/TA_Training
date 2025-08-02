@@ -75,7 +75,7 @@ Shader "Hidden/Pix/Decal"
 
             ZTest Always //到这里就只需要Stencil Test了
             Cull Back
-            Blend [_BlendSrc] [_BlendDst]
+            Blend [_BlendSrc] [_BlendDst], Zero One
 
             Stencil
             {

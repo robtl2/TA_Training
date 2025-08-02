@@ -8,7 +8,6 @@ namespace PixRenderPipline
         public TransparentPass(PixRenderer renderer) : base("PixTransparentPass", renderer) { }
 
         readonly ShaderTagId[] tagID = new ShaderTagId[] {
-            new("PixBackHull"),
             new("PixTransparent"),
         };
         
@@ -32,10 +31,10 @@ namespace PixRenderPipline
             if (list.isValid)
                 renderer.cmb.DrawRendererList(list);
 
+            TriggerEvent(PixRenderEventName.AfterTransparent);
+
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
-
-            TriggerEvent(PixRenderEventName.AfterTransparent);
         }
     }
 }

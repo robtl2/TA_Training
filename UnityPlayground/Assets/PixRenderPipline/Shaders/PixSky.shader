@@ -2,11 +2,9 @@ Shader "Hidden/Pix/Sky"
 {
     Properties
     {
-        _Color ("Color", Color) = (1, 1, 1, 1)
         _SkyType ("SkyType", Int) = 0
-        _SkyTex ("SkyTex", Cube) = "white" {}
+        _SkyDisplayColor("Color", Color) = (1,1,1,1)
         _BlurLevel ("BlurLevel", Float) = 0
-        _RotateSky ("RotateSky", Float) = 0
         _FovScale ("FovScale", Float) = 1
     }
     SubShader
@@ -32,7 +30,7 @@ Shader "Hidden/Pix/Sky"
             #pragma vertex vert
             #pragma fragment frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "lib/comman.hlsl"
+            #include "lib/common.hlsl"
 
             struct AttributesDepth
             {
@@ -47,7 +45,8 @@ Shader "Hidden/Pix/Sky"
             };
 
             int _SkyType;
-            half4 _Color;
+            half4 _SkyColor;
+            half4 _SkyDisplayColor;
             half _RotateSky;
             half _FovScale;
             half _BlurLevel;
@@ -75,12 +74,14 @@ Shader "Hidden/Pix/Sky"
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
-                half3 sky = _Color.rgb;
+                half3 sky = _SkyColor.rgb * _SkyDisplayColor;
 
                 if (_SkyType == 1)
                     sky *= SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, input.viewDir, _BlurLevel).rgb;
-                
-                return half4(sky, 1);
+
+                half maxVal = _SkyDisplayColor.a;
+                half3 ldr = HDR2LDR(sky, maxVal);
+                return half4(ldr,_SkyDisplayColor.a*0.5);
             }
             ENDHLSL
         }

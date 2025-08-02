@@ -15,7 +15,6 @@ namespace PixRenderPipline
 
         public override void Execute()
         {
-            TriggerEvent(PixRenderEventName.BeforePostProcess);
             base.Execute();
 
             renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
@@ -25,14 +24,18 @@ namespace PixRenderPipline
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, TransparentPass.ColorBuff);
             renderer.cmb.SetGlobalVector(_OutLineDepthNormalThreshold, new Vector2(renderer.asset.outLineDepthThreshold, renderer.asset.outLineNormalThreshold));
 
+            TriggerEvent(PixRenderEventName.BeforePostProcess);
+
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, postMaterial, 0, 0);
             renderer.cmb.ReleaseTemporaryRT(TransparentPass.ColorBuff);
             renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
+            TriggerEvent(PixRenderEventName.AfterPostProcess);
+
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
 
-            TriggerEvent(PixRenderEventName.AfterPostProcess);
+            
         }
     }
 }

@@ -2,19 +2,30 @@ Shader "Pix/Standard"
 {
     Properties
     {
-        _ShadingModel ("E/ShadingModel:Unlit,Lit", Int) = 0
+        Group#Feature("Feature", Int) = 1
+            _ShadingModel ("E/ShadingModel:Unlit,Lit,Hair[Feature]", Int) = 0
+            _CullMode("E/Cull:Off,Front,Back[Feature]", Int) = 2
+            _BentNormal("T(ENABLE_BENTNORMAL)/BentNormal[Feature]", Int) = 0
 
         Group#Main("Main", Int) = 1
             _Color ("Color[Main]", Color) = (1,1,1,1)
-            _MainTex ("MainTex[Main]", 2D) = "white" {}
+            _MainTex ("MainTex[Main]{sRGB:on}", 2D) = "white" {}
+            _AlphaClip("T(_ALPHATEST_ON)/AlphaClip[Main]", Int) = 0
+            _Cutoff("Cutoff[Main,_ALPHATEST_ON]", Range(0, 1)) = 0.5
+            _ParamTex("ParamTex[Main]{sRGB:off}", 2D) = "white" {}
 
-        Group#Lit("Lit[_ShadingModel_1]", Int) = 1
-            _Specular("Specular[Lit,_ShadingModel_1]", Range(0,1)) = 0
-            _Rim("Rim[Lit,_ShadingModel_1]", Range(0,1)) = 0
+        Group#Param("Param", Int) = 1
+            _RoughnessOffset("RoughnessOffset[Param]", Range(-1,1))=0
+            _MetallicOffset("MetallicOffset[Param]", Range(-1,1))=0
 
-        _OutlineColor("OutlineColor", Color) = (0,0,0,1)
-        _OutlineWidth("OutlineWidth", Float) = 0.05
-        _OutlineZOffset("OutlineZOffset", Float) = 0
+        Group#Nor("Normal[_ShadingModel_1|_ShadingModel_2]", Int) = 1
+            _NormalTex("NormalTex[Nor,_ShadingModel_1|_ShadingModel_2]{type:Normal}", 2D) = "bump" {}
+            _NormalIntensity("Intensity[Nor,_ShadingModel_1|_ShadingModel_2]", Range(0,2)) = 1
+
+        Group#Hair("Hair[_ShadingModel_2]", Int) = 1
+            _Anisotropy("Anisotropy[Hair,_ShadingModel_2]", Range(-1,1)) = 0.5
+
+        _Rule1("K|(EXPORT_TANGENT)/_ShadingModel" ,Int ) = 2
     }
 
     SubShader
@@ -24,6 +35,7 @@ Shader "Pix/Standard"
 
         ZWrite Off
         ZTest Equal
+        Cull[_CullMode]
 
         Pass
         {
@@ -33,7 +45,12 @@ Shader "Pix/Standard"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile _ _ALPHATEST_ON
+            #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
+            #pragma shader_feature EXPORT_TANGENT 
+            #pragma shader_feature ENABLE_BENTNORMAL
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "lib/light.hlsl"
             #include "lib/gbuffer.hlsl"
             
             struct Attributes
@@ -41,25 +58,45 @@ Shader "Pix/Standard"
                 float4 positionOS   : POSITION;
                 float2 uv           : TEXCOORD0;
                 float3 normalOS     : NORMAL;
+                float4 tangentOS    : TANGENT;
+            #ifdef ENABLE_BENTNORMAL
+                float4 bentNormal   : COLOR;
+            #endif
             };
 
             struct Varying
             {
                 float4 positionCS   : SV_POSITION;
-                float3 normalWS     : NORMAL;
+                float3 normalVS     : NORMAL;
+                float3 tangentVS    : TANGENT;
+                float3 bitangentVS  : TEXCOORD1;
                 float2 uv           : TEXCOORD0;
-                float2 normalVS     : TEXCOORD1;
+                float3 tangentWS    : TEXCOORD2;
+            #ifdef ENABLE_BENTNORMAL
+                float4 bentNormal   : COLOR;
+            #endif
             };
 
             float4 _Color;
             int _ShadingModel;
+            half _NormalIntensity;
+            half _Anisotropy;
+            half _RoughnessOffset;
+            half _MetallicOffset;
 
-            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
-            float4 _MainTex_ST;
+            #if _ALPHATEST_ON
+            half _Cutoff;
+            #endif
+
+            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _MainTex_ST;
+            TEXTURE2D(_NormalTex);SAMPLER(sampler_NormalTex);
+            TEXTURE2D(_ParamTex);SAMPLER(sampler_ParamTex);
 
             Varying vert(Attributes input)
             {
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
+                float3 tangentWS = TransformObjectToWorldNormal(input.tangentOS.xyz)* input.tangentOS.w;
+                float3 bitangentWS = cross(normalWS, tangentWS) ;
                 float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
 
                 // 计算视线空间下的法线
@@ -68,15 +105,29 @@ Shader "Pix/Standard"
                 float3 viewUp = float3(0.0, 1.0, 0.0);
                 float3 up = mul((float3x3)UNITY_MATRIX_I_V, viewUp);
                 float3 right = normalize(cross(viewDir, up));
-                up = cross(right, viewDir);
-                float x = dot(normalWS, right);
-                float y = dot(normalWS, up);
+
+                float3x3 mat_V = float3x3(right, up, viewDir);
+                float3 normalVS = mul(mat_V, normalWS);
+                float3 tangentVS = mul(mat_V, tangentWS);
+                float3 bitangentVS = mul(mat_V, bitangentWS);
+
+            #ifdef ENABLE_BENTNORMAL
+                float4 bentNormal = input.bentNormal;
+                bentNormal.xyz = bentNormal.xyz*2 - 1;
+                float3x3 tbn = float3x3(tangentWS, bitangentWS, normalWS);
+                bentNormal.xyz = mul(bentNormal.xyz, tbn);
+            #endif
 
                 Varying output;
                 output.positionCS = TransformWorldToHClip(positionWS);
-                output.normalVS = float2(x, y)*0.5+0.5;
-                output.normalWS = normalWS;
+                output.normalVS = normalVS;
+                output.tangentVS = tangentVS;
+                output.bitangentVS = bitangentVS;
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                output.tangentWS = tangentWS;
+            #ifdef ENABLE_BENTNORMAL
+                output.bentNormal = bentNormal;
+            #endif
                 return output;
             }
 
@@ -85,16 +136,39 @@ Shader "Pix/Standard"
             {
                 half4 gbuffer_0 : SV_Target0;    
                 half4 gbuffer_1 : SV_Target1; 
+                half4 gbuffer_2 : SV_Target2; 
             };
 
             FragmentOutput frag(Varying input)
             {
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
 
+            #if _ALPHATEST_ON
+                clip(color.a - _Cutoff);
+            #endif
+
+                float3 normal = normalize(input.normalVS);
+
+                half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalTex, sampler_NormalTex, input.uv));
+                float3x3 TBN = float3x3(input.tangentVS, input.bitangentVS, input.normalVS);
+                normal = lerp(normal, normalize(mul(normalTS, TBN)), _NormalIntensity);
+
+                half3 param = SAMPLE_TEXTURE2D(_ParamTex, sampler_ParamTex, input.uv).rgb;
+                half ior = 1-param.r;
+                half roughness = saturate(param.g + _RoughnessOffset);
+                half metalness = saturate(param.b + _MetallicOffset);
+                roughness = ior*ior + roughness;
+
+                half4 bentNormal = half4(0,0,1,1);
+            #ifdef ENABLE_BENTNORMAL
+                bentNormal = input.bentNormal;
+            #endif
+
                 FragmentOutput output;
-                GBuffer gbuffer = PackGBuffer(color, _ShadingModel, input.normalVS);
+                GBuffer gbuffer = PackGBuffer(color, _ShadingModel, normal, bentNormal, input.tangentWS, roughness, metalness, _Anisotropy);
                 output.gbuffer_0 = gbuffer.gbuffer_0;
                 output.gbuffer_1 = gbuffer.gbuffer_1;
+                output.gbuffer_2 = gbuffer.gbuffer_2;
                 return output;
             }
             ENDHLSL
@@ -157,7 +231,7 @@ Shader "Pix/Standard"
             {
             #if _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
-                clip(alpha - _Cutoff);
+                clip(alpha - _Cutoff-0.01);
             #endif
 
                 return 0;
@@ -167,60 +241,137 @@ Shader "Pix/Standard"
 
         Pass
         {
-            Name "PixBackHull"
-            Tags { "LightMode"="PixBackHull" }
-
-            ZWrite Off
+            Name "PixShadowCaster"
+            Tags { "LightMode"="PixShadowCaster" }
+            ZWrite On
             ZTest LEqual
+            ColorMask 0
             Cull Front
+            
 
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile _ _ALPHATEST_ON
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            #include "lib/struct.hlsl"
+            #include "lib/light.hlsl"
 
             struct AttributesDepth
             {
                 float4 positionOS : POSITION;
-                float3 normalOS : NORMAL;
+            #if _ALPHATEST_ON
+                float2 uv : TEXCOORD0;
+            #endif
             };
 
             struct VaryingsDepth
             {
                 float4 positionCS : SV_POSITION;
-                float4 uv : TEXCOORD0;
+            #if _ALPHATEST_ON
+                float2 uv : TEXCOORD0;
+            #endif
             };
 
-            float4 _OutlineColor;
-            float _OutlineWidth;
-            float _OutlineZOffset;
+        #if _ALPHATEST_ON
+            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
+            half4 _MainTex_ST;
+            half _Cutoff;
+        #endif
 
-            TEXTURE2D(_PixOpaqueTex);SAMPLER(sampler_PixOpaqueTex);
+            int _LightIndex;
 
             VaryingsDepth vert(AttributesDepth input)
             {
-                half4 positionCS = TransformObjectToHClip(input.positionOS.xyz); 
-                half4 screenPos = ComputeScreenPos(positionCS);
-                screenPos.w = 1/screenPos.w;
-                
-                half3 positionOS = input.positionOS.xyz + input.normalOS * _OutlineWidth;
-                positionCS = TransformObjectToHClip(positionOS);  
-                positionCS.z += _OutlineZOffset*_ProjectionParams.w;
-                
+                PixLight light = GetPixLight(_LightIndex);
+                float4x4 VP = light.VP;
+                float4 posWorld = mul(unity_ObjectToWorld, input.positionOS);
+
                 VaryingsDepth output;
-                output.uv = screenPos;
-                output.positionCS = positionCS;
+                output.positionCS = mul(VP,posWorld);
+            #if _ALPHATEST_ON
+                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+            #endif
                 return output;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
-                half2 uv = input.uv.xy * input.uv.w;
+            #if _ALPHATEST_ON
+                half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
+                clip(alpha - _Cutoff-0.01);
+            #endif
 
-                // 这个Pass是由PixOutLine组件在Transparent阶段画的，所以能拿到deferredPass的输出_PixOpaqueTex
-                half4 color = SAMPLE_TEXTURE2D(_PixOpaqueTex, sampler_PixOpaqueTex, uv);
+                return 0;
+            }
+            ENDHLSL
+        }
 
-                return color * _OutlineColor;
+        Pass
+        {
+            Name "PixTransparent"
+            Tags { "LightMode"="PixTransparent" }
+
+            ZWrite Off
+            ZTest Less
+            Blend SrcAlpha OneMinusSrcAlpha
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            
+        
+            #include "lib/light.hlsl"
+            #include "lib/gbuffer.hlsl"
+            #include "lib/shading.hlsl"
+            #include "lib/ibl.hlsl"
+
+            struct AttributesDepth
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct VaryingsDepth
+            {
+                float4 positionCS : SV_POSITION;
+                float3 normalWS : NORMAL;
+                float2 uv : TEXCOORD0;
+            };
+
+            float4 _Color;
+            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _MainTex_ST;
+
+            VaryingsDepth vert(AttributesDepth input)
+            {
+                VaryingsDepth output;
+                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                output.positionCS =  TransformObjectToHClip(input.positionOS.xyz);
+                output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+                return output;
+            }
+
+            half4 frag(VaryingsDepth input) : SV_Target
+            {
+                half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+                half3 result = half3(0,0,0);
+
+                half3 diffuse = color.rgb * _Color.rgb;
+                half3 normalWS = input.normalWS;
+
+                PixLight light = GetPixLight(0);
+                
+                evaluateLightSimple(light, diffuse, normalWS, result);
+                evaluateIBLSimple(diffuse, normalWS, result);
+
+                result = HDR2LDR(result);
+                // result = half3(1,0,0);
+
+                color.a = smoothstep(0,0.5,color.a);
+                return half4(result, color.a);
             }
             ENDHLSL
         }

@@ -14,6 +14,13 @@ Shader "Hidden/Pix/Debugger"
         ZTest Always
         Blend SrcAlpha OneMinusSrcAlpha
 
+        Stencil
+        {
+            Ref 0
+            Comp Equal
+        }
+
+
         Pass
         {
             Name "PixDebugger"
@@ -21,8 +28,11 @@ Shader "Hidden/Pix/Debugger"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile PIX_STYLE_PBR PIX_STYLE_NPR
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/light.hlsl"
+            #include "lib/shading.hlsl"
+            #include "lib/gbuffer.hlsl"
 
             struct AttributesDepth
             {
@@ -65,18 +75,23 @@ Shader "Hidden/Pix/Debugger"
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
 
-                half3 debugColor[7] = {
+                half3 debugColor[12] = {
                     gbufferData.albedo,
+                    gbufferData.diffuse,
+                    gbufferData.f0,
+                    half3(gbufferData.ao.xxx),
+                    gbufferData.bentNormal,
                     gbufferData.positionWS,
                     gbufferData.normalWS,
-                    // gbufferData.trueNormal,
                     gbufferData.normalVS,
+                    gbufferData.tangentWS,
                     gbufferData.viewDir,
                     gbufferData.NoV.xxx,
-                    gbufferData.depth.xxx,
+                    gbufferData.depth.xxx
                 };
-                
-                return half4(debugColor[_Channel], gbufferData.alpha);
+
+                half a = all(gbufferData.albedo > 0);
+                return half4(debugColor[_Channel], a);
             }
             ENDHLSL
         }

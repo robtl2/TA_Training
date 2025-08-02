@@ -11,6 +11,20 @@ namespace PixRenderPipline
     public class PixPassBase
     {
         #region 这里放的都是做菜时常用的配料
+        static Material _blitMat;
+        public Material blitMat
+        {
+            get
+            {
+                if (_blitMat == null)
+                {
+                    _blitMat = new Material(Shader.Find("Hidden/Pix/Blit"));
+                }
+
+                return _blitMat;
+            }
+        }
+
         static Mesh _fullScreenQuad;
         public Mesh FullScreenQuad
         {
@@ -145,7 +159,12 @@ namespace PixRenderPipline
 
         public void GetTemporaryColorRT(int nameID, int width, int height)
         {
-            renderer.cmb.GetTemporaryRT(nameID, width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32, renderer.colorSpace);
+            GetTemporaryColorRT(nameID, width, height, FilterMode.Point);
+        }
+
+        public void GetTemporaryColorRT(int nameID, int width, int height, FilterMode filterMode)
+        { 
+            renderer.cmb.GetTemporaryRT(nameID, width, height, 0, filterMode, RenderTextureFormat.ARGB32, renderer.colorSpace);
         }
 
         public void GetTemporaryColorRT(int nameID)

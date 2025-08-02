@@ -20,6 +20,15 @@ namespace PixRenderPipline
             _640p,
             _720p,
         }
+
+        public enum Style
+        {
+            PBR,
+            NPR,
+        }
+
+        public Style style;
+
         public RenderSize renderSize;
 
         public enum ColorSpace
@@ -28,6 +37,17 @@ namespace PixRenderPipline
             Linear,
         }
         public ColorSpace colorSpace = ColorSpace.Linear;
+
+        public bool GPU_OCC_Culling = true;
+
+        [Range(0,1)]
+        public float ao_factor = 1;
+
+        public bool Enable_SSAO = true;
+        public float ssao_radius = 0.01f;
+        public float ssao_intensity = 1.0f;
+        public int ssao_sampleCount = 2;
+
         #endregion
 
         #region OutLine
@@ -45,10 +65,15 @@ namespace PixRenderPipline
         {
             None,
             Albedo,
+            Diffuse,
+            F0,
+            AO,
+            BentNormal,
             PositionWS,
             NormalWS,
             // TrueNormal,
             NormalVS,
+            TangentWS,
             ViewDir,
             NdotV,
             Depth,

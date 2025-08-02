@@ -1,24 +1,22 @@
 using System.Collections.Generic;
 using System;
 
-/// <summary>
-/// 渲染事件,方便为渲染管线不同阶段扩展流程
-/// 相当于极简版的RenderFeature
-/// 就是起个问外面的人还要不要加菜的作用
-/// </summary>
 namespace PixRenderPipline
 {
-
+    /// <summary>
+    /// 渲染事件,方便为渲染管线不同阶段扩展流程
+    /// 相当于极简版的RenderFeature
+    /// 就是起个问外面的人还要不要加菜的作用
+    /// </summary>
     public enum PixRenderEventName
     {
+        BeforeAll,
+        
         BeforeEarlyZ,
         AfterEarlyZ,
 
         BeforeGBuffer,
         AfterGBuffer,
-
-        BeforeTiled,
-        AfterTiled,
 
         BeforeDeferred,
         AfterDeferred,

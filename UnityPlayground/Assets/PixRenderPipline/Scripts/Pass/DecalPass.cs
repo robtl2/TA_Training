@@ -34,6 +34,7 @@ namespace PixRenderPipline
         /// 注意：严肃场合遇到多个方案时都应该留着，做了足够的性能测试才能取舍
         public override void Execute()
         {
+            if (PixDecal.decals.Count == 0) return;
             base.Execute();
 
             visibleDecals.Clear();

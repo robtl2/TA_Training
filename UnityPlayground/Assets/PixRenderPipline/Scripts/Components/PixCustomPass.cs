@@ -4,37 +4,43 @@ using UnityEngine;
 namespace PixRenderPipline
 {   
     [ExecuteInEditMode]
-    public class PixOutLine : MonoBehaviour
+    public class PixCustomPass : MonoBehaviour
     {
-        public Color color = Color.black;
-        public float width = 0.05f;
-        public float zOffset = 0;
+        public string pass;
+        public PixRenderEventName insetEvent = PixRenderEventName.BeforeTransparent;
+        public int repeatTimes = 1;
 
         HashSet<Renderer> renderers = new();
         Dictionary<Material, int> passIDs = new();
 
-        static readonly int _OutlineColor = Shader.PropertyToID("_OutlineColor");
-        static readonly int _OutlineWidth = Shader.PropertyToID("_OutlineWidth");
-        static readonly int _OutlineZOffset = Shader.PropertyToID("_OutlineZOffset");
+        readonly int _PassIndex = Shader.PropertyToID("_PassIndex");
 
         void OnEnable()
         {
             RefreshRenderers();
-            PixRenderEvent.AddEvent(PixRenderEventName.BeforeTransparent, WhenBeforeTransparent);
+            PixRenderEvent.AddEvent(insetEvent, WhenBeforeTransparent);
         }
         void OnDisable()
         {
-            PixRenderEvent.RemoveEvent(PixRenderEventName.BeforeTransparent, WhenBeforeTransparent);
+            PixRenderEvent.RemoveEvent(insetEvent, WhenBeforeTransparent);
         }
 
         void WhenBeforeTransparent(PixRenderer renderer)
         {
             foreach (var r in renderers)
             {
-                var mat = r.sharedMaterial;
-
                 if (renderer.FrustumCull(r.bounds))
-                    renderer.cmb.DrawRenderer(r, mat, 0, passIDs[mat]);
+                {
+                    var mat = r.sharedMaterial;
+
+                    // TODO: 我感觉这里可以用DrawMeshInstanced优化
+                    // 需要做个shortFur测试
+                    for (int i = 0; i < repeatTimes; i++)
+                    {
+                        mat.SetInt(_PassIndex, i);
+                        renderer.cmb.DrawRenderer(r, mat, 0, passIDs[mat]);
+                    }
+                }
             }
         }
 
@@ -47,7 +53,7 @@ namespace PixRenderPipline
                 var materials = renderer.sharedMaterials;
                 foreach (var mat in materials)
                 {
-                    int passID = mat.FindPass("PixBackHull");
+                    int passID = mat.FindPass(pass);
                     if (mat != null && mat.shader != null && passID >= 0)
                     {
                         passIDs[mat] = passID;

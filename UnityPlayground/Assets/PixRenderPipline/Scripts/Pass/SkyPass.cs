@@ -8,6 +8,8 @@ namespace PixRenderPipline
 
         public override void Execute()
         {
+            if (PixSky.instance == null || PixSky.instance.skyType == PixSky.SkyType.None) return;
+
             base.Execute();
 
             var material = PixSky.instance.material;

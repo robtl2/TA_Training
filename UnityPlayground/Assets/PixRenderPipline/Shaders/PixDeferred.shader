@@ -26,10 +26,16 @@ Shader "Hidden/Pix/Deferred"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile _ ENABLE_SSAO
+            #pragma multi_compile _ _ORTHOGRAPHIC
+            #pragma multi_compile PIX_STYLE_PBR PIX_STYLE_NPR
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "lib/gbuffer.hlsl"
             #include "lib/light.hlsl"
-            #include "lib/comman.hlsl"
+            #include "lib/gbuffer.hlsl"
+            #include "lib/shading.hlsl"
+            
+            #include "lib/ibl.hlsl"
 
             struct AttributesDepth
             {
@@ -49,9 +55,9 @@ Shader "Hidden/Pix/Deferred"
                 float2 uv = input.uv;
                 float2 pos = uv*2.0-1.0;
 
-                #if UNITY_UV_STARTS_AT_TOP
+                // #if UNITY_UV_STARTS_AT_TOP
                 uv.y = 1.0 - uv.y;
-                #endif
+                // #endif
 
                 half4 tiled_id = SAMPLE_TEXTURE2D_LOD(_PixTiledID, sampler_PixTiledID, uv, 0);
 
@@ -66,15 +72,19 @@ Shader "Hidden/Pix/Deferred"
             {
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
-                Light mainLight = GetMainLight();
 
-                CauclateLight(mainLight, gbufferData);
-                half3 lit = mainLight.lit;
-                lit += _PixAmbientLightColor;
+                if(gbufferData.shadingModel == SHADING_MODEL_UNLIT)
+                    return half4(gbufferData.albedo, 1);
 
-                half3 col = gbufferData.albedo * lit;
+                half3 result = half3(0, 0, 0);
 
-                return half4(col, 1);
+                PixLight light = GetPixLight(0);
+                evaluateLight(light, gbufferData, result);
+                
+                evaluateIBL(gbufferData, uv, result);
+
+                half3 ldr = HDR2LDR(result);
+                return half4(ldr,1);
             }
             ENDHLSL
         }
