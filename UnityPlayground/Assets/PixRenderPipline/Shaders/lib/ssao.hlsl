@@ -5,7 +5,7 @@
 #include "light.hlsl"
 
 
-#define SSAO_SAMPLE_BIAS 0.00001
+#define SSAO_SAMPLE_BIAS 0.0001
 
 //x:intensity y:radius z:stepCount w:jitter
 half4 _SSAO_Props;
@@ -25,9 +25,9 @@ half calculateSSAO(half2 uv, GBufferData gbufferData)
 
     half ao = 0.0h;
     for(int i = 0; i < SSAO_SAMPLER_COUNT; i++){
-        half3 direction = normalize(dirSamplers[i]);
+        half3 direction = dirSamplers[i];
         direction = mul(direction, tbn);
-        ao += ContactShadow(gbufferData, direction, radius, stepCount, jitter, 0.000);
+        ao += ContactShadow(gbufferData, direction, radius, stepCount, jitter, SSAO_SAMPLE_BIAS);
     }
     ao /= SSAO_SAMPLER_COUNT;
 
