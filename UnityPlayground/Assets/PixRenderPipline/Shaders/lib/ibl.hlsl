@@ -3,7 +3,7 @@
 
 #include "bentnormal.hlsl"
 
-#ifdef ENABLE_SSAO
+#ifndef SSAO_QUALITY_OFF
     #include "lib/ssao.hlsl"
 #endif
 
@@ -133,13 +133,13 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     #endif
 
     half ao = gbufferData.ao;
-    #ifdef ENABLE_SSAO
+    if(_AO_Factor<0.999)
+        ao = lerp(1,ao,_AO_Factor);
+
+    #ifndef SSAO_QUALITY_OFF
         half ssao = calculateSSAO(uv, gbufferData);
         ao *= ssao;
     #endif
-
-    if(_AO_Factor<0.999)
-        ao = lerp(1,ao,_AO_Factor);
 
     Fd *= ao;
 

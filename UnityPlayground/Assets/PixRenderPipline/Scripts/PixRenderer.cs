@@ -11,6 +11,13 @@ namespace PixRenderPipline
 {
     public class PixRenderer
     {
+        public enum SamplerQuality
+        {
+            Low = 1,
+            Medium = 2,
+            High = 3,
+        }
+
         /// <summary>
         /// 这就是那个菜单
         /// </summary>
@@ -133,6 +140,7 @@ namespace PixRenderPipline
         /// unity URP中的内置命名也是这个
         /// </summary>
         readonly int MATRIX_I_VP = Shader.PropertyToID("unity_MatrixInvVP");
+        
 
         protected virtual void SetupGlobalUniform()
         {
@@ -144,6 +152,36 @@ namespace PixRenderPipline
             Matrix4x4 VP = P * V;
             Matrix4x4 iVP = VP.inverse;
             Shader.SetGlobalMatrix(MATRIX_I_VP, iVP);
+
+
+            if (asset.Enable_SSAO)
+            {
+                Shader.DisableKeyword("SSAO_QUALITY_OFF");
+                Shader.DisableKeyword("SSAO_QUALITY_LOW");
+                Shader.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                Shader.DisableKeyword("SSAO_QUALITY_HIGH");
+
+                switch (asset.ssao_quality)
+                {
+                    case SamplerQuality.Low:
+                        Shader.EnableKeyword("SSAO_QUALITY_LOW");
+                        break;
+                    case SamplerQuality.Medium:
+                        Shader.EnableKeyword("SSAO_QUALITY_MEDIUM");
+                        break;
+                    case SamplerQuality.High:
+                        Shader.EnableKeyword("SSAO_QUALITY_HIGH");
+                        break;
+                }
+            }
+            else
+            {
+                Shader.EnableKeyword("SSAO_QUALITY_OFF");
+                Shader.DisableKeyword("SSAO_QUALITY_LOW");
+                Shader.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                Shader.DisableKeyword("SSAO_QUALITY_HIGH");
+            }
+
 
             // 以后缺什么补什么
         }

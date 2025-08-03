@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: PixRenderPiplineAsset
   m_EditorClassIdentifier: 
   style: 0
-  renderSize: 4
+  renderSize: 5
   colorSpace: 1
   GPU_OCC_Culling: 0
-  ao_factor: 1
+  ao_factor: 0.558
   Enable_SSAO: 1
-  ssao_radius: 0.01
-  ssao_intensity: 2.16
-  ssao_sampleCount: 16
-  outLineDepthThreshold: 1
-  outLineNormalThreshold: 2
+  ssao_factor: 0.513
+  ssao_radius: 26.16
+  ssao_stepCount: 5
+  ssao_jitterRadius: 0.014
+  ssao_quality: 2
   debugMode: 0
   debugSize: 1

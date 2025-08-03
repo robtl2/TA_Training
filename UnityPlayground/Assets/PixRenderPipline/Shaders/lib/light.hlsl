@@ -59,6 +59,7 @@ PixLight GetPixLight(int index)
     light.contactShadow = _PixLightsContactShadow[index].x;
     light.contactSampleCount = (int)_PixLightsContactShadow[index].y;
     light.contactBias = _PixLightsContactShadow[index].z;
+    light.contactShadowJitter = _PixLightsContactShadow[index].w;
 
     light.shadowMapBias = _PixLightsShadowMap[index].x;
     light.shadowMapType = (int)_PixLightsShadowMap[index].y;
@@ -89,30 +90,43 @@ half ShadowMap(PixLight light, half2 screenUV, GBufferData gbufferData){
     return depthSrc>depthDest;
 }
 
-// TODO: 改成在灯光的local空间进行对比
-half ContactShadow(PixLight light, GBufferData gbufferData){
-    if(light.contactShadow == 0) return 1.0h;
-
-    int sampleCount = light.contactSampleCount + 1; 
-    half step = light.contactShadow; //采样步长
-    half3 pos = gbufferData.positionWS; //ray的起点
-
+half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias){
+    int sampleCount = stepCount + 1; 
+    half step = rayLengthDivStepCount; //采样步长
+    half3 pos_src = gbufferData.positionWS; //ray的起点
+    
     //遍历次数不定加[loop]，避免编译器unroll优化时报错
     [loop]
     for(int i = 1; i < sampleCount; i++){
-        pos += light.direction * step; //ray的步进
+        pos_src += direction * step; //ray的步进
 
-        half2 uv = PosWorldToScreenUV(pos);
+        half2 uv = PosWorldToScreenUV(pos_src);
+
+        if(jitterRadius>0)
+            uv += hash22(uv).xy*jitterRadius;
+
         half depth = sampleDepth(uv);
-        half4 ndcPos = TransformWorldToHClip(pos);
+        half4 ndcPos = TransformWorldToHClip(pos_src);
         half rayDepth = ndcPos.z/ndcPos.w;
-        rayDepth += light.contactBias;
+        rayDepth += bias;
         
         if(depth > rayDepth){
             return 0.0h;
         }
     }
     return 1.0h;
+}
+
+half ContactShadow(PixLight light, GBufferData gbufferData){
+    if(light.contactShadow == 0) return 1.0h;
+
+    half3 direction = light.direction;
+    half rayLengthDivStepCount = light.contactShadow;
+    int stepCount = light.contactSampleCount;
+    half jitterRadius = light.contactShadowJitter*light.shadowMapSize.y;
+    half bias = light.contactBias;
+
+    return ContactShadow(gbufferData, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias);
 }
 
 #endif

@@ -12,9 +12,7 @@ namespace PixRenderPipline
 
 
         static int _AO_Factor = Shader.PropertyToID("_AO_Factor");
-        static int _SSAO_radius = Shader.PropertyToID("_SSAO_radius");
-        static int _SSAO_intensity = Shader.PropertyToID("_SSAO_intensity");
-        static int _SSAO_sampleCount = Shader.PropertyToID("_SSAO_sampleCount");
+        static int _SSAO_Props = Shader.PropertyToID("_SSAO_Props");
 
 
 
@@ -52,9 +50,41 @@ namespace PixRenderPipline
                     material.DisableKeyword("_ORTHOGRAPHIC");
 
                 material.SetFloat(_AO_Factor, renderer.asset.ao_factor);
-                material.SetFloat(_SSAO_radius, renderer.asset.ssao_radius);
-                material.SetFloat(_SSAO_intensity, renderer.asset.ssao_intensity);
-                material.SetInt(_SSAO_sampleCount, renderer.asset.ssao_sampleCount);
+                
+                if (renderer.asset.Enable_SSAO)
+                {
+                    Vector4 ssao_props = new Vector4();
+                    ssao_props.x = renderer.asset.ssao_factor;
+                    ssao_props.y = renderer.asset.ssao_radius*0.001f / renderer.asset.ssao_stepCount;
+                    ssao_props.z = renderer.asset.ssao_stepCount;
+                    ssao_props.w = renderer.asset.ssao_jitterRadius;
+                    material.SetVector(_SSAO_Props, ssao_props);
+
+                    material.DisableKeyword("SSAO_QUALITY_OFF");
+                    material.DisableKeyword("SSAO_QUALITY_LOW");
+                    material.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                    material.DisableKeyword("SSAO_QUALITY_HIGH");
+
+                    switch (renderer.asset.ssao_quality)
+                    {
+                        case PixRenderer.SamplerQuality.Low:
+                            material.EnableKeyword("SSAO_QUALITY_LOW");
+                            break;
+                        case PixRenderer.SamplerQuality.Medium:
+                            material.EnableKeyword("SSAO_QUALITY_MEDIUM");
+                            break;
+                        case PixRenderer.SamplerQuality.High:
+                            material.EnableKeyword("SSAO_QUALITY_HIGH");
+                            break;
+                    }
+                }
+                else
+                {
+                    material.EnableKeyword("SSAO_QUALITY_OFF");
+                    material.DisableKeyword("SSAO_QUALITY_LOW");
+                    material.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                    material.DisableKeyword("SSAO_QUALITY_HIGH");
+                }
             }
             else
             {

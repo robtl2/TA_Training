@@ -22,7 +22,6 @@ namespace PixRenderPipline
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
             renderer.cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, TransparentPass.ColorBuff);
-            renderer.cmb.SetGlobalVector(_OutLineDepthNormalThreshold, new Vector2(renderer.asset.outLineDepthThreshold, renderer.asset.outLineNormalThreshold));
 
             TriggerEvent(PixRenderEventName.BeforePostProcess);
 

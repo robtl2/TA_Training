@@ -41,24 +41,29 @@ namespace PixRenderPipline
 
         public bool GPU_OCC_Culling = true;
 
-        [Range(0,1)]
+        [Header("AO")]
+        [Range(0, 1)]
         public float ao_factor = 1;
-
         public bool Enable_SSAO = true;
+
+        [Range(0,1)]
+        public float ssao_factor = 1.0f;
         public float ssao_radius = 0.01f;
-        public float ssao_intensity = 1.0f;
-        public int ssao_sampleCount = 2;
+        public int ssao_stepCount = 4;
+        public float ssao_jitterRadius = 1.0f;
+        
+        public PixRenderer.SamplerQuality ssao_quality = PixRenderer.SamplerQuality.Low;
 
         #endregion
 
-        #region OutLine
-        [Header("OutLine")]
+    //     #region OutLine
+    //     [Header("OutLine")]
         
-        [Range(0, 1)]
-        public float outLineDepthThreshold = 0.2f;
-        [Range(0, 2)]
-        public float outLineNormalThreshold = 0.2f;
-    #endregion
+    //     [Range(0, 1)]
+    //     public float outLineDepthThreshold = 0.2f;
+    //     [Range(0, 2)]
+    //     public float outLineNormalThreshold = 0.2f;
+    // #endregion
 
 
     #region GBuffer Debug

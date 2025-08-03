@@ -84,6 +84,9 @@ namespace PixRenderPipline
 
         [Header("Contact Shadow")]
         public bool enableContactShadow = false;
+        public bool contactShadowJitter = false;
+        [Range(0,3)]
+        public float contactShadowJitterRadius = 0.5f;
 
         [Range(0f, 0.01f)]
         public float contactRayLength = 0.25f;
@@ -134,7 +137,6 @@ namespace PixRenderPipline
             }
         }
 
-        [SerializeField]
         bool passAdded = false;
         void OnValidate()
         {
@@ -316,6 +318,7 @@ namespace PixRenderPipline
             contactShadowParam.x = contactShadow;
             contactShadowParam.y = contactSampleCount;
             contactShadowParam.z = contactBias;
+            contactShadowParam.w = contactShadowJitter ? contactShadowJitterRadius : 0;
             contactShadowPropList[i] = contactShadowParam;
 
             Vector4 shadowMapParam = Vector4.zero;
@@ -400,10 +403,8 @@ namespace PixRenderPipline
 
             // 计算视图矩阵
             Vector3 lightPosition = bounds.center;
-
             Vector3 up = transform.up;
             Vector3 forward = transform.forward;
-
             Matrix4x4 viewMatrix = Matrix4x4.LookAt(lightPosition, lightPosition - forward, -up);
 
             // 将角点转换到光源空间

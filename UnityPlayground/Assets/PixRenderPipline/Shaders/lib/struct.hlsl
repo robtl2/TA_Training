@@ -34,6 +34,7 @@ struct PixLight{
     half contactShadow;
     int contactSampleCount;
     half contactBias;
+    half contactShadowJitter;
 
     half shadowMapBias;
     int shadowMapType;
