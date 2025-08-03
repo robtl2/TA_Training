@@ -51,7 +51,7 @@ half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData)
     half3 dominantDir = getSpecularDominantDir(N, L, gbufferData.roughness);
     dominantDir = lerp(dominantDir, L, abs(gbufferData.anisotropy));
 
-    half v = selfOcclusion(gbufferData, dominantDir, gbufferData.perceptualRoughness);
+    half v = selfOcclusion(gbufferData, dominantDir, gbufferData.roughness);
 
     dominantDir = rotate_y(dominantDir, _RotateSky);
     
@@ -59,7 +59,7 @@ half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData)
 }
 
 half3 prefilteredRadiance(GBufferData gbufferData) {
-    half v = selfOcclusion(gbufferData, gbufferData.reflectDir, gbufferData.perceptualRoughness);
+    half v = selfOcclusion(gbufferData, gbufferData.reflectDir, gbufferData.roughness);
 
     half3 r = gbufferData.reflectDir;
     r = rotate_y(r, _RotateSky);
