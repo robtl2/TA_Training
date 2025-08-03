@@ -151,7 +151,5 @@ void evaluateIBLSimple(half3 diffuse, half3 normalWS, inout half3 result) {
     result += Fd * _SkyColor.rgb;
 }
 
-// TODO: ssao, shadowMapPass 
-    
 
 #endif

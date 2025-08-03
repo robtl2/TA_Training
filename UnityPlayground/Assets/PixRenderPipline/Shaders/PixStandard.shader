@@ -320,7 +320,7 @@ Shader "Pix/Standard"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #pragma multi_compile SSAO_QUALITY_OFF SSAO_QUALITY_LOW SSAO_QUALITY_MEDIUM SSAO_QUALITY_HIGH
+            #pragma multi_compile SSAO_QUALITY_OFF
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             

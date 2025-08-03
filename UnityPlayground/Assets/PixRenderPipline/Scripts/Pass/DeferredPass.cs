@@ -34,63 +34,52 @@ namespace PixRenderPipline
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
             renderer.cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
             renderer.cmb.SetGlobalTexture(TiledPass.tileID, TiledPass.tileID);
+            
+            material.SetFloat(_AO_Factor, renderer.asset.ao_factor);
+
+            int2 size = renderer.size / 2;
+            GetTemporaryColorRT(DepthDownSample, size.x, size.y, FilterMode.Bilinear);
+            renderer.cmb.Blit(EarlyZPass.nameID, DepthDownSample);
+            renderer.cmb.SetGlobalTexture(DepthDownSample, DepthDownSample);
+
+            if (renderer.camera.orthographic)
+                material.EnableKeyword("ORTHOGRAPHIC");
+            else
+                material.DisableKeyword("ORTHOGRAPHIC");
 
             if (renderer.asset.Enable_SSAO)
             {
-                int2 size = renderer.size / 2;
-                GetTemporaryColorRT(DepthDownSample, size.x, size.y, FilterMode.Bilinear);
-                renderer.cmb.Blit(EarlyZPass.nameID, DepthDownSample);
-                renderer.cmb.SetGlobalTexture(DepthDownSample, DepthDownSample);
+                Vector4 ssao_props = new();
+                ssao_props.x = renderer.asset.ssao_factor;
+                ssao_props.y = renderer.asset.ssao_radius * 0.001f / renderer.asset.ssao_stepCount;
+                ssao_props.z = renderer.asset.ssao_stepCount;
+                ssao_props.w = renderer.asset.ssao_jitterRadius;
+                material.SetVector(_SSAO_Props, ssao_props);
 
-                material.EnableKeyword("ENABLE_SSAO");
+                material.DisableKeyword("SSAO_QUALITY_OFF");
+                material.DisableKeyword("SSAO_QUALITY_LOW");
+                material.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                material.DisableKeyword("SSAO_QUALITY_HIGH");
 
-                if (renderer.camera.orthographic)
-                    material.EnableKeyword("_ORTHOGRAPHIC");
-                else
-                    material.DisableKeyword("_ORTHOGRAPHIC");
-
-                material.SetFloat(_AO_Factor, renderer.asset.ao_factor);
-                
-                if (renderer.asset.Enable_SSAO)
+                switch (renderer.asset.ssao_quality)
                 {
-                    Vector4 ssao_props = new Vector4();
-                    ssao_props.x = renderer.asset.ssao_factor;
-                    ssao_props.y = renderer.asset.ssao_radius*0.001f / renderer.asset.ssao_stepCount;
-                    ssao_props.z = renderer.asset.ssao_stepCount;
-                    ssao_props.w = renderer.asset.ssao_jitterRadius;
-                    material.SetVector(_SSAO_Props, ssao_props);
-
-                    material.DisableKeyword("SSAO_QUALITY_OFF");
-                    material.DisableKeyword("SSAO_QUALITY_LOW");
-                    material.DisableKeyword("SSAO_QUALITY_MEDIUM");
-                    material.DisableKeyword("SSAO_QUALITY_HIGH");
-
-                    switch (renderer.asset.ssao_quality)
-                    {
-                        case PixRenderer.SamplerQuality.Low:
-                            material.EnableKeyword("SSAO_QUALITY_LOW");
-                            break;
-                        case PixRenderer.SamplerQuality.Medium:
-                            material.EnableKeyword("SSAO_QUALITY_MEDIUM");
-                            break;
-                        case PixRenderer.SamplerQuality.High:
-                            material.EnableKeyword("SSAO_QUALITY_HIGH");
-                            break;
-                    }
-                }
-                else
-                {
-                    material.EnableKeyword("SSAO_QUALITY_OFF");
-                    material.DisableKeyword("SSAO_QUALITY_LOW");
-                    material.DisableKeyword("SSAO_QUALITY_MEDIUM");
-                    material.DisableKeyword("SSAO_QUALITY_HIGH");
+                    case PixRenderer.SamplerQuality.Low:
+                        material.EnableKeyword("SSAO_QUALITY_LOW");
+                        break;
+                    case PixRenderer.SamplerQuality.Medium:
+                        material.EnableKeyword("SSAO_QUALITY_MEDIUM");
+                        break;
+                    case PixRenderer.SamplerQuality.High:
+                        material.EnableKeyword("SSAO_QUALITY_HIGH");
+                        break;
                 }
             }
             else
             {
-                material.DisableKeyword("ENABLE_SSAO");
-                material.DisableKeyword("_ORTHOGRAPHIC");
-                // renderer.cmb.SetGlobalTexture(DepthDownSample, EarlyZPass.depthID, RenderTextureSubElement.Depth);
+                material.EnableKeyword("SSAO_QUALITY_OFF");
+                material.DisableKeyword("SSAO_QUALITY_LOW");
+                material.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                material.DisableKeyword("SSAO_QUALITY_HIGH");
             }
 
             renderer.cmb.SetRenderTarget(ColorBuff);
@@ -107,7 +96,6 @@ namespace PixRenderPipline
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
-            
         }
         
     }

@@ -38,9 +38,8 @@ struct PixLight{
 
     half shadowMapBias;
     int shadowMapType;
-    int shadowMapQuality;
+    int shadowMapQuality; //给pcf pcss用的
     bool shadowMapJitter;
-    
 };
 
 
@@ -79,7 +78,6 @@ struct GBufferData
 
     half anisotropy;
 };
-
 
 
 #endif

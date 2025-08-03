@@ -6,7 +6,6 @@
 #define SAMPLER_QUALITY_HIGH 3
 
 
-
 #if defined SSAO_QUALITY_LOW
     #define SSAO_SAMPLER_COUNT 4
 

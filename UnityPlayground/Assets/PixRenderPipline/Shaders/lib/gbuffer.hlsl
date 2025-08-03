@@ -172,10 +172,27 @@ GBufferData UnpackGBuffer(float2 uv)
     fresnel = pow5(fresnel);
 
     GBufferData gbufferData;
+#if 1
     gbufferData.shadingModel = shadingModel;
     gbufferData.albedo = albedo;
     gbufferData.diffuse = diffuse;
     gbufferData.f0 = f0;
+    gbufferData.perceptualRoughness = perceptualRoughness;
+    gbufferData.roughness = roughness;
+    gbufferData.metallic = metallic;
+    gbufferData.anisotropy = anisotropy;
+    gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
+#else
+    gbufferData.shadingModel = 1;
+    gbufferData.albedo = 1;
+    gbufferData.diffuse = 1;
+    gbufferData.f0 = 0;
+    gbufferData.perceptualRoughness = 1;
+    gbufferData.roughness = 1;
+    gbufferData.metallic = 0;
+    gbufferData.anisotropy = 0;
+    gbufferData.fresnel = 0;
+#endif
     gbufferData.ao = ao;
     gbufferData.bentNormal = bentNormal;
     gbufferData.positionWS = worldPos;
@@ -186,13 +203,8 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.viewDir = viewDir;
     gbufferData.reflectDir = reflect(-viewDir, normalWS);
     gbufferData.NoV = normalVS.z;
-    gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
     gbufferData.ndcDepth = ndcDepth;
     gbufferData.depth = depth;
-    gbufferData.perceptualRoughness = perceptualRoughness;
-    gbufferData.roughness = roughness;
-    gbufferData.metallic = metallic;
-    gbufferData.anisotropy = anisotropy;
     return gbufferData;
 }
 
