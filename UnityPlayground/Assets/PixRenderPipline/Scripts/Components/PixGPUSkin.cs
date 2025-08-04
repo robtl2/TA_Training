@@ -1,9 +1,14 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
+
 namespace PixRenderPipline
-{
+{   
+    /// <summary>
+    /// 在VS阶段做Skin的变换，
+    /// 如果遇到相同的Mesh和Material，那SkinnedMesh也可以用Instance一次画多个了
+    /// 倒不是心血来潮想写个这个，只是因为准备做TAA，到了拿motionVector时干脆顺便就把这个做了
+    /// </summary>
     [ExecuteInEditMode]
     public class PixGPUSkin : MonoBehaviour
     {
@@ -57,9 +62,9 @@ namespace PixRenderPipline
             int passID = 0;
             if (renderer.cmb.name == "PixEarlyZPass")
                 passID = 1;
-            else if(renderer.cmb.name == "PixShadowMap")
+            else if (renderer.cmb.name == "PixShadowMap")
                 passID = 2;
-            
+
             foreach (var rm in meshes)
             {
                 var ren = rm.Key;
@@ -117,7 +122,7 @@ namespace PixRenderPipline
                 var mat = ren.sharedMaterial;
                 mat.EnableKeyword("GPU_SKIN");
                 mat.SetMatrixArray(_CurrentPoses, currentPoses);
-                
+
                 if (previousPoses.Length > 0)
                     mat.SetMatrixArray(_PreviousPoses, previousPoses);
 
