@@ -8,18 +8,15 @@ namespace PixRenderPipline
     {
         public static readonly int ColorBuff = Shader.PropertyToID("_PixOpaqueTex");
         public static readonly int DepthDownSample = Shader.PropertyToID("_PixDepthDownSample");
-        static RenderTargetIdentifier depthDownsampleID = new(DepthDownSample);
-
-
         static int _AO_Factor = Shader.PropertyToID("_AO_Factor");
         static int _SSAO_Props = Shader.PropertyToID("_SSAO_Props");
-
-
-
         public Material material;
+        Material blitMaterial;
+
         public DeferredPass(PixRenderer renderer) : base("PixDeferredPass", renderer)
-        { 
+        {
             material = new Material(Shader.Find("Hidden/Pix/Deferred"));
+            blitMaterial = new Material(Shader.Find("Hidden/Pix/Blit"));
         }
 
         public override void Execute()
@@ -37,10 +34,11 @@ namespace PixRenderPipline
             
             material.SetFloat(_AO_Factor, renderer.asset.ao_factor);
 
+            // Depth经常拿来被采样，这里blit出来一个下采样的DepthTexture
             int2 size = renderer.size / 2;
-            GetTemporaryColorRT(DepthDownSample, size.x, size.y, FilterMode.Bilinear);
-            renderer.cmb.Blit(EarlyZPass.nameID, DepthDownSample);
-            renderer.cmb.SetGlobalTexture(DepthDownSample, DepthDownSample);
+            renderer.cmb.GetTemporaryRT(DepthDownSample, size.x, size.y, 0, FilterMode.Bilinear, RenderTextureFormat.R16);
+            renderer.cmb.SetRenderTarget(DepthDownSample);
+            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMaterial, 0, 0);
 
             if (renderer.camera.orthographic)
                 material.EnableKeyword("ORTHOGRAPHIC");
@@ -83,15 +81,13 @@ namespace PixRenderPipline
             }
 
             renderer.cmb.SetRenderTarget(ColorBuff);
+            renderer.cmb.SetGlobalTexture(DepthDownSample, DepthDownSample);
 
             TriggerEvent(PixRenderEventName.BeforeDeferred);
 
             renderer.cmb.DrawMesh(TiledFullScreenQuad, Matrix4x4.identity, material, 0, 0);
             renderer.cmb.ReleaseTemporaryRT(TiledPass.tileID);
             
-            if (renderer.asset.Enable_SSAO)
-                renderer.cmb.ReleaseTemporaryRT(DepthDownSample);
-
             TriggerEvent(PixRenderEventName.AfterDeferred);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);

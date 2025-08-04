@@ -48,6 +48,10 @@ struct GBuffer
     half4 gbuffer_0; //rgb:albedo a:ao
     half4 gbuffer_1; //rg:normal b:roughness a:(metallic|anisotropy)&shadingModel[5:3]
     half4 gbuffer_2; //rg:tangent ba:bentNormal
+
+#ifdef MOTION_VECTOR_ON
+    half4 gbuffer_3; // movtionVector
+#endif
 };
 
 
@@ -75,8 +79,11 @@ struct GBufferData
     half perceptualRoughness;
     half roughness;
     half metallic;
-
     half anisotropy;
+
+#ifdef MOTION_VECTOR_ON
+    half2 motionVector;
+#endif
 };
 
 

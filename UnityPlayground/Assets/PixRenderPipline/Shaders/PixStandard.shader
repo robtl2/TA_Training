@@ -46,10 +46,16 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
+            #pragma multi_compile _ GPU_SKIN
             #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
             #pragma shader_feature EXPORT_TANGENT 
             #pragma shader_feature ENABLE_BENTNORMAL
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            #ifdef GPU_SKIN
+            #include "lib/gpuskin.hlsl"
+            #endif
+
             #include "lib/light.hlsl"
             #include "lib/gbuffer.hlsl"
             
@@ -61,6 +67,11 @@ Shader "Pix/Standard"
                 float4 tangentOS    : TANGENT;
             #ifdef ENABLE_BENTNORMAL
                 float4 bentNormal   : COLOR;
+            #endif
+
+            #ifdef GPU_SKIN
+                float4 boneWeights  : BLENDWEIGHTS; 
+                uint4 boneIndices   : BLENDINDICES; 
             #endif
             };
 
@@ -94,6 +105,12 @@ Shader "Pix/Standard"
 
             Varying vert(Attributes input)
             {
+                #ifdef GPU_SKIN
+                transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
+                transformSkinnedDir(input.boneWeights, input.boneIndices, input.normalOS);
+                transformSkinnedDir(input.boneWeights, input.boneIndices, input.tangentOS.xyz);
+                #endif
+
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
                 float3 tangentWS = TransformObjectToWorldNormal(input.tangentOS.xyz)* input.tangentOS.w;
                 float3 bitangentWS = cross(normalWS, tangentWS) ;
@@ -114,6 +131,11 @@ Shader "Pix/Standard"
             #ifdef ENABLE_BENTNORMAL
                 float4 bentNormal = input.bentNormal;
                 bentNormal.xyz = bentNormal.xyz*2 - 1;
+
+                #ifdef GPU_SKIN
+                transformSkinnedDir(input.boneWeights, input.boneIndices, bentNormal.xyz);
+                #endif
+
                 float3x3 tbn = float3x3(tangentWS, bitangentWS, normalWS);
                 bentNormal.xyz = mul(bentNormal.xyz, tbn);
             #endif
@@ -143,9 +165,9 @@ Shader "Pix/Standard"
             {
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
 
-            #if _ALPHATEST_ON
+                #if _ALPHATEST_ON
                 clip(color.a - _Cutoff);
-            #endif
+                #endif
 
                 float3 normal = normalize(input.normalVS);
 
@@ -160,9 +182,10 @@ Shader "Pix/Standard"
                 roughness = ior*ior + roughness;
 
                 half4 bentNormal = half4(0,0,1,1);
-            #ifdef ENABLE_BENTNORMAL
+                
+                #ifdef ENABLE_BENTNORMAL
                 bentNormal = input.bentNormal;
-            #endif
+                #endif
 
                 FragmentOutput output;
                 GBuffer gbuffer = PackGBuffer(color, _ShadingModel, normal, bentNormal, input.tangentWS, roughness, metalness, _Anisotropy);
@@ -193,13 +216,23 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
+            #pragma multi_compile _ GPU_SKIN
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            #ifdef GPU_SKIN
+            #include "lib/gpuskin.hlsl"
+            #endif
 
             struct AttributesDepth
             {
                 float4 positionOS : POSITION;
             #if _ALPHATEST_ON
                 float2 uv : TEXCOORD0;
+            #endif
+
+            #ifdef GPU_SKIN
+                float4 boneWeights  : BLENDWEIGHTS; 
+                uint4 boneIndices   : BLENDINDICES; 
             #endif
             };
 
@@ -212,18 +245,25 @@ Shader "Pix/Standard"
             };
 
             #if _ALPHATEST_ON
-            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
-            half4 _MainTex_ST;
-            half _Cutoff;
+                TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
+                half4 _MainTex_ST;
+                half _Cutoff;
             #endif
 
             VaryingsDepth vert(AttributesDepth input)
             {
                 VaryingsDepth output;
+
+                #ifdef GPU_SKIN
+                transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
+                #endif
+
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-            #if _ALPHATEST_ON
+                
+                #if _ALPHATEST_ON
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
-            #endif
+                #endif
+
                 return output;
             }
 
@@ -253,7 +293,12 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
+            #pragma multi_compile _ GPU_SKIN
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            #ifdef GPU_SKIN
+            #include "lib/gpuskin.hlsl"
+            #endif
 
             #include "lib/struct.hlsl"
             #include "lib/light.hlsl"
@@ -263,6 +308,11 @@ Shader "Pix/Standard"
                 float4 positionOS : POSITION;
             #if _ALPHATEST_ON
                 float2 uv : TEXCOORD0;
+            #endif
+
+            #ifdef GPU_SKIN
+                float4 boneWeights  : BLENDWEIGHTS; 
+                uint4 boneIndices   : BLENDINDICES; 
             #endif
             };
 
@@ -274,16 +324,20 @@ Shader "Pix/Standard"
             #endif
             };
 
-        #if _ALPHATEST_ON
-            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
-            half4 _MainTex_ST;
-            half _Cutoff;
-        #endif
+            #if _ALPHATEST_ON
+                TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
+                half4 _MainTex_ST;
+                half _Cutoff;
+            #endif
 
             int _LightIndex;
 
             VaryingsDepth vert(AttributesDepth input)
             {
+                #ifdef GPU_SKIN
+                transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
+                #endif
+
                 PixLight light = GetPixLight(_LightIndex);
                 float4x4 VP = light.VP;
                 float4 posWorld = mul(unity_ObjectToWorld, input.positionOS);
@@ -314,19 +368,21 @@ Shader "Pix/Standard"
             Tags { "LightMode"="PixTransparent" }
 
             ZWrite Off
-            ZTest Less
+            ZTest LESS
             Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile SSAO_QUALITY_OFF
-
+            #pragma multi_compile _ GPU_SKIN
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            
+
+            #ifdef GPU_SKIN
+            #include "lib/gpuskin.hlsl"
+            #endif
         
             #include "lib/light.hlsl"
-            #include "lib/gbuffer.hlsl"
             #include "lib/shading.hlsl"
             #include "lib/ibl.hlsl"
 
@@ -335,6 +391,11 @@ Shader "Pix/Standard"
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
+
+            #ifdef GPU_SKIN
+                float4 boneWeights  : BLENDWEIGHTS; 
+                uint4 boneIndices   : BLENDINDICES; 
+            #endif
             };
 
             struct VaryingsDepth
@@ -349,10 +410,21 @@ Shader "Pix/Standard"
 
             VaryingsDepth vert(AttributesDepth input)
             {
+                #ifdef GPU_SKIN
+                transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
+                transformSkinnedDir(input.boneWeights, input.boneIndices, input.normalOS);
+                #endif
+
                 VaryingsDepth output;
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.positionCS =  TransformObjectToHClip(input.positionOS.xyz);
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+
+                #ifdef GPU_SKIN
+                //搞不懂怎么到这儿depth的精度就有误差了
+                output.positionCS.z -= 0.00001;
+                #endif
+
                 return output;
             }
 

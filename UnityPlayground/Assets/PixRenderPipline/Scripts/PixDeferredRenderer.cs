@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>
@@ -20,7 +21,7 @@ namespace PixRenderPipline
         public FinalPass finalPass { get; private set; }
 
         public PixDeferredRenderer()
-        { 
+        {
             earlyZPass = new(this);
             occlusionCullingPass = new(this);
             gBufferPass = new(this);
@@ -36,26 +37,31 @@ namespace PixRenderPipline
         public override void Render()
         {
             base.Render();
-            
-            earlyZPass.Execute();
-            occlusionCullingPass.Execute();
-            gBufferPass.Execute();
-            tiledPass.Execute();
-            deferredPass.Execute();
-            skyPass.Execute();
-            decalPass.Execute();
-            transparentPass.Execute();
-            postProcessPass.Execute();
-            finalPass.Execute();
 
-    #if UNITY_EDITOR
+            ExecutePass(earlyZPass);
+            ExecutePass(occlusionCullingPass);
+            ExecutePass(gBufferPass);
+            ExecutePass(tiledPass);
+            ExecutePass(deferredPass);
+            ExecutePass(skyPass);
+            ExecutePass(decalPass);
+            ExecutePass(transparentPass);
+            ExecutePass(postProcessPass);
+            ExecutePass(finalPass);
+
+            #if UNITY_EDITOR
             // 绘制编辑器视图中的Gizmos
             if (isSceneView)
                 context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
-    #endif
+            #endif
 
             //菜单以及工艺都写完了，交还给厨房管事儿的
             context.Submit();
+        }
+
+        void ExecutePass(PixPassBase pass)
+        {
+            pass.Execute();
         }
     }
 }

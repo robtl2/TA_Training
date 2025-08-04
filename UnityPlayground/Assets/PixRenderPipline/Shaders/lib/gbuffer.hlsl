@@ -11,6 +11,9 @@ static half IOR  = half(2.0);
 TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);float2 _PixGBuffer_0_TexelSize;
 TEXTURE2D(_PixGBuffer_1);SAMPLER(sampler_PixGBuffer_1);
 TEXTURE2D(_PixGBuffer_2);SAMPLER(sampler_PixGBuffer_2);
+#ifdef MOTION_VECTOR_ON
+TEXTURE2D(_PixGBuffer_3);SAMPLER(sampler_PixGBuffer_3);
+#endif
 TEXTURE2D(_PixEarlyZDepth);SAMPLER(sampler_PixEarlyZDepth);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
@@ -33,11 +36,9 @@ half sampleDepth(float2 uv){
     return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
 }
 
-half sampleDepthDownSample(float2 uv){
-    half2 depthRaw = SAMPLE_TEXTURE2D(_PixDepthDownSample, sampler_PixDepthDownSample, uv).rg;
-    // return depthRaw.r;
 
-    return PackFloat2To8(depthRaw);
+half sampleDepthDownSample(float2 uv){
+    return SAMPLE_TEXTURE2D(_PixDepthDownSample, sampler_PixDepthDownSample, uv).r;
 }
 
 half3 samplePositionWS(float2 uv){
@@ -106,11 +107,26 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     return gbuffer;
 }
 
+#ifdef MOTION_VECTOR_ON
+GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalWS,
+                    half3 tangentWS, half roughness, half metallic, half anisotropy, half2 motionVector)
+{
+    GBuffer gbuffer = PackGBuffer(color, shadingModel, normalVS, bentNormalWS, tangentWS, roughness, metallic, anisotropy);
+    
+    half2 xy = PackFloatToR8G8(motionVector.x);
+    half2 zw = PackFloatToR8G8(motionVector.y);
+    gbuffer.gbuffer_3 = half4(xy,zw);
+}
+#endif
+
 GBufferData UnpackGBuffer(float2 uv)
 {
     half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
     half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
     half4 gbuffer_2 = SAMPLE_TEXTURE2D(_PixGBuffer_2, sampler_PixGBuffer_2, uv);
+#ifdef MOTION_VECTOR_ON
+    half4 gbuffer_3 = SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv);
+#endif
     float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
 
 #ifdef PIX_STYLE_NPR
@@ -184,8 +200,8 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
 #else
     gbufferData.shadingModel = 1;
-    gbufferData.albedo = 1;
-    gbufferData.diffuse = 1;
+    gbufferData.albedo = 0.5;
+    gbufferData.diffuse = 0.5;
     gbufferData.f0 = 0;
     gbufferData.perceptualRoughness = 1;
     gbufferData.roughness = 1;
@@ -205,6 +221,13 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.NoV = normalVS.z;
     gbufferData.ndcDepth = ndcDepth;
     gbufferData.depth = depth;
+
+#ifdef MOTION_VECTOR_ON
+    half x = UnpackFloatFromR8G8(gbuffer_3.xy);
+    half y = UnpackFloatFromR8G8(gbuffer_3.zw);
+    gbufferData.motionVector = half2(x,y);
+#endif
+
     return gbufferData;
 }
 

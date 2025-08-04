@@ -94,7 +94,7 @@ namespace PixRenderPipline
         [Range(1, 16)]
         public int contactSampleCount = 1;
 
-        [Range(0f, 0.00003f)]
+        [Range(0f, 0.0001f)]
         public float contactBias = 0.000005f;
 
         [Header("Volume Light")]
@@ -109,6 +109,7 @@ namespace PixRenderPipline
 
         int index;
         int shadowMapIndex = 0;
+        bool passAdded = false;
 
         void OnEnable()
         {
@@ -118,7 +119,7 @@ namespace PixRenderPipline
             lights.Add(this);
             lightListIsDirty = true;
 
-            if (enabled && !passAdded && (int)shadowMapType > 0 && shadowMapBias > 0)
+            if (enabled && !passAdded && shadowMapType != ShadowMapType.None && shadowMapBias > 0)
             {
                 PixRenderEvent.AddEvent(PixRenderEventName.BeforeAll, ShadowMapPass);
                 passAdded = true;
@@ -136,8 +137,7 @@ namespace PixRenderPipline
                 passAdded = false;
             }
         }
-
-        bool passAdded = false;
+        
         void OnValidate()
         {
             // 当满足这三个条件时才开启ShadowMapPass
@@ -189,6 +189,9 @@ namespace PixRenderPipline
                 if (rendererList.isValid)
                     renderer.cmb.DrawRendererList(rendererList);
             }
+
+            if (PixGPUSkin.gpuSkins.Count > 0)
+                foreach (var gpuskin in PixGPUSkin.gpuSkins) gpuskin.ExecuteGPUskinPass(renderer);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
