@@ -5,8 +5,6 @@
 
 #define MAX_BONE_COUNT  256
 
-int _BindPoseCount;
-float4x4 _BindPoses[MAX_BONE_COUNT];
 float4x4 _CurrentPoses[MAX_BONE_COUNT];
 float4x4 _PreviousPoses[MAX_BONE_COUNT];
 

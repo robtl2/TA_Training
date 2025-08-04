@@ -93,8 +93,6 @@ namespace PixRenderPipline
             }
         }
 
-        static int _BindPoseCount = Shader.PropertyToID("_BindPoseCount");
-        static int _BindPoses = Shader.PropertyToID("_BindPoses");
         static int _CurrentPoses = Shader.PropertyToID("_CurrentPoses");
         static int _PreviousPoses = Shader.PropertyToID("_PreviousPoses");
 
@@ -105,13 +103,9 @@ namespace PixRenderPipline
             {
                 var ren = m.Key;
                 var mesh = m.Value;
-                int bindposeCount = mesh.bindposeCount;
                 Matrix4x4[] bindposes = mesh.bindposes;
 
-                // Transform root = ren.rootBone;
                 Transform[] bones = ren.bones;
-                // Matrix4x4 worldToLocal = root.worldToLocalMatrix;
-
                 Matrix4x4[] currentPoses = new Matrix4x4[bones.Length];
                 for (int i = 0; i < bones.Length; i++)
                 {
@@ -122,8 +116,6 @@ namespace PixRenderPipline
 
                 var mat = ren.sharedMaterial;
                 mat.EnableKeyword("GPU_SKIN");
-                mat.SetInt(_BindPoseCount, bindposeCount);
-                mat.SetMatrixArray(_BindPoses, bindposes);
                 mat.SetMatrixArray(_CurrentPoses, currentPoses);
                 
                 if (previousPoses.Length > 0)
