@@ -25,6 +25,6 @@ MonoBehaviour:
   ssao_quality: 2
   enable_TAA: 1
   TAA_jitter: 0.545
-  TAA_histroy: 0.833
+  TAA_histroy: 0.8
   debugMode: 0
   debugSize: 1
