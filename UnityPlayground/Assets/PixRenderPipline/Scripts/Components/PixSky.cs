@@ -22,6 +22,8 @@ namespace PixRenderPipline
         public SkyType skyType = SkyType.None;
         public Color displayColor;
         public Color color;
+
+        public int detherStep = 0;
         public Cubemap texture;
 
         public PixSHData shData = new();
@@ -37,6 +39,7 @@ namespace PixRenderPipline
         readonly int _SkyType = Shader.PropertyToID("_SkyType");
         readonly int _SkyColor = Shader.PropertyToID("_SkyColor");
         readonly int _SkyDisplayColor = Shader.PropertyToID("_SkyDisplayColor");
+        readonly int _Dethering = Shader.PropertyToID("_Dethering");
         readonly int _FovScale = Shader.PropertyToID("_FovScale");
         readonly int _RotateSky = Shader.PropertyToID("_RotateSky");
         readonly int _SkyTex = Shader.PropertyToID("_SkyTex");
@@ -68,6 +71,7 @@ namespace PixRenderPipline
 
             material.SetFloat(_BlurLevel, blurLevel);
             material.SetColor(_SkyDisplayColor, displayColor);
+            material.SetInt(_Dethering, detherStep);
 
             Shader.SetGlobalColor(_SkyColor, color * intensity);
             Shader.SetGlobalFloat(_SkyTexMipCount, texture ? texture.mipmapCount : 0);

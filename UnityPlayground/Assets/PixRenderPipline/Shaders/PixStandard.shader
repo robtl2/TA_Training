@@ -46,7 +46,7 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
-            #pragma multi_compile _ GPU_SKIN
+            // #pragma multi_compile _ GPU_SKIN
             #pragma multi_compile _ TAA
             #pragma multi_compile _ MOTION_BLUR
             #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
@@ -68,6 +68,7 @@ Shader "Pix/Standard"
 
             #include "lib/light.hlsl"
             #include "lib/gbuffer.hlsl"
+            #include "lib/random.hlsl"
             
             struct Attributes
             {
@@ -99,8 +100,10 @@ Shader "Pix/Standard"
 
             #ifdef MOTION_VECTOR_ON
                 float4 prevPosCS    : TEXCOORD3;
-                float4 screenUV     : TEXCOORD4;
             #endif
+
+                float4 screenUV     : TEXCOORD4;
+            
             };
 
             float4 _Color;
@@ -198,8 +201,19 @@ Shader "Pix/Standard"
             {
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
 
+                half2 screenUV = input.screenUV.xy/input.screenUV.w;
+                screenUV = screenUV*0.5+0.5;
+
                 #if _ALPHATEST_ON
-                clip(color.a - _Cutoff);
+                    #ifdef TAA
+                        half alpha = color.a;
+                        // half c = _Cutoff*0.5;
+                        alpha = smoothstep(0, 1-_Cutoff*0.5,alpha);
+                        half a = dether(screenUV, alpha) - 0.001;
+                        clip(a);
+                    #else
+                        clip(color.a - _Cutoff);
+                    #endif
                 #endif
 
                 float3 normal = normalize(input.normalVS);
@@ -227,9 +241,6 @@ Shader "Pix/Standard"
                 output.gbuffer_2 = gbuffer.gbuffer_2;
 
             #ifdef MOTION_VECTOR_ON
-                float2 ndcPos = input.screenUV.xy / input.screenUV.w;
-                float2 screenUV = ndcPos * 0.5 + 0.5;
-
                 float2 preNdcPos = input.prevPosCS.xy / input.prevPosCS.w;
                 float2 preScreenUV = preNdcPos * 0.5 + 0.5;
 
@@ -261,8 +272,14 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
+            #pragma multi_compile _ TAA
             #pragma multi_compile _ GPU_SKIN
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "lib/random.hlsl"
+
+            #ifdef TAA
+            #define GPU_SKIN
+            #endif
 
             #ifdef GPU_SKIN
             #include "lib/gpuskin.hlsl"
@@ -271,29 +288,32 @@ Shader "Pix/Standard"
             struct AttributesDepth
             {
                 float4 positionOS : POSITION;
-            #if _ALPHATEST_ON
+                #if _ALPHATEST_ON
                 float2 uv : TEXCOORD0;
-            #endif
+                #endif
 
-            #ifdef GPU_SKIN
+                #ifdef GPU_SKIN
                 float4 boneWeights  : BLENDWEIGHTS; 
                 uint4 boneIndices   : BLENDINDICES; 
-            #endif
+                #endif
             };
 
             struct VaryingsDepth
             {
                 float4 positionCS : SV_POSITION;
-            #if _ALPHATEST_ON
-                float2 uv : TEXCOORD0;
+                float4 screenUV : TEXCOORD0;
+
+            #ifdef _ALPHATEST_ON
+                float2 uv : TEXCOORD1;
             #endif
             };
 
-            #if _ALPHATEST_ON
+            #ifdef _ALPHATEST_ON
                 TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
                 half4 _MainTex_ST;
                 half _Cutoff;
             #endif
+
 
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -307,21 +327,34 @@ Shader "Pix/Standard"
 
                 output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
                 
-                #if _ALPHATEST_ON
+                #ifdef _ALPHATEST_ON
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 #endif
+
+                // #ifdef TAA
+                output.screenUV = output.positionCS;
+                // #endif
 
                 return output;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
-            #if _ALPHATEST_ON
+            #ifdef _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
-                clip(alpha - _Cutoff-0.01);
+
+                #ifdef TAA
+                    half2 screenUV = input.screenUV.xy/input.screenUV.w;
+                    screenUV = screenUV*0.5+0.5;
+                    alpha = smoothstep(0,1 - _Cutoff*0.5,alpha);
+                    half a = dether(screenUV, alpha) - 0.001;
+                    clip(a);
+                #else
+                    clip(alpha - _Cutoff);
+                #endif
             #endif
 
-                return 0;
+                return 1;
             }
             ENDHLSL
         }
@@ -401,7 +434,7 @@ Shader "Pix/Standard"
             {
             #if _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
-                clip(alpha - _Cutoff-0.01);
+                clip(alpha - _Cutoff);
             #endif
 
                 return 0;
@@ -470,7 +503,7 @@ Shader "Pix/Standard"
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 
                 #ifdef GPU_SKIN
-                output.positionCS.z -= 0.00001;
+                output.positionCS.z -= 0.00002;
                 #endif
 
                 return output;
@@ -493,6 +526,7 @@ Shader "Pix/Standard"
                 // result = half3(1,0,0);
 
                 color.a = smoothstep(0,0.5,color.a);
+                // color.a = 0;
                 return half4(result, color.a);
             }
             ENDHLSL

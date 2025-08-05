@@ -47,7 +47,7 @@ namespace PixRenderPipline
             {
                 renderer.cmb.GetTemporaryRT(GbufferID_3, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.RG32, renderer.colorSpace);
                 renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, EarlyZPass.depthID);
-                renderer.cmb.ClearRenderTarget(false, true, gray);
+                renderer.cmb.ClearRenderTarget(false, true, black);
             }
             else
             {

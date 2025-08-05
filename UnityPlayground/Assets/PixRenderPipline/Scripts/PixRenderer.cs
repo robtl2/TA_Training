@@ -86,6 +86,7 @@ namespace PixRenderPipline
             this.camera = camera;
             this.asset = asset;
             this.frameIndex = frameIndex;
+            jitterUploaded = false;
 
             frustum = GeometryUtility.CalculateFrustumPlanes(camera);
         }
@@ -167,19 +168,37 @@ namespace PixRenderPipline
         static Dictionary<Camera, Matrix4x4> VP_pre_map = new();
         static Matrix4x4 VP = Matrix4x4.identity;
         
-        static Vector2[] haltonSamples = new Vector2[]
+        static float2[] haltonSamples = new float2[]
         {
-            new Vector2(0.5f, 0.5f),
-            new Vector2(0.25f, 0.75f),
-            new Vector2(0.75f, 0.25f),
-            new Vector2(0.125f, 0.625f),
-            new Vector2(0.625f, 0.125f),
-            new Vector2(0.375f, 0.875f),
-            new Vector2(0.875f, 0.375f),
-            new Vector2(0.0625f, 0.5625f)
+            new float2(0.5f, 0.5f),
+            new float2(0.25f, 0.75f),
+            new float2(0.75f, 0.25f),
+            new float2(0.125f, 0.625f),
+            new float2(0.625f, 0.125f),
+            new float2(0.375f, 0.875f),
+            new float2(0.875f, 0.375f),
+            new float2(0.0625f, 0.5625f)
         };
+
+        bool jitterUploaded = false;
+        float2 taaJitter = float2.zero;
+
         protected virtual void SetupGlobalUniform()
         {
+            if (!jitterUploaded)
+            {
+                jitterUploaded = true;
+
+                int jitterIndex = (frameIndex + 1) % haltonSamples.Length;
+                float2 jitter = haltonSamples[jitterIndex];
+
+                taaJitter = jitter * 2 - 1;
+                taaJitter *= asset.TAA_jitter;
+
+                if (asset.enable_TAA)
+                    Shader.SetGlobalVector(_TAA_Jitter, new Vector2(taaJitter.x, taaJitter.y));
+            }
+
             // 把VP的逆矩阵传给Shader
             // 不要以为URP有就代表SRP有，这里得自己传
             Matrix4x4 V = camera.worldToCameraMatrix;
@@ -188,16 +207,16 @@ namespace PixRenderPipline
             // 只需要抖P矩阵
             if (asset.enable_TAA)
             {
-                int jitterIndex = (frameIndex + 1) % haltonSamples.Length;
-                Vector2 jitter = haltonSamples[jitterIndex];
+                float jitterX = taaJitter.x / size.x;
+                float jitterY = taaJitter.y / size.y;
+                P.m02 += jitterX;
+                P.m12 += jitterY;
 
-                float jitterX = (jitter.x*2 - 1) / size.x;
-                float jitterY = (jitter.y*2 - 1) / size.y;
-
-                Shader.SetGlobalVector(_TAA_Jitter, new Vector2(jitterX, jitterY));
-
-                P.m02 += jitterX*asset.TAA_jitter;
-                P.m12 += jitterY*asset.TAA_jitter;
+                Shader.EnableKeyword("TAA");
+            }
+            else
+            {
+                Shader.DisableKeyword("TAA");
             }
 
             P = GL.GetGPUProjectionMatrix(P, true);

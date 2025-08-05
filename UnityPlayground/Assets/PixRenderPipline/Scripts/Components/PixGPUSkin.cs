@@ -172,6 +172,8 @@ namespace PixRenderPipline
             {
                 var mesh = ren.sharedMesh;
                 meshInRenderer[ren] = mesh;
+                
+                if (ren.enabled) ren.enabled = false;
             }
 
             if (enabled && !passAdded && meshInRenderer.Count > 0)
