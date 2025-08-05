@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 namespace PixRenderPipline
-{   
+{
     /// <summary>
     /// 在VS阶段做Skin的变换，
     /// 如果遇到相同的Mesh和Material，那SkinnedMesh也可以用Instance一次画多个了
@@ -42,8 +42,10 @@ namespace PixRenderPipline
 
             if (passAdded)
             {
+                PixRenderEvent.RemoveEvent(PixRenderEventName.BeforeShadowMap, UpLoadParams);
                 PixRenderEvent.RemoveEvent(PixRenderEventName.AfterEarlyZ, ExecuteGPUskinPass);
                 PixRenderEvent.RemoveEvent(PixRenderEventName.AfterGBuffer, ExecuteGPUskinPass);
+                PixRenderEvent.RemoveEvent(PixRenderEventName.AfterTransparent, ExecuteGPUskinPass);
                 passAdded = false;
             }
 
@@ -87,6 +89,8 @@ namespace PixRenderPipline
                 passID = 1;
             else if (renderer.cmb.name == "PixShadowMap")
                 passID = 2;
+            else if (renderer.cmb.name == "PixTransparentPass")
+                passID = 3;
 
             foreach (var rm in meshInRenderer)
             {
@@ -99,25 +103,6 @@ namespace PixRenderPipline
             }
         }
 
-        void RefreshRenderers()
-        {
-            meshInRenderer.Clear();
-
-            var renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
-            foreach (var ren in renderers)
-            {
-                var mesh = ren.sharedMesh;
-                meshInRenderer[ren] = mesh;
-            }
-
-            if (enabled && !passAdded && meshInRenderer.Count > 0)
-            {
-                PixRenderEvent.AddEvent(PixRenderEventName.AfterEarlyZ, ExecuteGPUskinPass);
-                PixRenderEvent.AddEvent(PixRenderEventName.AfterGBuffer, ExecuteGPUskinPass);
-                passAdded = true;
-            }
-        }
-
         static int _CurrentPoses = Shader.PropertyToID("_CurrentPoses");
         static int _PreviousPoses = Shader.PropertyToID("_PreviousPoses");
         static int _PreviousLocalToWorld = Shader.PropertyToID("_PreviousLocalToWorld");
@@ -125,8 +110,10 @@ namespace PixRenderPipline
         static Dictionary<SkinnedMeshRenderer, Matrix4x4[]> previousPoses = new();
         static Dictionary<SkinnedMeshRenderer, Matrix4x4> previousLocalToWorld = new();
 
-        void Update()
+        void UpLoadParams(PixRenderer rendere)
         {
+            if (!rendere.asset.enable_TAA) return;
+
             foreach (var rm in meshInRenderer)
             {
                 var ren = rm.Key;
@@ -151,7 +138,7 @@ namespace PixRenderPipline
                 Matrix4x4 localToWorld = ren.transform.localToWorldMatrix;
                 if (!previousLocalToWorld.ContainsKey(ren))
                     previousLocalToWorld[ren] = localToWorld;
-                    
+
                 if (!previousPoses.ContainsKey(ren))
                     previousPoses[ren] = currentPoses;
 
@@ -163,16 +150,38 @@ namespace PixRenderPipline
                 previousPoses[ren] = currentPoses;
             }
         }
-        
+
         void LateUpdate()
         {
             if (gpuSkinMan != this) return;
+
             if (!listIsDirty) return;
 
             listIsDirty = false;
 
             for (int i = 0; i < gpuSkins.Count; i++)
                 gpuSkins[i].RefreshRenderers();
+        }
+        
+        void RefreshRenderers()
+        {
+            meshInRenderer.Clear();
+
+            var renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+            foreach (var ren in renderers)
+            {
+                var mesh = ren.sharedMesh;
+                meshInRenderer[ren] = mesh;
+            }
+
+            if (enabled && !passAdded && meshInRenderer.Count > 0)
+            {
+                PixRenderEvent.AddEvent(PixRenderEventName.BeforeShadowMap, UpLoadParams);
+                PixRenderEvent.AddEvent(PixRenderEventName.AfterEarlyZ, ExecuteGPUskinPass);
+                PixRenderEvent.AddEvent(PixRenderEventName.AfterGBuffer, ExecuteGPUskinPass);
+                PixRenderEvent.AddEvent(PixRenderEventName.AfterTransparent, ExecuteGPUskinPass);
+                passAdded = true;
+            }
         }
     }
 }

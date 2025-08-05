@@ -303,7 +303,9 @@ Shader "Pix/Standard"
                 transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
                 #endif
 
-                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
+
+                output.positionCS = TransformWorldToHClip(positionWS);
                 
                 #if _ALPHATEST_ON
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
@@ -460,16 +462,12 @@ Shader "Pix/Standard"
                 transformSkinnedDir(input.boneWeights, input.boneIndices, input.normalOS);
                 #endif
 
+                float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
+
                 VaryingsDepth output;
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
-                output.positionCS =  TransformObjectToHClip(input.positionOS.xyz);
+                output.positionCS =  TransformWorldToHClip(positionWS);
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
-
-                #ifdef GPU_SKIN
-                // 搞不懂怎么到这儿depth的精度就有误差了
-                // 要是前面ZTest Equal时也有误差那真是想死的心都有了
-                output.positionCS.z -= 0.00001;
-                #endif
 
                 return output;
             }

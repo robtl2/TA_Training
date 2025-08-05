@@ -10,6 +10,7 @@ namespace PixRenderPipline
     /// </summary>
     public enum PixRenderEventName
     {
+        BeforeShadowMap,
         BeforeAll,
         
         BeforeEarlyZ,

@@ -171,6 +171,8 @@ namespace PixRenderPipline
             // 最多只画4个shadowMap, 画多一次肉痛一次
             if (shadowMapIndex > 3) return;
 
+            PixRenderEvent.TriggerEvent(PixRenderEventName.BeforeShadowMap, renderer);
+
             PixRenderEvent.AddEvent(PixRenderEventName.BeforeDeferred, SetGlobalShadowMap);
             PixRenderEvent.AddEvent(PixRenderEventName.AfterTransparent, CleanUp);
 
