@@ -33,6 +33,8 @@ namespace PixRenderPipline
             };
         }
 
+        static Color gray = new Color(0.5f, 0.5f, 0, 0);
+
         public override void Execute()
         {
             base.Execute();
@@ -45,11 +47,13 @@ namespace PixRenderPipline
             {
                 renderer.cmb.GetTemporaryRT(GbufferID_3, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.Default, renderer.colorSpace);
                 renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, EarlyZPass.depthID);
+                renderer.cmb.ClearRenderTarget(false, true, gray);
             }
             else
+            {
                 renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);
-
-            renderer.cmb.ClearRenderTarget(false, true, black);
+                renderer.cmb.ClearRenderTarget(false, true, black);
+            }
 
             TriggerEvent(PixRenderEventName.BeforeGBuffer);
 
@@ -63,7 +67,7 @@ namespace PixRenderPipline
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
 
-            
+
         }
     }
         
