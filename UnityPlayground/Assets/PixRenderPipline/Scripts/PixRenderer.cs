@@ -73,17 +73,19 @@ namespace PixRenderPipline
         /// </summary>
         public bool cullingSuccess { get; private set; }
 
+        public int frameCount{get; private set; }
         public PixRenderer()
         {
             cmb = new();
             cmb.name = "PixRenderer";
         }
 
-        public void Setup(ScriptableRenderContext context, Camera camera, PixRenderPiplineAsset asset)
+        public void Setup(ScriptableRenderContext context, Camera camera, PixRenderPiplineAsset asset, int frameCount)
         {
             this.context = context;
             this.camera = camera;
             this.asset = asset;
+            this.frameCount = frameCount;
 
             frustum = GeometryUtility.CalculateFrustumPlanes(camera);
         }
@@ -146,27 +148,66 @@ namespace PixRenderPipline
         /// unity URP中的内置命名也是这个
         /// </summary>
         readonly int MATRIX_I_VP = Shader.PropertyToID("unity_MatrixInvVP");
+
+        /// <summary>
+        /// 因为是自己做TAA，所以VP得自己来抖
+        /// 这个名字当然是有讲究的，就是unity内置VP矩阵的名字
+        /// </summary>
+        readonly int MATRIX_VP = Shader.PropertyToID("unity_MatrixVP");
         
         readonly int _MatrixVP_Prev = Shader.PropertyToID("_MatrixVP_Prev");
         
         // 相机上一帧的VP
-        static Dictionary<Camera, Matrix4x4> VP_pre = new();
+        static Dictionary<Camera, Matrix4x4> VP_pre_map = new();
+        static Matrix4x4 VP = Matrix4x4.identity;
+        
+        static readonly Vector2[] haltonSequence = new Vector2[]
+        {
+            new Vector2(0.5f, 0.333333f), new Vector2(0.25f, 0.666667f), new Vector2(0.75f, 0.111111f),
+            new Vector2(0.125f, 0.444444f), new Vector2(0.625f, 0.777778f), new Vector2(0.375f, 0.222222f),
+            new Vector2(0.875f, 0.555556f), new Vector2(0.0625f, 0.888889f), new Vector2(0.5625f, 0.037037f),
+            new Vector2(0.3125f, 0.37037f), new Vector2(0.8125f, 0.703704f), new Vector2(0.1875f, 0.148148f),
+            new Vector2(0.6875f, 0.481481f), new Vector2(0.4375f, 0.814815f), new Vector2(0.9375f, 0.259259f),
+            new Vector2(0.03125f, 0.592593f)
+        };
+
         protected virtual void SetupGlobalUniform()
         {
             // 把VP的逆矩阵传给Shader
             // 不要以为URP有就代表SRP有，这里得自己传
             Matrix4x4 V = camera.worldToCameraMatrix;
             Matrix4x4 P = camera.projectionMatrix;
+            
+            // 只需要抖P矩阵
+            if (asset.enable_TAA)
+            {
+                int sequenceIndex = frameCount % haltonSequence.Length;
+                Vector2 jitter = haltonSequence[sequenceIndex];
+
+                float texelWidth = 1.0f / size.x;
+                float texelHeight = 1.0f / size.y;
+                jitter.x = (jitter.x * 2.0f - 1.0f) * texelWidth;
+                jitter.y = (jitter.y * 2.0f - 1.0f) * texelHeight;
+
+                Matrix4x4 jitterMatrix = Matrix4x4.identity;
+                jitterMatrix.m03 = jitter.x;
+                jitterMatrix.m13 = jitter.y;
+                P = jitterMatrix * P;
+            }
+
             P = GL.GetGPUProjectionMatrix(P, true);
-            Matrix4x4 VP = P * V;
+            VP = P * V;
+
+            Shader.SetGlobalMatrix(MATRIX_VP, VP);
+
             Matrix4x4 iVP = VP.inverse;
             Shader.SetGlobalMatrix(MATRIX_I_VP, iVP);
 
-            if (!VP_pre.ContainsKey(camera))
-                VP_pre[camera] = VP;
+            if (!VP_pre_map.ContainsKey(camera))
+                VP_pre_map[camera] = VP;
 
-            Shader.SetGlobalMatrix(_MatrixVP_Prev, VP_pre[camera]);
-            VP_pre[camera] = VP;
+            Shader.SetGlobalMatrix(_MatrixVP_Prev, VP_pre_map[camera]);
+            VP_pre_map[camera] = VP;
 
             // 以后缺什么补什么
         }

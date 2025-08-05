@@ -30,7 +30,6 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.AfterTransparent);
 
-            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
