@@ -20,6 +20,8 @@
 #define SHADING_MODEL_HAIR   2
 // ----------------------------------------------
 
+// float4x4 unity_MatrixVP;
+
 struct PixLight{
     float4x4 VP;
 

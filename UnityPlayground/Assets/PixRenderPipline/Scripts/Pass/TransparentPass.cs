@@ -1,17 +1,24 @@
 using UnityEngine.Rendering;
 using UnityEngine;
+using UnityEditor.VersionControl;
 
 namespace PixRenderPipline
 {
     public class TransparentPass : PixPassBase
     {
-        public TransparentPass(PixRenderer renderer) : base("PixTransparentPass", renderer) { }
+        public TransparentPass(PixRenderer renderer) : base("PixTransparentPass", renderer)
+        {
+            materialTAA = new Material(Shader.Find("Hidden/Pix/TAA"));
+        }
 
         readonly ShaderTagId[] tagID = new ShaderTagId[] {
             new("PixTransparent"),
         };
+
+        Material materialTAA;
         
         public static readonly int ColorBuff = Shader.PropertyToID("_PixColorTex");
+        public static readonly int ColorBuff_Front = Shader.PropertyToID("_PixColorTex_Front");
         
         public override void Execute()
         {
@@ -30,6 +37,18 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.AfterTransparent);
 
+            if (renderer.asset.enable_TAA)
+            {
+                PixDeferredRenderer dr = renderer as PixDeferredRenderer;
+
+                materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
+                renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
+                renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera], EarlyZPass.depthID);
+                renderer.cmb.SetGlobalTexture(ColorBuff, ColorBuff);
+                renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 1);
+
+                renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_3);
+            }
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

@@ -11,12 +11,11 @@ namespace PixRenderPipline
         static int _AO_Factor = Shader.PropertyToID("_AO_Factor");
         static int _SSAO_Props = Shader.PropertyToID("_SSAO_Props");
         public Material material;
-        Material blitMaterial;
+        
 
         public DeferredPass(PixRenderer renderer) : base("PixDeferredPass", renderer)
         {
             material = new Material(Shader.Find("Hidden/Pix/Deferred"));
-            blitMaterial = new Material(Shader.Find("Hidden/Pix/Blit"));
         }
 
         public override void Execute()
@@ -38,7 +37,7 @@ namespace PixRenderPipline
             int2 size = renderer.size / 2;
             renderer.cmb.GetTemporaryRT(DepthDownSample, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.RFloat);
             renderer.cmb.SetRenderTarget(DepthDownSample);
-            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMaterial, 0, 0);
+            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 0);
 
             if (renderer.camera.orthographic)
                 material.EnableKeyword("ORTHOGRAPHIC");

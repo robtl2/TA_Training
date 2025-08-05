@@ -23,10 +23,9 @@ namespace PixRenderPipline
             TriggerEvent(PixRenderEventName.BeforePostProcess);
 
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, postMaterial, 0, 0);
+
             renderer.cmb.ReleaseTemporaryRT(TransparentPass.ColorBuff);
-            
             renderer.cmb.ReleaseTemporaryRT(DeferredPass.DepthDownSample);
-            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
             TriggerEvent(PixRenderEventName.AfterPostProcess);
 

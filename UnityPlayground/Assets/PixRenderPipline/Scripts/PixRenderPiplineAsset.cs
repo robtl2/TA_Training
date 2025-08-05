@@ -60,6 +60,8 @@ namespace PixRenderPipline
         [Header("TAA")]
         public bool enable_TAA = false;
 
+        [Range(0, 1)]
+        public float TAA_jitter = 1.0f;
 
         #endregion
 

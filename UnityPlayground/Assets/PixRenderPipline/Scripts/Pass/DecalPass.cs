@@ -126,9 +126,6 @@ namespace PixRenderPipline
             renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_1);
             renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_2);
 
-            if (renderer.asset.enable_TAA)
-                renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_3);
-
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
         }

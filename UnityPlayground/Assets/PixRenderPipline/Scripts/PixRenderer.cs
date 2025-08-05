@@ -73,19 +73,19 @@ namespace PixRenderPipline
         /// </summary>
         public bool cullingSuccess { get; private set; }
 
-        public int frameCount{get; private set; }
+        public int frameIndex{get; private set; }
         public PixRenderer()
         {
             cmb = new();
             cmb.name = "PixRenderer";
         }
 
-        public void Setup(ScriptableRenderContext context, Camera camera, PixRenderPiplineAsset asset, int frameCount)
+        public void Setup(ScriptableRenderContext context, Camera camera, PixRenderPiplineAsset asset, int frameIndex)
         {
             this.context = context;
             this.camera = camera;
             this.asset = asset;
-            this.frameCount = frameCount;
+            this.frameIndex = frameIndex;
 
             frustum = GeometryUtility.CalculateFrustumPlanes(camera);
         }
@@ -141,6 +141,11 @@ namespace PixRenderPipline
             context.SetupCameraProperties(camera);
             SetupGlobalUniform();
         }
+
+        public virtual void CleanUp()
+        { 
+            
+        }
         
         #region GlobalUniforms
         /// <summary>
@@ -161,38 +166,35 @@ namespace PixRenderPipline
         static Dictionary<Camera, Matrix4x4> VP_pre_map = new();
         static Matrix4x4 VP = Matrix4x4.identity;
         
-        static readonly Vector2[] haltonSequence = new Vector2[]
+        static Vector2[] haltonSamples = new Vector2[]
         {
-            new Vector2(0.5f, 0.333333f), new Vector2(0.25f, 0.666667f), new Vector2(0.75f, 0.111111f),
-            new Vector2(0.125f, 0.444444f), new Vector2(0.625f, 0.777778f), new Vector2(0.375f, 0.222222f),
-            new Vector2(0.875f, 0.555556f), new Vector2(0.0625f, 0.888889f), new Vector2(0.5625f, 0.037037f),
-            new Vector2(0.3125f, 0.37037f), new Vector2(0.8125f, 0.703704f), new Vector2(0.1875f, 0.148148f),
-            new Vector2(0.6875f, 0.481481f), new Vector2(0.4375f, 0.814815f), new Vector2(0.9375f, 0.259259f),
-            new Vector2(0.03125f, 0.592593f)
+            new Vector2(0.5f, 0.5f),
+            new Vector2(0.25f, 0.75f),
+            new Vector2(0.75f, 0.25f),
+            new Vector2(0.125f, 0.625f),
+            new Vector2(0.625f, 0.125f),
+            new Vector2(0.375f, 0.875f),
+            new Vector2(0.875f, 0.375f),
+            new Vector2(0.0625f, 0.5625f)
         };
-
         protected virtual void SetupGlobalUniform()
         {
             // 把VP的逆矩阵传给Shader
             // 不要以为URP有就代表SRP有，这里得自己传
             Matrix4x4 V = camera.worldToCameraMatrix;
             Matrix4x4 P = camera.projectionMatrix;
-            
+
             // 只需要抖P矩阵
             if (asset.enable_TAA)
             {
-                int sequenceIndex = frameCount % haltonSequence.Length;
-                Vector2 jitter = haltonSequence[sequenceIndex];
+                int jitterIndex = (frameIndex + 1) % haltonSamples.Length;
+                Vector2 jitter = haltonSamples[jitterIndex];
 
-                float texelWidth = 1.0f / size.x;
-                float texelHeight = 1.0f / size.y;
-                jitter.x = (jitter.x * 2.0f - 1.0f) * texelWidth;
-                jitter.y = (jitter.y * 2.0f - 1.0f) * texelHeight;
+                float jitterX = (jitter.x*2 - 1) / size.x;
+                float jitterY = (jitter.y*2 - 1) / size.y;
 
-                Matrix4x4 jitterMatrix = Matrix4x4.identity;
-                jitterMatrix.m03 = jitter.x;
-                jitterMatrix.m13 = jitter.y;
-                P = jitterMatrix * P;
+                P.m02 += jitterX*asset.TAA_jitter;
+                P.m12 += jitterY*asset.TAA_jitter;
             }
 
             P = GL.GetGPUProjectionMatrix(P, true);

@@ -12,7 +12,7 @@ namespace PixRenderPipline
         public PixRenderPiplineAsset asset { get; private set; }
         public PixRenderer renderer { get; private set; }
 
-        int frameCount = 0;
+        int frameIndex = 0;
         public PixRenderPipline(PixRenderPiplineAsset asset)
         {
             this.asset = asset;
@@ -26,13 +26,13 @@ namespace PixRenderPipline
         /// <param name="cameras">点菜的客人</param>
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
-            frameCount++;
+            frameIndex++;
             // 按照深度排序相机
             System.Array.Sort(cameras, (c1, c2) => c1.depth.CompareTo(c2.depth));
 
             foreach (var camera in cameras)
             {
-                renderer.Setup(context, camera, asset, frameCount);
+                renderer.Setup(context, camera, asset, frameIndex);
                 renderer.Render();
             }
         }
@@ -41,6 +41,7 @@ namespace PixRenderPipline
         {
             base.Dispose(disposing);
 
+            renderer.CleanUp();
         }
     }
 }

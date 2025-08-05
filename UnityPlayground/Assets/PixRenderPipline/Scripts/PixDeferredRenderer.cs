@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using System.Collections.Generic;
+using UnityEngine.Diagnostics;
 
 /// <summary>
 /// 呐，几乎干的所有事情就是写下来我给的菜品方案而已
@@ -20,6 +22,11 @@ namespace PixRenderPipline
         public PostProcessPass postProcessPass { get; private set; }
         public FinalPass finalPass { get; private set; }
 
+        /// <summary>
+        /// 上一帧后处理之前的渲染结果
+        /// </summary>
+        public Dictionary<Camera, RenderTexture> frontRT = new();
+
         public PixDeferredRenderer()
         {
             earlyZPass = new(this);
@@ -38,6 +45,20 @@ namespace PixRenderPipline
         {
             base.Render();
 
+            if (asset.enable_TAA)
+            {
+                if (!frontRT.ContainsKey(camera) || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
+                {
+                    if (frontRT.ContainsKey(camera))
+                        frontRT[camera].Release();
+
+                    frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Linear);
+                    frontRT[camera].name = "_ColorTex_Front";
+                    frontRT[camera].Create();
+                }
+            }
+            
+
             ExecutePass(earlyZPass);
             ExecutePass(occlusionCullingPass);
             ExecutePass(gBufferPass);
@@ -49,11 +70,11 @@ namespace PixRenderPipline
             ExecutePass(postProcessPass);
             ExecutePass(finalPass);
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             // 绘制编辑器视图中的Gizmos
             if (isSceneView)
                 context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
-            #endif
+#endif
 
             //菜单以及工艺都写完了，交还给厨房管事儿的
             context.Submit();
@@ -62,6 +83,16 @@ namespace PixRenderPipline
         void ExecutePass(PixPassBase pass)
         {
             pass.Execute();
+        }
+
+        public override void CleanUp()
+        {
+            base.CleanUp();
+
+            foreach (var rt in frontRT)
+                rt.Value.Release();
+
+            frontRT.Clear();
         }
     }
 }

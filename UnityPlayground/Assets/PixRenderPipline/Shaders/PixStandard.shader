@@ -163,7 +163,7 @@ Shader "Pix/Standard"
             #endif
 
                 Varying output;
-                output.positionCS = TransformWorldToHClip(positionWS);
+                output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
                 output.normalVS = normalVS;
                 output.tangentVS = tangentVS;
                 output.bitangentVS = bitangentVS;
@@ -305,7 +305,7 @@ Shader "Pix/Standard"
 
                 float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
 
-                output.positionCS = TransformWorldToHClip(positionWS);
+                output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
                 
                 #if _ALPHATEST_ON
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
@@ -466,7 +466,7 @@ Shader "Pix/Standard"
 
                 VaryingsDepth output;
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
-                output.positionCS =  TransformWorldToHClip(positionWS);
+                output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 
                 return output;
