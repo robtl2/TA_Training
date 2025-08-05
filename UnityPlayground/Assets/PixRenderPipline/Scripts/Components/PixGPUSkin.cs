@@ -33,8 +33,12 @@ namespace PixRenderPipline
             gpuSkins.Remove(this);
             listIsDirty = true;
 
-            foreach (var rm in meshInRenderer)
-                rm.Key.enabled = true;
+            if (gpuSkinMan == this)
+            {
+                gpuSkinMan = null;
+                if (gpuSkins.Count > 0)
+                    gpuSkinMan = gpuSkins[0];
+            }
 
             if (passAdded)
             {
@@ -43,23 +47,41 @@ namespace PixRenderPipline
                 passAdded = false;
             }
 
-            if (gpuSkinMan == this)
-            {
-                gpuSkinMan = null;
-                if (gpuSkins.Count > 0)
-                    gpuSkinMan = gpuSkins[0];
-            }
-
             foreach (var m in meshInRenderer)
             {
                 var ren = m.Key;
                 var mat = ren.sharedMaterial;
+                ren.enabled = true;
                 mat.DisableKeyword("GPU_SKIN");
             }
         }
 
+        static bool preTAA_enabled = false;
         public void ExecuteGPUskinPass(PixRenderer renderer)
         {
+            if (renderer.asset.enable_TAA != preTAA_enabled)
+            {
+                preTAA_enabled = renderer.asset.enable_TAA;
+
+                if (!preTAA_enabled)
+                {
+                    foreach (var rm in meshInRenderer)
+                    {
+                        var ren = rm.Key;
+                        var mat = ren.sharedMaterial;
+                        ren.enabled = true;
+                        mat.DisableKeyword("GPU_SKIN");
+                    }
+
+                    return;
+                }
+                else
+                {
+                    foreach (var rm in meshInRenderer)
+                        rm.Key.enabled = false;
+                }
+            }
+
             int passID = 0;
             if (renderer.cmb.name == "PixEarlyZPass")
                 passID = 1;
@@ -87,9 +109,6 @@ namespace PixRenderPipline
                 var mesh = ren.sharedMesh;
                 meshInRenderer[ren] = mesh;
             }
-
-            foreach (var rm in meshInRenderer)
-                rm.Key.enabled = false;
 
             if (enabled && !passAdded && meshInRenderer.Count > 0)
             {

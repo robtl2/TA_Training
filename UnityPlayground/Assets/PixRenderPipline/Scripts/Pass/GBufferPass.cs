@@ -11,9 +11,7 @@ namespace PixRenderPipline
 
         public static readonly int GbufferID_0 = Shader.PropertyToID("_PixGBuffer_0");
         public static readonly int GbufferID_1 = Shader.PropertyToID("_PixGBuffer_1");
-
         public static readonly int GbufferID_2 = Shader.PropertyToID("_PixGBuffer_2");
-
         public static readonly int GbufferID_3 = Shader.PropertyToID("_PixGBuffer_3");
 
         readonly RenderTargetIdentifier[] gbuffers;
@@ -47,7 +45,6 @@ namespace PixRenderPipline
             {
                 renderer.cmb.GetTemporaryRT(GbufferID_3, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.Default, renderer.colorSpace);
                 renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, EarlyZPass.depthID);
-                renderer.cmb.ClearRenderTarget(false, true, black);
             }
             else
                 renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);

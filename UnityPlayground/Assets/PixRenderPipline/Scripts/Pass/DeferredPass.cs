@@ -36,7 +36,7 @@ namespace PixRenderPipline
 
             // Depth经常拿来被采样，这里blit出来一个下采样的DepthTexture
             int2 size = renderer.size / 2;
-            renderer.cmb.GetTemporaryRT(DepthDownSample, size.x, size.y, 0, FilterMode.Bilinear, RenderTextureFormat.R16);
+            renderer.cmb.GetTemporaryRT(DepthDownSample, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.R16);
             renderer.cmb.SetRenderTarget(DepthDownSample);
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMaterial, 0, 0);
 

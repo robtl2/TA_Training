@@ -55,7 +55,7 @@ namespace PixRenderPipline
                 renderer.cmb.Blit(DeferredPass.ColorBuff, BuiltinRenderTextureType.CameraTarget, filterMaterial);
 
             renderer.cmb.ReleaseTemporaryRT(DeferredPass.ColorBuff);
-            
+            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
