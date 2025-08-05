@@ -469,6 +469,10 @@ Shader "Pix/Standard"
                 output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 
+                #ifdef GPU_SKIN
+                output.positionCS.z -= 0.00001;
+                #endif
+
                 return output;
             }
 

@@ -27,8 +27,8 @@ namespace PixRenderPipline
 
         void WhenBeforeTransparent(PixRenderer renderer)
         {
-            if (renderer.asset.enable_TAA) return;
-            
+            // if (renderer.asset.enable_TAA) return;
+
             foreach (var r in renderers)
             {
                 if (renderer.FrustumCull(r.bounds))

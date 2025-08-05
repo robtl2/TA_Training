@@ -63,6 +63,9 @@ namespace PixRenderPipline
         [Range(0, 1)]
         public float TAA_jitter = 1.0f;
 
+        [Range(0, 0.995f)]
+        public float TAA_histroy = 0.95f;
+
         #endregion
 
 

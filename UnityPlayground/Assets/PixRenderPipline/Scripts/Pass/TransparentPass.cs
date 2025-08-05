@@ -19,6 +19,7 @@ namespace PixRenderPipline
         
         public static readonly int ColorBuff = Shader.PropertyToID("_PixColorTex");
         public static readonly int ColorBuff_Front = Shader.PropertyToID("_PixColorTex_Front");
+        static int _HistroyWeight = Shader.PropertyToID("_HistroyWeight");
         
         public override void Execute()
         {
@@ -42,6 +43,7 @@ namespace PixRenderPipline
                 PixDeferredRenderer dr = renderer as PixDeferredRenderer;
 
                 materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
+                materialTAA.SetFloat("_HistroyWeight", renderer.asset.TAA_histroy);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
                 renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera], EarlyZPass.depthID);
                 renderer.cmb.SetGlobalTexture(ColorBuff, ColorBuff);

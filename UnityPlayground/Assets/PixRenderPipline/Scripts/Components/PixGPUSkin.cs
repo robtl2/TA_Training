@@ -45,7 +45,7 @@ namespace PixRenderPipline
                 PixRenderEvent.RemoveEvent(PixRenderEventName.BeforeShadowMap, UpLoadParams);
                 PixRenderEvent.RemoveEvent(PixRenderEventName.AfterEarlyZ, ExecuteGPUskinPass);
                 PixRenderEvent.RemoveEvent(PixRenderEventName.AfterGBuffer, ExecuteGPUskinPass);
-                PixRenderEvent.RemoveEvent(PixRenderEventName.AfterTransparent, ExecuteGPUskinPass);
+                // PixRenderEvent.RemoveEvent(PixRenderEventName.AfterTransparent, ExecuteGPUskinPass);
                 passAdded = false;
             }
 
@@ -179,7 +179,7 @@ namespace PixRenderPipline
                 PixRenderEvent.AddEvent(PixRenderEventName.BeforeShadowMap, UpLoadParams);
                 PixRenderEvent.AddEvent(PixRenderEventName.AfterEarlyZ, ExecuteGPUskinPass);
                 PixRenderEvent.AddEvent(PixRenderEventName.AfterGBuffer, ExecuteGPUskinPass);
-                PixRenderEvent.AddEvent(PixRenderEventName.AfterTransparent, ExecuteGPUskinPass);
+                // PixRenderEvent.AddEvent(PixRenderEventName.AfterTransparent, ExecuteGPUskinPass);
                 passAdded = true;
             }
         }

@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   skyType: 2
-  displayColor: {r: 0.5471698, g: 0.5445888, b: 0.5445888, a: 0.42745098}
+  displayColor: {r: 0.5471698, g: 0.5445888, b: 0.5445888, a: 1}
   color: {r: 0.4627451, g: 0.441073, b: 0.4117647, a: 1}
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   shData:

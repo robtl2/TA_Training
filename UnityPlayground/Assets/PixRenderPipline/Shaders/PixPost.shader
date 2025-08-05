@@ -80,7 +80,7 @@ Shader "Hidden/Pix/Post"
                 float2 uv = input.uv;
                 half4 color = SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv);
 
-                color.rgb = LDR2HDR(color.rgb, color.a*2);
+                color.rgb = LDR2HDR(color.rgb);
 
             #if 1
                 color.rgb = Tonemap(color.rgb);

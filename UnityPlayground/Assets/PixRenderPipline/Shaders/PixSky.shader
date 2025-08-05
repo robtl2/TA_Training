@@ -79,8 +79,7 @@ Shader "Hidden/Pix/Sky"
                 if (_SkyType == 1)
                     sky *= SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, input.viewDir, _BlurLevel).rgb;
 
-                half maxVal = _SkyDisplayColor.a;
-                half3 ldr = HDR2LDR(sky, maxVal);
+                half3 ldr = HDR2LDR(sky);
                 return half4(ldr,_SkyDisplayColor.a*0.5);
             }
             ENDHLSL

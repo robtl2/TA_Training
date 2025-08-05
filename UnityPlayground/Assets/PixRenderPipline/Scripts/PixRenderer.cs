@@ -161,6 +161,7 @@ namespace PixRenderPipline
         readonly int MATRIX_VP = Shader.PropertyToID("unity_MatrixVP");
         
         readonly int _MatrixVP_Prev = Shader.PropertyToID("_MatrixVP_Prev");
+        readonly int _TAA_Jitter = Shader.PropertyToID("_TAA_Jitter");
         
         // 相机上一帧的VP
         static Dictionary<Camera, Matrix4x4> VP_pre_map = new();
@@ -192,6 +193,8 @@ namespace PixRenderPipline
 
                 float jitterX = (jitter.x*2 - 1) / size.x;
                 float jitterY = (jitter.y*2 - 1) / size.y;
+
+                Shader.SetGlobalVector(_TAA_Jitter, new Vector2(jitterX, jitterY));
 
                 P.m02 += jitterX*asset.TAA_jitter;
                 P.m12 += jitterY*asset.TAA_jitter;

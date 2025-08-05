@@ -10,6 +10,8 @@
 #define MAX_PIX_LIGHT_COUNT 64
 #define PIX_LIGHT_COUNT     _PixLightCount
 
+half2       _TAA_Jitter;
+
 int         _PixLightCount;
 half4       _PixLightsShadowMapSize[MAX_PIX_LIGHT_COUNT];
 half4       _PixLightsPosition[MAX_PIX_LIGHT_COUNT];
@@ -80,7 +82,7 @@ half ShadowMap(PixLight light, half2 screenUV, GBufferData gbufferData){
     if(any(uv<0 || uv>1))return 1.0h;
 
     if(light.shadowMapJitter)
-        uv += hash22(screenUV).xy*light.shadowMapSize.y;
+        uv += hash22(screenUV+_TAA_Jitter).xy*light.shadowMapSize.y;
 
     float depthSrc = saturate(ndcPos.z + light.shadowMapBias);
 
@@ -104,7 +106,7 @@ half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivSt
         half2 uv = PosWorldToScreenUV(pos_src);
 
         if(jitterRadius>0)
-            uv += hash22(uv).xy*jitterRadius;
+            uv += hash22(uv+_TAA_Jitter).xy*jitterRadius;
 
         half depth_dest = sampleDepthDownSample(uv);
         half3 pos_dest = ReconstructWorldPos(uv, depth_dest);
