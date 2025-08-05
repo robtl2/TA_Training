@@ -18,10 +18,11 @@ MonoBehaviour:
   GPU_OCC_Culling: 0
   ao_factor: 1
   Enable_SSAO: 1
-  ssao_factor: 0.67
+  ssao_factor: 0.69
   ssao_radius: 20
   ssao_stepCount: 3
   ssao_jitterRadius: 0.02
   ssao_quality: 2
-  debugMode: 0
+  enable_TAA: 1
+  debugMode: 13
   debugSize: 1

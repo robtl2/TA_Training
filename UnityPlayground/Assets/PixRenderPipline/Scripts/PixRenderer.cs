@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 /// <summary>
 /// Renderer负责按设计方案依次调度各个Pass
@@ -111,6 +112,11 @@ namespace PixRenderPipline
                 Shader.DisableKeyword("PIX_STYLE_PBR");
             }
 
+            if (asset.enable_TAA)
+                Shader.EnableKeyword("TAA");
+            else
+                Shader.DisableKeyword("TAA");
+
             size = asset.GetRenderSize(camera.aspect);
             tiledSize = size / 8;
 
@@ -141,7 +147,10 @@ namespace PixRenderPipline
         /// </summary>
         readonly int MATRIX_I_VP = Shader.PropertyToID("unity_MatrixInvVP");
         
-
+        readonly int _MatrixVP_Prev = Shader.PropertyToID("_MatrixVP_Prev");
+        
+        // 相机上一帧的VP
+        static Dictionary<Camera, Matrix4x4> VP_pre = new();
         protected virtual void SetupGlobalUniform()
         {
             // 把VP的逆矩阵传给Shader
@@ -153,6 +162,11 @@ namespace PixRenderPipline
             Matrix4x4 iVP = VP.inverse;
             Shader.SetGlobalMatrix(MATRIX_I_VP, iVP);
 
+            if (!VP_pre.ContainsKey(camera))
+                VP_pre[camera] = VP;
+
+            Shader.SetGlobalMatrix(_MatrixVP_Prev, VP_pre[camera]);
+            VP_pre[camera] = VP;
 
             // 以后缺什么补什么
         }

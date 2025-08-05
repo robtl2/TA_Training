@@ -14,7 +14,10 @@ namespace PixRenderPipline
 
         public static readonly int GbufferID_2 = Shader.PropertyToID("_PixGBuffer_2");
 
+        public static readonly int GbufferID_3 = Shader.PropertyToID("_PixGBuffer_3");
+
         readonly RenderTargetIdentifier[] gbuffers;
+        readonly RenderTargetIdentifier[] gbuffersWithMotionVec;
 
         public GBufferPass(PixRenderer renderer) : base("PixGBufferPass", renderer)
         {
@@ -22,6 +25,13 @@ namespace PixRenderPipline
                 new(GbufferID_0),
                 new(GbufferID_1),
                 new(GbufferID_2),
+            };
+
+            gbuffersWithMotionVec = new RenderTargetIdentifier[] {
+                new(GbufferID_0),
+                new(GbufferID_1),
+                new(GbufferID_2),
+                new(GbufferID_3),
             };
         }
 
@@ -33,7 +43,15 @@ namespace PixRenderPipline
             GetTemporaryColorRT(GbufferID_1);
             GetTemporaryColorRT(GbufferID_2);
 
-            renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);
+            if (renderer.asset.enable_TAA)
+            {
+                renderer.cmb.GetTemporaryRT(GbufferID_3, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.Default, renderer.colorSpace);
+                renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, EarlyZPass.depthID);
+                renderer.cmb.ClearRenderTarget(false, true, black);
+            }
+            else
+                renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);
+
             renderer.cmb.ClearRenderTarget(false, true, black);
 
             TriggerEvent(PixRenderEventName.BeforeGBuffer);

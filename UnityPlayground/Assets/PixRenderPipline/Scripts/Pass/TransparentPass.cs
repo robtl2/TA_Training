@@ -21,9 +21,6 @@ namespace PixRenderPipline
             //先把之前Deferred渲染的结果复制过来
             renderer.cmb.Blit(DeferredPass.ColorBuff, ColorBuff);
             renderer.cmb.SetRenderTarget(ColorBuff, EarlyZPass.depthID);
-            renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
-            renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
-            renderer.cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);
 
             TriggerEvent(PixRenderEventName.BeforeTransparent);
 
@@ -32,6 +29,8 @@ namespace PixRenderPipline
                 renderer.cmb.DrawRendererList(list);
 
             TriggerEvent(PixRenderEventName.AfterTransparent);
+
+            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

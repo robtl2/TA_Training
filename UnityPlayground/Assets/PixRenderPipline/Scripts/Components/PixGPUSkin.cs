@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -16,7 +17,7 @@ namespace PixRenderPipline
         public static PixGPUSkin gpuSkinMan;
         public static bool listIsDirty = true;
 
-        Dictionary<SkinnedMeshRenderer, Mesh> meshes = new();
+        Dictionary<SkinnedMeshRenderer, Mesh> meshInRenderer = new();
         bool passAdded = false;
         void OnEnable()
         {
@@ -32,7 +33,7 @@ namespace PixRenderPipline
             gpuSkins.Remove(this);
             listIsDirty = true;
 
-            foreach (var rm in meshes)
+            foreach (var rm in meshInRenderer)
                 rm.Key.enabled = true;
 
             if (passAdded)
@@ -49,7 +50,7 @@ namespace PixRenderPipline
                     gpuSkinMan = gpuSkins[0];
             }
 
-            foreach (var m in meshes)
+            foreach (var m in meshInRenderer)
             {
                 var ren = m.Key;
                 var mat = ren.sharedMaterial;
@@ -65,7 +66,7 @@ namespace PixRenderPipline
             else if (renderer.cmb.name == "PixShadowMap")
                 passID = 2;
 
-            foreach (var rm in meshes)
+            foreach (var rm in meshInRenderer)
             {
                 var ren = rm.Key;
                 var mat = ren.sharedMaterial;
@@ -78,19 +79,19 @@ namespace PixRenderPipline
 
         void RefreshRenderers()
         {
-            meshes.Clear();
+            meshInRenderer.Clear();
 
             var renderers = GetComponentsInChildren<SkinnedMeshRenderer>();
             foreach (var ren in renderers)
             {
                 var mesh = ren.sharedMesh;
-                meshes[ren] = mesh;
+                meshInRenderer[ren] = mesh;
             }
 
-            foreach (var rm in meshes)
+            foreach (var rm in meshInRenderer)
                 rm.Key.enabled = false;
 
-            if (enabled && !passAdded && meshes.Count > 0)
+            if (enabled && !passAdded && meshInRenderer.Count > 0)
             {
                 PixRenderEvent.AddEvent(PixRenderEventName.AfterEarlyZ, ExecuteGPUskinPass);
                 PixRenderEvent.AddEvent(PixRenderEventName.AfterGBuffer, ExecuteGPUskinPass);
@@ -100,36 +101,50 @@ namespace PixRenderPipline
 
         static int _CurrentPoses = Shader.PropertyToID("_CurrentPoses");
         static int _PreviousPoses = Shader.PropertyToID("_PreviousPoses");
+        static int _PreviousLocalToWorld = Shader.PropertyToID("_PreviousLocalToWorld");
 
-        Matrix4x4[] previousPoses = new Matrix4x4[0];
+        static Dictionary<SkinnedMeshRenderer, Matrix4x4[]> previousPoses = new();
+        static Dictionary<SkinnedMeshRenderer, Matrix4x4> previousLocalToWorld = new();
+
         void Update()
         {
-            foreach (var m in meshes)
+            foreach (var rm in meshInRenderer)
             {
-                var ren = m.Key;
-                var mesh = m.Value;
-                Matrix4x4[] bindposes = mesh.bindposes;
+                var ren = rm.Key;
+                var mat = ren.sharedMaterial;
+                var mesh = rm.Value;
 
+                mat.EnableKeyword("GPU_SKIN");
+
+                Matrix4x4[] bindposes = mesh.bindposes;
                 Transform[] bones = ren.bones;
+                Matrix4x4 m_root = transform.worldToLocalMatrix;
+
                 Matrix4x4[] currentPoses = new Matrix4x4[bones.Length];
                 for (int i = 0; i < bones.Length; i++)
                 {
                     Transform pose = bones[i];
                     Matrix4x4 m_world = pose.localToWorldMatrix;
+                    m_world = m_root * m_world;
                     currentPoses[i] = m_world * bindposes[i];
                 }
 
-                var mat = ren.sharedMaterial;
-                mat.EnableKeyword("GPU_SKIN");
+                Matrix4x4 localToWorld = ren.transform.localToWorldMatrix;
+                if (!previousLocalToWorld.ContainsKey(ren))
+                    previousLocalToWorld[ren] = localToWorld;
+                    
+                if (!previousPoses.ContainsKey(ren))
+                    previousPoses[ren] = currentPoses;
+
+                mat.SetMatrix(_PreviousLocalToWorld, previousLocalToWorld[ren]);
                 mat.SetMatrixArray(_CurrentPoses, currentPoses);
+                mat.SetMatrixArray(_PreviousPoses, previousPoses[ren]);
 
-                if (previousPoses.Length > 0)
-                    mat.SetMatrixArray(_PreviousPoses, previousPoses);
-
-                previousPoses = currentPoses;
+                previousLocalToWorld[ren] = localToWorld;
+                previousPoses[ren] = currentPoses;
             }
         }
-
+        
         void LateUpdate()
         {
             if (gpuSkinMan != this) return;

@@ -29,6 +29,7 @@ Shader "Hidden/Pix/Debugger"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile PIX_STYLE_PBR PIX_STYLE_NPR
+            #pragma multi_compile _ MOTION_VECTOR_ON
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/light.hlsl"
             #include "lib/shading.hlsl"
@@ -75,11 +76,11 @@ Shader "Hidden/Pix/Debugger"
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
 
-                half3 debugColor[12] = {
+                half3 debugColor[13] = {
                     gbufferData.albedo,
                     gbufferData.diffuse,
                     gbufferData.f0,
-                    half3(gbufferData.ao.xxx),
+                    gbufferData.ao.xxx,
                     gbufferData.bentNormal,
                     gbufferData.positionWS,
                     gbufferData.normalWS,
@@ -87,7 +88,12 @@ Shader "Hidden/Pix/Debugger"
                     gbufferData.tangentWS,
                     gbufferData.viewDir,
                     gbufferData.NoV.xxx,
-                    gbufferData.depth.xxx
+                    gbufferData.depth.xxx,
+                #ifdef MOTION_VECTOR_ON
+                    half3(gbufferData.motionVector.xy,0),
+                #else
+                    half3(0,0,1),
+                #endif
                 };
 
                 half a = all(gbufferData.albedo > 0);

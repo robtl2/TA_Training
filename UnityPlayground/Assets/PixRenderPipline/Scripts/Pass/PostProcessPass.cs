@@ -7,7 +7,6 @@ namespace PixRenderPipline
     {
         Material postMaterial;
 
-        int _OutLineDepthNormalThreshold = Shader.PropertyToID("_OutLineDepthNormalThreshold");
         public PostProcessPass(PixRenderer renderer) : base("PixPostProcessPass", renderer)
         {
             postMaterial = new Material(Shader.Find("Hidden/Pix/Post"));
@@ -18,10 +17,8 @@ namespace PixRenderPipline
             base.Execute();
 
             renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
-            renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
-            renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
-            renderer.cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, TransparentPass.ColorBuff);
+            renderer.cmb.SetGlobalTexture(DeferredPass.DepthDownSample, DeferredPass.DepthDownSample);
 
             TriggerEvent(PixRenderEventName.BeforePostProcess);
 

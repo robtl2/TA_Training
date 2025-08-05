@@ -223,9 +223,8 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.depth = depth;
 
 #ifdef MOTION_VECTOR_ON
-    half x = UnpackFloatFromR8G8(gbuffer_3.xy);
-    half y = UnpackFloatFromR8G8(gbuffer_3.zw);
-    gbufferData.motionVector = half2(x,y);
+    gbufferData.motionVector = gbuffer_3.xy*2-1;
+    // gbufferData.motionVector = half3(0,1,0);
 #endif
 
     return gbufferData;

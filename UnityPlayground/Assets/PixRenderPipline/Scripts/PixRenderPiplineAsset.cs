@@ -56,17 +56,15 @@ namespace PixRenderPipline
 
         #endregion
 
-    //     #region OutLine
-    //     [Header("OutLine")]
-        
-    //     [Range(0, 1)]
-    //     public float outLineDepthThreshold = 0.2f;
-    //     [Range(0, 2)]
-    //     public float outLineNormalThreshold = 0.2f;
-    // #endregion
+        #region TAA
+        [Header("TAA")]
+        public bool enable_TAA = false;
 
 
-    #region GBuffer Debug
+        #endregion
+
+
+        #region GBuffer Debug
         public enum DebugMode
         {
             None,
@@ -83,6 +81,7 @@ namespace PixRenderPipline
             ViewDir,
             NdotV,
             Depth,
+            MotionVector,
         }
 
         [Header("GBuffer Debug")]

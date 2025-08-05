@@ -47,10 +47,20 @@ Shader "Pix/Standard"
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
             #pragma multi_compile _ GPU_SKIN
+            #pragma multi_compile _ TAA
+            #pragma multi_compile _ MOTION_BLUR
             #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
             #pragma shader_feature EXPORT_TANGENT 
             #pragma shader_feature ENABLE_BENTNORMAL
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            #if defined TAA || defined MOTION_BLUR
+            #define MOTION_VECTOR_ON
+            #endif
+
+            #if defined MOTION_BLUR || defined MOTION_BLUR || defined TAA
+            #define GPU_SKIN
+            #endif
 
             #ifdef GPU_SKIN
             #include "lib/gpuskin.hlsl"
@@ -86,6 +96,11 @@ Shader "Pix/Standard"
             #ifdef ENABLE_BENTNORMAL
                 float4 bentNormal   : COLOR;
             #endif
+
+            #ifdef MOTION_VECTOR_ON
+                float4 prevPosCS    : TEXCOORD3;
+                float4 screenUV     : TEXCOORD4;
+            #endif
             };
 
             float4 _Color;
@@ -95,8 +110,14 @@ Shader "Pix/Standard"
             half _RoughnessOffset;
             half _MetallicOffset;
 
-            #if _ALPHATEST_ON
+            #ifdef _ALPHATEST_ON
             half _Cutoff;
+            #endif
+
+            #ifdef MOTION_VECTOR_ON
+            float4x4 _PreviousLocalToWorld;
+            float4x4 _MatrixVP_Prev;
+            float4x4 _CurrentLocalToWorld;
             #endif
 
             TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _MainTex_ST;
@@ -106,6 +127,7 @@ Shader "Pix/Standard"
             Varying vert(Attributes input)
             {
                 #ifdef GPU_SKIN
+                float4 prevPosOS = input.positionOS;
                 transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
                 transformSkinnedDir(input.boneWeights, input.boneIndices, input.normalOS);
                 transformSkinnedDir(input.boneWeights, input.boneIndices, input.tangentOS.xyz);
@@ -150,6 +172,14 @@ Shader "Pix/Standard"
             #ifdef ENABLE_BENTNORMAL
                 output.bentNormal = bentNormal;
             #endif
+
+            #ifdef MOTION_VECTOR_ON
+                transformPreviousSkinnedPos(input.boneWeights, input.boneIndices, prevPosOS);
+                float4 prevPosWS = mul(_PreviousLocalToWorld, prevPosOS);
+                output.prevPosCS = mul(_MatrixVP_Prev, prevPosWS);
+                output.screenUV = output.positionCS;
+            #endif
+
                 return output;
             }
 
@@ -158,7 +188,10 @@ Shader "Pix/Standard"
             {
                 half4 gbuffer_0 : SV_Target0;    
                 half4 gbuffer_1 : SV_Target1; 
-                half4 gbuffer_2 : SV_Target2; 
+                half4 gbuffer_2 : SV_Target2;
+            #ifdef MOTION_VECTOR_ON
+                half4 gbuffer_3 : SV_Target3;
+            #endif
             };
 
             FragmentOutput frag(Varying input)
@@ -192,6 +225,18 @@ Shader "Pix/Standard"
                 output.gbuffer_0 = gbuffer.gbuffer_0;
                 output.gbuffer_1 = gbuffer.gbuffer_1;
                 output.gbuffer_2 = gbuffer.gbuffer_2;
+
+            #ifdef MOTION_VECTOR_ON
+                float2 ndcPos = input.screenUV.xy / input.screenUV.w;
+                float2 screenUV = ndcPos * 0.5 + 0.5;
+
+                float2 preNdcPos = input.prevPosCS.xy / input.prevPosCS.w;
+                float2 preScreenUV = preNdcPos * 0.5 + 0.5;
+
+                float2 motionVector = preScreenUV - screenUV;
+                output.gbuffer_3 = half4(motionVector*0.5 +0.5, 0, 0);
+            #endif
+
                 return output;
             }
             ENDHLSL
@@ -421,7 +466,8 @@ Shader "Pix/Standard"
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 
                 #ifdef GPU_SKIN
-                //搞不懂怎么到这儿depth的精度就有误差了
+                // 搞不懂怎么到这儿depth的精度就有误差了
+                // 要是前面ZTest Equal时也有误差那真是想死的心都有了
                 output.positionCS.z -= 0.00001;
                 #endif
 

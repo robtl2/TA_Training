@@ -1,7 +1,7 @@
 #ifndef GPUSKIN_INCLUDED
 #define GPUSKIN_INCLUDED
 
-#define MOTION_VECTOR_ON
+
 
 #define MAX_BONE_COUNT  256
 
@@ -22,6 +22,25 @@ void transformSkinnedPos(float4 boneWeights, uint4 boneIndices, inout float4 pos
     pos += mul(skinMatrix, positionOS) * boneWeights.z;
 
     skinMatrix = _CurrentPoses[boneIndices.w];
+    pos += mul(skinMatrix, positionOS) * boneWeights.w;
+
+    positionOS = pos;
+}
+
+void transformPreviousSkinnedPos(float4 boneWeights, uint4 boneIndices, inout float4 positionOS){
+    float4 pos = 0;
+    float4x4 skinMatrix;
+
+    skinMatrix = _PreviousPoses[boneIndices.x];
+    pos += mul(skinMatrix, positionOS) * boneWeights.x;
+
+    skinMatrix = _PreviousPoses[boneIndices.y];
+    pos += mul(skinMatrix, positionOS) * boneWeights.y;
+
+    skinMatrix = _PreviousPoses[boneIndices.z];
+    pos += mul(skinMatrix, positionOS) * boneWeights.z;
+
+    skinMatrix = _PreviousPoses[boneIndices.w];
     pos += mul(skinMatrix, positionOS) * boneWeights.w;
 
     positionOS = pos;

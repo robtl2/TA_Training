@@ -41,6 +41,12 @@ namespace PixRenderPipline
                 {
                     debugMaterial.SetInt(_Channel, debugMode - 1);
                     debugMaterial.SetFloat(_Size, renderer.asset.debugSize);
+
+                    if (renderer.asset.enable_TAA)
+                        debugMaterial.EnableKeyword("MOTION_VECTOR_ON");
+                    else
+                        debugMaterial.DisableKeyword("MOTION_VECTOR_ON");
+
                     renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, debugMaterial, 0, 0);
                 }
             }
@@ -49,9 +55,7 @@ namespace PixRenderPipline
                 renderer.cmb.Blit(DeferredPass.ColorBuff, BuiltinRenderTextureType.CameraTarget, filterMaterial);
 
             renderer.cmb.ReleaseTemporaryRT(DeferredPass.ColorBuff);
-            renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_0);
-            renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_1);
-            renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_2);
+            
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
