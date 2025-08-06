@@ -82,7 +82,12 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
 
     half3 specular = 0;
     if(light.enableSpecular){
+        half f0 = gbufferData.f0;
+
+        gbufferData.f0 *= light.f0;
         specular = specularLobe(gbufferData, L, N, NoH, H, NoV, NoL, LoH);
+        gbufferData.f0 = f0;
+
         half occ = selfOcclusion(gbufferData, H, gbufferData.roughness);
         specular *= occ;
     }
@@ -93,7 +98,13 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
 void evaluateLightSimple(PixLight light, half3 diffuse, half3 N, inout half3 result)
 {
     half3 L = light.direction;
-    half3 NoL = saturate(dot(N, L));
+    half NoL_full = dot(N, L);
+    
+    if(NoL_full<0.05){
+        return;
+    }
+
+    half3 NoL = saturate(NoL_full);
     result += light.color * diffuse * NoL * Fd_Lambert();
 }
 

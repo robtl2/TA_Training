@@ -167,10 +167,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightType: 0
   color: {r: 0.9254902, g: 0.86904716, b: 0.3960784, a: 1}
-  intensity: 1.5
+  intensity: 1.1
   spotAngle: 0
-  enableDiffuse: 0
-  enableSpecular: 1
+  enableDiffuse: 1
+  enableSpecular: 0
+  f0: 1
   shadowMapType: 0
   shadowMapSize: 512
   shadowMapJitter: 1
@@ -273,10 +274,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightType: 0
   color: {r: 0.9254902, g: 0.86904716, b: 0.3960784, a: 1}
-  intensity: 4
+  intensity: 12.2
   spotAngle: 0
   enableDiffuse: 0
   enableSpecular: 1
+  f0: 0.124
   shadowMapType: 0
   shadowMapSize: 512
   shadowMapJitter: 1
@@ -406,7 +408,7 @@ MonoBehaviour:
     - {x: -0.03311291, y: -0.03310678, z: -0.038971633, w: 0.11080575}
     - {x: -0.086318225, y: -0.107339576, z: -0.13044548, w: -0.17397688}
     - {x: -0.4413207, y: -0.639625, z: -0.9142936, w: 0.084583916}
-  blurLevel: 2.73
+  blurLevel: 3.21
   intensity: 0.7
   fovScale: 1.3
 --- !u!4 &602252877
@@ -417,7 +419,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 602252875}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.8470385, z: -0, w: 0.53153163}
+  m_LocalRotation: {x: 0, y: -0.8841737, z: 0, w: 0.46715835}
   m_LocalPosition: {x: 0, y: 0.037, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -426,7 +428,7 @@ Transform:
   - {fileID: 164846893}
   - {fileID: 20128326}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -115.782, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -124.3, z: 0}
 --- !u!1 &611652128 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
@@ -481,6 +483,7 @@ MonoBehaviour:
   spotAngle: 0
   enableDiffuse: 1
   enableSpecular: 1
+  f0: 1
   shadowMapType: 1
   shadowMapSize: 512
   shadowMapJitter: 1
@@ -490,7 +493,7 @@ MonoBehaviour:
   enableContactShadow: 1
   contactShadowJitter: 1
   contactShadowJitterRadius: 3
-  contactRayLength: 0.00487
+  contactRayLength: 0.00549
   contactSampleCount: 1
   contactBias: 0.000057
   enableVisbilityShadow: 0
@@ -695,7 +698,7 @@ MonoBehaviour:
   ssao_radius: 20
   ssao_stepCount: 2
   ssao_jitterRadius: 0.01
-  ssao_quality: 0
+  ssao_quality: 1
   enable_TAA: 1
   TAA_jitter: 1
   TAA_histroy: 0.8

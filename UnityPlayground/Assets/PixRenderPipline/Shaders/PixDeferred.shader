@@ -80,6 +80,8 @@ Shader "Hidden/Pix/Deferred"
 
                 half3 result = half3(0, 0, 0);
 
+                evaluateIBL(gbufferData, uv, result);
+
                 [loop]
                 for(int i = 0;i<PIX_LIGHT_COUNT;i++)
                 {
@@ -88,8 +90,6 @@ Shader "Hidden/Pix/Deferred"
                     if(light.enabled)
                         evaluateLight(light, gbufferData, uv, result);
                 }
-                
-                evaluateIBL(gbufferData, uv, result);
 
                 half3 ldr = HDR2LDR(result);
                 return half4(ldr,1);

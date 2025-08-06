@@ -77,6 +77,10 @@ namespace PixRenderPipline
         public bool enableDiffuse = true;
         public bool enableSpecular = true;
 
+        // 灯光可以自由设置f0的强度，做逆光灯时很方便
+        [Range(0, 1)]
+        public float f0 = 1.0f;
+
         [Header("ShadowMap")]
         public ShadowMapType shadowMapType = ShadowMapType.None;
         public int shadowMapSize = 512;
@@ -315,7 +319,7 @@ namespace PixRenderPipline
 
             float visibilityShadow = visibilityShadowSoftness;
             if (!enableVisbilityShadow) visibilityShadow = 0;
-            shadowmapSizePropList[i] = new Vector4(shadowMapSize, 1.0f / shadowMapSize, visibilityShadow, 0);
+            shadowmapSizePropList[i] = new Vector4(shadowMapSize, 1.0f / shadowMapSize, visibilityShadow, f0);
 
             Vector3 pos = transform.position;
             Vector4 posProp = new Vector4(pos.x, pos.y, pos.z, (int)lightType);

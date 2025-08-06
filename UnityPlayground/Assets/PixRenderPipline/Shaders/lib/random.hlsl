@@ -47,8 +47,8 @@ half3 dether(half2 uv, half3 alpha){
 half3 detherColor(half3 col, half2 uv, int step){
     uv += _TAA_Jitter.xy;
 
-    col *= step;
-    half3 rgb = floor(col*0.9999);
+    col = col*step;
+    half3 rgb = floor(col);
     half3 f = frac(col);
 
     half3 d = dether(uv, f);
@@ -56,9 +56,7 @@ half3 detherColor(half3 col, half2 uv, int step){
     rgb = lerp(rgb,rgb+1,d);
     rgb/=step;
 
-    col = rgb;
-
-    return col;
+    return rgb;
 }
 
 half detherAlpha(half alpha, half cutOff, half2 screenUV){

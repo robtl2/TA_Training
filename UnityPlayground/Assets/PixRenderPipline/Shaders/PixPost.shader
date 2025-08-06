@@ -83,11 +83,12 @@ Shader "Hidden/Pix/Post"
                 half2 dxy = half2(ddx(gray), ddy(gray));
                 half edge = dot(dxy,dxy);
 
-                if (edge > 0.01)
+                if (edge > 0.01 && edge <0.08)
                 {
                     half factor = (contrast == 0.0f) ? 1.0f : (1.0f + contrast);
                     half midpoint = 0.5f;
                     color = (color - midpoint) * factor + midpoint;
+                    // color = half3(1,0,0);
                 }
             }
 

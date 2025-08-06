@@ -68,6 +68,7 @@ PixLight GetPixLight(int index)
     light.shadowMapJitter = _PixLightsShadowMap[index].w > 0;
     light.shadowMapSize = _PixLightsShadowMapSize[index].xy;
     light.visibilityShadow = _PixLightsShadowMapSize[index].z;
+    light.f0 = _PixLightsShadowMapSize[index].w;
 
     int shadingFilter = _PixLightsShadowMap[index].z;
     bool enableDiffuse = true;
