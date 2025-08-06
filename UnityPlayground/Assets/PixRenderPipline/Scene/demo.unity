@@ -149,9 +149,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   skyType: 2
-  displayColor: {r: 0.764151, g: 0.764151, b: 0.764151, a: 1}
+  displayColor: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 1}
   color: {r: 0.4627451, g: 0.441073, b: 0.4117647, a: 1}
-  detherStep: 128
+  detherStep: 127
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   shData:
     shCoefficients:
@@ -608,6 +608,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 611652130}
+    - targetCorrespondingSourceObject: {fileID: -345174089952144456, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2088854910}
   m_SourcePrefab: {fileID: 100100000, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
 --- !u!1 &1795428411
 GameObject:
@@ -662,6 +665,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2088854904 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -345174089952144456, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
+  m_PrefabInstance: {fileID: 1472155546}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2088854910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2088854904}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b6985768462f4498a248bf2924cf2d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pass: PixTransparent
+  insetEvent: 8
+  repeatTimes: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

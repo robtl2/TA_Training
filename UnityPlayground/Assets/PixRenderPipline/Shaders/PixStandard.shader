@@ -502,10 +502,10 @@ Shader "Pix/Standard"
                 evaluateIBLSimple(diffuse, normalWS, result);
 
                 result = HDR2LDR(result);
-                // result = half3(1,0,0);
+                color.a = smoothstep(0,0.2,color.a);
 
-                color.a = smoothstep(0,0.5,color.a);
-                // color.a = 0;
+                // return half4(1,0,0,color.a);
+
                 return half4(result, color.a);
             }
             ENDHLSL

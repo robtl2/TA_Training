@@ -17,8 +17,6 @@ half2 hash22(half2 p)
 
 half hash21(half2 p)
 {
-    p += _TAA_Jitter*0.5;
-
     p = frac(p * half2(53.543h, 62.743h));
     p += dot(p, p.yx + 19.191h);
     return frac((p.x * p.y + p.x + p.y) * 95.432h) * 2.0h - 1.0h;
@@ -26,8 +24,6 @@ half hash21(half2 p)
 
 half3 hash23(half2 p)
 {
-    p += _TAA_Jitter.xy;
-
     p = frac(p * float2(53.543123f, 62.743513f));
     p += dot(p, p.yx + 19.1919f);
 
@@ -49,13 +45,15 @@ half3 dether(half2 uv, half3 alpha){
 }
 
 half3 detherColor(half3 col, half2 uv, int step){
+    uv += _TAA_Jitter.xy;
+
     col *= step;
-    half3 rgb = floor(col);
+    half3 rgb = floor(col*0.9999);
     half3 f = frac(col);
 
     half3 d = dether(uv, f);
 
-    rgb = lerp(rgb-1,rgb,d);
+    rgb = lerp(rgb,rgb+1,d);
     rgb/=step;
 
     col = rgb;
@@ -64,7 +62,9 @@ half3 detherColor(half3 col, half2 uv, int step){
 }
 
 half detherAlpha(half alpha, half cutOff, half2 screenUV){
-    alpha = smoothstep(0,1 - cutOff*0.5,alpha);
+    // screenUV += _TAA_Jitter.xy;
+
+    alpha = smoothstep(0.1,0.3,alpha);
     return dether(screenUV, alpha) - 0.001;
 }
 
