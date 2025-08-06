@@ -169,7 +169,7 @@ MonoBehaviour:
   contactSampleCount: 6
   contactBias: 0.000057
   enableVisbilityShadow: 1
-  visibilityShadowSoftness: 0.62
+  visibilityShadowSoftness: 0.001
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &164846891
@@ -565,13 +565,13 @@ MonoBehaviour:
   style: 0
   colorSpace: 1
   GPU_OCC_Culling: 0
-  ao_factor: 0.761
+  ao_factor: 0.788
   Enable_SSAO: 1
-  ssao_factor: 0.788
+  ssao_factor: 0.779
   ssao_radius: 20
   ssao_stepCount: 2
-  ssao_jitterRadius: 0.02
-  ssao_quality: 1
+  ssao_jitterRadius: 0.01
+  ssao_quality: 0
   enable_TAA: 1
   TAA_jitter: 1
   TAA_histroy: 0.8

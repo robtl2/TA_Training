@@ -76,7 +76,7 @@ Shader "Hidden/Pix/Deferred"
                 if(gbufferData.shadingModel == SHADING_MODEL_UNLIT)
                     return half4(gbufferData.albedo, 1);
 
-                // return selfOcclusion(gbufferData, gbufferData.reflectDir, 0.01);
+                // return selfOcclusion(gbufferData, gbufferData.reflectDir, gbufferData.roughness);
 
                 half3 result = half3(0, 0, 0);
 
