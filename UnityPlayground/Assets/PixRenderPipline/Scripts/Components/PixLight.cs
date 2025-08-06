@@ -162,7 +162,6 @@ namespace PixRenderPipline
             Shader.PropertyToID("_PixShadowMap_3")
         };
 
-        static Color black = new Color(0, 0, 0, 0);
         static readonly int _LightIndex = Shader.PropertyToID("_LightIndex");
 
         void ShadowMapPass(PixRenderer renderer)
@@ -181,7 +180,7 @@ namespace PixRenderPipline
 
             renderer.cmb.GetTemporaryRT(shadowMapName, shadowMapSize, shadowMapSize, 32, FilterMode.Point, RenderTextureFormat.Depth);
             renderer.cmb.SetRenderTarget(shadowMapName);
-            renderer.cmb.ClearRenderTarget(true, true, black);
+            renderer.cmb.ClearRenderTarget(true, true, Color.clear);
             renderer.cmb.SetGlobalInt(_LightIndex, index);
 
             if (FrustumCulling(renderer, out CullingResults cullingResults))
@@ -242,9 +241,8 @@ namespace PixRenderPipline
         }
 
         RendererList GetRenderList(PixRenderer renderer, CullingResults cullingResults)
-        { 
-            ShaderTagId tag = new ShaderTagId("PixShadowCaster");
-            RendererListDesc rendererListDesc = new(tag, cullingResults, renderer.camera)
+        {
+            RendererListDesc rendererListDesc = new(PixPassBase.shadowCasterTag, cullingResults, renderer.camera)
             {
                 renderQueueRange = RenderQueueRange.opaque,
                 sortingCriteria = SortingCriteria.CommonOpaque
@@ -368,7 +366,7 @@ namespace PixRenderPipline
         void CalculateLightVPMatrix()
         {
             // 获取BoxCollider的8个角点
-            Vector3[] corners = GetBoxColliderCorners(boxArea);
+            GetBoxColliderCorners(boxArea);
             
             // 将角点转换到世界坐标系
             for (int i = 0; i < corners.Length; i++)
@@ -380,13 +378,13 @@ namespace PixRenderPipline
                 CalculateSpotLightVPMatrix(corners);
         }
 
-        Vector3[] GetBoxColliderCorners(BoxCollider boxCollider)
+        static Vector3[] corners = new Vector3[8];
+        void GetBoxColliderCorners(BoxCollider boxCollider)
         {
             Vector3 center = boxCollider.center;
             Vector3 size = boxCollider.size;
             Vector3 extents = size * 0.5f;
 
-            Vector3[] corners = new Vector3[8];
             corners[0] = center + new Vector3(-extents.x, -extents.y, -extents.z);
             corners[1] = center + new Vector3(extents.x, -extents.y, -extents.z);
             corners[2] = center + new Vector3(-extents.x, extents.y, -extents.z);
@@ -395,8 +393,6 @@ namespace PixRenderPipline
             corners[5] = center + new Vector3(extents.x, -extents.y, extents.z);
             corners[6] = center + new Vector3(-extents.x, extents.y, extents.z);
             corners[7] = center + new Vector3(extents.x, extents.y, extents.z);
-
-            return corners;
         }
 
         void CalculateDirectionalLightVPMatrix(Vector3[] corners)

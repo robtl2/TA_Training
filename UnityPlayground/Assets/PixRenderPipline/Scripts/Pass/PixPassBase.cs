@@ -11,6 +11,8 @@ namespace PixRenderPipline
     public class PixPassBase
     {
         #region 这里放的都是做菜时常用的配料
+
+        public static readonly ShaderTagId shadowCasterTag = new("PixShadowCaster");
         static Material _blitMat;
         public Material blitMat
         {
