@@ -94,7 +94,7 @@ Shader "Pix/Standard"
                 float2 uv           : TEXCOORD0;
                 float3 tangentWS    : TEXCOORD2;
             #ifdef ENABLE_BENTNORMAL
-                float4 bentNormal   : COLOR;
+                float4 bentNormalVS   : COLOR;
             #endif
 
             #ifdef MOTION_VECTOR_ON
@@ -153,15 +153,19 @@ Shader "Pix/Standard"
                 float3 bitangentVS = mul(mat_V, bitangentWS);
 
             #ifdef ENABLE_BENTNORMAL
-                float4 bentNormal = input.bentNormal;
-                bentNormal.xyz = bentNormal.xyz*2 - 1;
+                float4 bentNormalRaw = input.bentNormal;
+                float3 bentNormal =bentNormalRaw.xyz*2 - 1; 
+                float len = length(bentNormal);
+                float ao = bentNormalRaw.w * len;
+                bentNormal /= len;
 
                 #ifdef GPU_SKIN
-                transformSkinnedDir(input.boneWeights, input.boneIndices, bentNormal.xyz);
+                transformSkinnedDir(input.boneWeights, input.boneIndices, bentNormal);
                 #endif
 
                 float3x3 tbn = float3x3(tangentWS, bitangentWS, normalWS);
-                bentNormal.xyz = mul(bentNormal.xyz, tbn);
+                float3 bentNormalWS = mul(bentNormal, tbn);
+                float3 bentNormalVS = mul(mat_V, bentNormalWS);
             #endif
 
                 Varying output;
@@ -172,7 +176,7 @@ Shader "Pix/Standard"
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.tangentWS = tangentWS;
             #ifdef ENABLE_BENTNORMAL
-                output.bentNormal = bentNormal;
+                output.bentNormalVS = half4(bentNormalVS, ao);
             #endif
 
             #ifdef MOTION_VECTOR_ON
@@ -219,10 +223,10 @@ Shader "Pix/Standard"
                 half metalness = saturate(param.b + _MetallicOffset);
                 roughness = ior*ior + roughness;
 
-                half4 bentNormal = half4(0,0,1,1);
+                half4 bentNormal = half4(normal, 1);
                 
                 #ifdef ENABLE_BENTNORMAL
-                bentNormal = input.bentNormal;
+                bentNormal = input.bentNormalVS;
                 #endif
 
                 FragmentOutput output;

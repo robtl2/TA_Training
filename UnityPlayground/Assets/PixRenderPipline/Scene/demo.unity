@@ -150,7 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skyType: 2
   displayColor: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 1}
-  color: {r: 0.4627451, g: 0.441073, b: 0.4117647, a: 1}
+  color: {r: 0.6415094, g: 0.60659415, b: 0.56585974, a: 1}
   detherStep: 127
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   shData:
@@ -441,18 +441,18 @@ MonoBehaviour:
   style: 0
   colorSpace: 1
   GPU_OCC_Culling: 0
-  ao_factor: 1
+  ao_factor: 0.788
   Enable_SSAO: 1
-  ssao_factor: 0.77
+  ssao_factor: 0.796
   ssao_radius: 20
   ssao_stepCount: 2
-  ssao_jitterRadius: 0.01
-  ssao_quality: 0
+  ssao_jitterRadius: 0.02
+  ssao_quality: 1
   enable_TAA: 1
-  TAA_jitter: 0.7
+  TAA_jitter: 1
   TAA_histroy: 0.8
   debugMode: 0
-  debugSize: 1
+  debugSize: 0.602
 --- !u!4 &1365793593
 Transform:
   m_ObjectHideFlags: 0
@@ -748,9 +748,9 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1365793593}
   - {fileID: 961739753}
   - {fileID: 870345109}
   - {fileID: 1795428413}
   - {fileID: 602252877}
-  - {fileID: 1365793593}
   - {fileID: 1472155546}

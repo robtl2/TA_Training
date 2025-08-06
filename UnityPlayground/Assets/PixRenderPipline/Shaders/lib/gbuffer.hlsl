@@ -62,7 +62,7 @@ half iorToF0(half transmittedIor, half incidentIor) {
 }
 
 
-GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalWS,
+GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalVS,
                     half3 tangentWS, half roughness, half metallic, half anisotropy){
     
     // 没有考虑各向异性的金属
@@ -74,12 +74,8 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     half2 nor = normalVS.xy*0.5+0.5;
     half2 tan = tangentWS.xy*0.5+0.5;
 
-    half3 bnor = bentNormalWS.xyz;
-    half ao = bentNormalWS.w;
-
-    half bnlen = length(bnor);
-    ao *= bnlen;
-    bnor /= bnlen;
+    half2 bnor = bentNormalVS.xy*0.5+0.5;
+    half ao = bentNormalVS.w;
 
     ao = saturate(ao*20);
     ao = 1-ao;
@@ -99,7 +95,7 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     gbuffer.gbuffer_0 = half4(color.rgb, ao);
     gbuffer.gbuffer_1 = half4(nor, roughness, packedMetallicShadingModel);
     #if defined EXPORT_TANGENT || defined ENABLE_BENTNORMAL
-    gbuffer.gbuffer_2 = half4(tan, bnor.xy*0.5+0.5);
+    gbuffer.gbuffer_2 = half4(tan, bnor);
     #endif
 #endif
     
@@ -181,7 +177,8 @@ GBufferData UnpackGBuffer(float2 uv)
     half3 diffuse = computeDiffuseColor(albedo, metallic);
 
     half ao = gbuffer_0.a;
-    half3 bentNormal = UnpackNormal(gbuffer_2.zw);
+    half3 bentNormalVS = UnpackNormal(gbuffer_2.zw);
+    half3 bentNormalWS = mul(bentNormalVS, viewToWorld);
 
     half fresnel = 1-normalVS.z;
     fresnel = pow5(fresnel);
@@ -209,7 +206,7 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.fresnel = 0;
 #endif
     gbufferData.ao = ao;
-    gbufferData.bentNormal = bentNormal;
+    gbufferData.bentNormal = bentNormalWS;
     gbufferData.positionWS = worldPos;
     gbufferData.normalWS = normalWS;
     gbufferData.tangentWS = tangentWS;
@@ -223,7 +220,6 @@ GBufferData UnpackGBuffer(float2 uv)
 
 #ifdef MOTION_VECTOR_ON
     gbufferData.motionVector = gbuffer_3.xy*2-1;
-    // gbufferData.motionVector = half3(0,1,0);
 #endif
 
     return gbufferData;

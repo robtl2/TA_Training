@@ -80,8 +80,8 @@ Shader "Hidden/Pix/Deferred"
 
                 PixLight light = GetPixLight(0);
 
-                // half3 H = normalize(light.direction + gbufferData.viewDir);
-                // return selfOcclusion(gbufferData, H, gbufferData.roughness);
+                half3 H = normalize(light.direction + gbufferData.viewDir);
+                // return selfOcclusion(gbufferData, gbufferData.reflectDir, 1);
                 evaluateLight(light, gbufferData, uv, result);
                 
                 evaluateIBL(gbufferData, uv, result);

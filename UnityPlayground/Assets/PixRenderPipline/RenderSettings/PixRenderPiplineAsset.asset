@@ -12,19 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00f5f307b390d4092a669213bd0f27ae, type: 3}
   m_Name: PixRenderPiplineAsset
   m_EditorClassIdentifier: 
-  style: 0
   renderSize: 5
-  colorSpace: 1
-  GPU_OCC_Culling: 0
-  ao_factor: 1
-  Enable_SSAO: 1
-  ssao_factor: 0.655
-  ssao_radius: 20
-  ssao_stepCount: 2
-  ssao_jitterRadius: 0.01
-  ssao_quality: 0
-  enable_TAA: 1
-  TAA_jitter: 0.5
-  TAA_histroy: 0.8
-  debugMode: 0
-  debugSize: 1

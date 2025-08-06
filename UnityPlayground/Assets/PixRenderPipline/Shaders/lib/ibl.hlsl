@@ -132,7 +132,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
     #endif
 
-    half ao = gbufferData.ao;
+    half ao = selfOcclusion(gbufferData, gbufferData.normalWS, 1);
     if(_AO_Factor<0.999)
         ao = lerp(1,ao,_AO_Factor);
 
