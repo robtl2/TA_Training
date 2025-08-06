@@ -5,6 +5,7 @@
 // BRDF from filament
 //------------------------------------------------------------------------------
 
+#define FILAMENT_QUALITY_LOW
 
 // Diffuse BRDFs
 #define DIFFUSE_LAMBERT             0
@@ -120,7 +121,7 @@ half3 F_Schlick(const half3 f0, float f90, float VoH) {
 }
 
 half3 F_Schlick(const half3 f0, float VoH) {
-    float f = pow(1.0 - VoH, 5.0);
+    float f = pow5(1.0 - VoH);
     return f + f0 * (1.0 - f);
 }
 
@@ -144,25 +145,28 @@ float visibility(float roughness, float NoV, float NoL) {
 #endif
 }
 
+
+
 half3 fresnel(const half3 f0, float LoH) {
-#if BRDF_SPECULAR_F == SPECULAR_F_SCHLICK
-#if FILAMENT_QUALITY == FILAMENT_QUALITY_LOW
+
+#ifdef  FILAMENT_QUALITY_LOW
     return F_Schlick(f0, LoH); // f90 = 1.0
 #else
-    float f90 = saturate(dot(f0, half3(50.0 * 0.33)));
+    half v = 50.0 * 0.33;
+    float f90 = saturate(dot(f0, v.xxx));
     return F_Schlick(f0, f90, LoH);
 #endif
-#endif
+
 }
 
 half3 fresnel(const half3 f0, const float f90, float LoH) {
-#if BRDF_SPECULAR_F == SPECULAR_F_SCHLICK
-#if FILAMENT_QUALITY == FILAMENT_QUALITY_LOW
+
+#ifdef FILAMENT_QUALITY_LOW
     return F_Schlick(f0, LoH); // f90 = 1.0
 #else
     return F_Schlick(f0, f90, LoH);
 #endif
-#endif
+
 }
 
 float distributionAnisotropic(float at, float ab, float ToH, float BoH, float NoH) {

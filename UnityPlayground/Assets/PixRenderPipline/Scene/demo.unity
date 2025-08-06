@@ -573,7 +573,7 @@ MonoBehaviour:
   ssao_jitterRadius: 0.02
   ssao_quality: 1
   enable_TAA: 1
-  TAA_jitter: 0.5
+  TAA_jitter: 1
   TAA_histroy: 0.8
   Enable_Sharpen: 1
   Enable_Tonemapping: 1
