@@ -26,6 +26,8 @@ namespace PixRenderPipline
         /// <param name="cameras">点菜的客人</param>
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
+            if (!PixRenderSetting.instance) return;
+            
             frameIndex++;
             // 按照深度排序相机
             System.Array.Sort(cameras, (c1, c2) => c1.depth.CompareTo(c2.depth));

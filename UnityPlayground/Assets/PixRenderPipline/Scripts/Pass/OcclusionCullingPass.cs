@@ -12,7 +12,8 @@ namespace PixRenderPipline
         // TODO: fullfil
         public override void Execute()
         {
-            if (!renderer.asset.GPU_OCC_Culling) return;
+            var setting = PixRenderSetting.instance;
+            if (!setting.GPU_OCC_Culling) return;
             base.Execute();
 
 

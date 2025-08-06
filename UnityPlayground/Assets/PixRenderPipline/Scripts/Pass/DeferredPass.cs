@@ -22,6 +22,8 @@ namespace PixRenderPipline
         {
             base.Execute();
 
+            var setting = PixRenderSetting.instance;
+
             GetTemporaryColorRT(ColorBuff);
 
             // TODO: TiledPass搞好后用Tile来剔除多余的栅格化
@@ -31,7 +33,7 @@ namespace PixRenderPipline
             renderer.cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
             renderer.cmb.SetGlobalTexture(TiledPass.tileID, TiledPass.tileID);
             
-            material.SetFloat(_AO_Factor, renderer.asset.ao_factor);
+            material.SetFloat(_AO_Factor, setting.ao_factor);
 
             // Depth经常拿来被采样，这里blit出来一个下采样的DepthTexture
             int2 size = renderer.size / 2;
@@ -44,13 +46,13 @@ namespace PixRenderPipline
             else
                 material.DisableKeyword("ORTHOGRAPHIC");
 
-            if (renderer.asset.Enable_SSAO)
+            if (setting.Enable_SSAO)
             {
                 Vector4 ssao_props = new();
-                ssao_props.x = renderer.asset.ssao_factor;
-                ssao_props.y = renderer.asset.ssao_radius * 0.001f / renderer.asset.ssao_stepCount;
-                ssao_props.z = renderer.asset.ssao_stepCount;
-                ssao_props.w = renderer.asset.ssao_jitterRadius;
+                ssao_props.x = setting.ssao_factor;
+                ssao_props.y = setting.ssao_radius * 0.001f / setting.ssao_stepCount;
+                ssao_props.z = setting.ssao_stepCount;
+                ssao_props.w = setting.ssao_jitterRadius;
                 material.SetVector(_SSAO_Props, ssao_props);
 
                 material.DisableKeyword("SSAO_QUALITY_OFF");
@@ -59,7 +61,7 @@ namespace PixRenderPipline
                 material.DisableKeyword("SSAO_QUALITY_MEDIUM");
                 material.DisableKeyword("SSAO_QUALITY_HIGH");
 
-                switch (renderer.asset.ssao_quality)
+                switch (setting.ssao_quality)
                 {
                     case PixRenderer.SamplerQuality.Poor:
                         material.EnableKeyword("SSAO_QUALITY_POOR");

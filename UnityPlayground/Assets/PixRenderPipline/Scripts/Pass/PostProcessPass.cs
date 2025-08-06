@@ -22,6 +22,8 @@ namespace PixRenderPipline
         {
             base.Execute();
 
+            var setting = PixRenderSetting.instance;
+
             renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, TransparentPass.ColorBuff);
             renderer.cmb.SetGlobalTexture(DeferredPass.DepthDownSample, DeferredPass.DepthDownSample);
@@ -35,12 +37,12 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.AfterPostProcess);
 
-            if (renderer.asset.enable_TAA)
+            if (setting.enable_TAA)
             {
                 PixDeferredRenderer dr = renderer as PixDeferredRenderer;
 
                 materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
-                materialTAA.SetFloat("_HistroyWeight", renderer.asset.TAA_histroy);
+                materialTAA.SetFloat("_HistroyWeight", setting.TAA_histroy);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
                 renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera], EarlyZPass.depthID);
                 renderer.cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);

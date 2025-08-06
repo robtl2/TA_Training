@@ -39,11 +39,13 @@ namespace PixRenderPipline
         {
             base.Execute();
 
+            var setting = PixRenderSetting.instance;
+
             GetTemporaryColorRT(GbufferID_0);
             GetTemporaryColorRT(GbufferID_1);
             GetTemporaryColorRT(GbufferID_2);
 
-            if (renderer.asset.enable_TAA)
+            if (setting.enable_TAA)
             {
                 renderer.cmb.GetTemporaryRT(GbufferID_3, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.RG32, renderer.colorSpace);
                 renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, EarlyZPass.depthID);

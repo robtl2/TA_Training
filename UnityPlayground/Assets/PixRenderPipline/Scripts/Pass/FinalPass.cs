@@ -23,6 +23,8 @@ namespace PixRenderPipline
 
             base.Execute();
 
+            var setting = PixRenderSetting.instance;
+
             filterMaterial.SetFloat(_IsSceneView, renderer.isSceneView ? 1 : 0);
 
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, DeferredPass.ColorBuff);
@@ -36,13 +38,13 @@ namespace PixRenderPipline
                 renderer.cmb.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, filterMaterial);
 
-                int debugMode = (int)renderer.asset.debugMode;
+                int debugMode = (int)setting.debugMode;
                 if (debugMode > 0)
                 {
                     debugMaterial.SetInt(_Channel, debugMode - 1);
-                    debugMaterial.SetFloat(_Size, renderer.asset.debugSize);
+                    debugMaterial.SetFloat(_Size, setting.debugSize);
 
-                    if (renderer.asset.enable_TAA)
+                    if (setting.enable_TAA)
                         debugMaterial.EnableKeyword("MOTION_VECTOR_ON");
                     else
                         debugMaterial.DisableKeyword("MOTION_VECTOR_ON");

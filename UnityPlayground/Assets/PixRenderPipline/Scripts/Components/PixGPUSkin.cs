@@ -61,9 +61,11 @@ namespace PixRenderPipline
         static bool preTAA_enabled = false;
         public void ExecuteGPUskinPass(PixRenderer renderer)
         {
-            if (renderer.asset.enable_TAA != preTAA_enabled)
+            var setting = PixRenderSetting.instance;
+
+            if (setting.enable_TAA != preTAA_enabled)
             {
-                preTAA_enabled = renderer.asset.enable_TAA;
+                preTAA_enabled = setting.enable_TAA;
 
                 if (!preTAA_enabled)
                 {
@@ -112,7 +114,8 @@ namespace PixRenderPipline
 
         void UpLoadParams(PixRenderer rendere)
         {
-            if (!rendere.asset.enable_TAA) return;
+            var setting = PixRenderSetting.instance;
+            if (!setting.enable_TAA) return;
 
             foreach (var rm in meshInRenderer)
             {
@@ -172,7 +175,7 @@ namespace PixRenderPipline
             {
                 var mesh = ren.sharedMesh;
                 meshInRenderer[ren] = mesh;
-                
+
                 if (ren.enabled) ren.enabled = false;
             }
 

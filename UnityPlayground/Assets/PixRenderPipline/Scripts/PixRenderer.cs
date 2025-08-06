@@ -104,7 +104,8 @@ namespace PixRenderPipline
         /// </summary>
         public virtual void Render()
         {
-            if (asset.style == PixRenderPiplineAsset.Style.PBR)
+            var setting = PixRenderSetting.instance;
+            if (setting.style == PixRenderSetting.Style.PBR)
             {
                 Shader.EnableKeyword("PIX_STYLE_PBR");
                 Shader.DisableKeyword("PIX_STYLE_NPR");
@@ -115,7 +116,7 @@ namespace PixRenderPipline
                 Shader.DisableKeyword("PIX_STYLE_PBR");
             }
 
-            if (asset.enable_TAA)
+            if (setting.enable_TAA)
                 Shader.EnableKeyword("TAA");
             else
                 Shader.DisableKeyword("TAA");
@@ -124,7 +125,7 @@ namespace PixRenderPipline
             tiledSize = size / 8;
 
             colorSpace = RenderTextureReadWrite.Linear;
-            if (asset.colorSpace == PixRenderPiplineAsset.ColorSpace.Gamma)
+            if (setting.colorSpace == PixRenderSetting.ColorSpace.Gamma)
                 colorSpace = RenderTextureReadWrite.sRGB;
 
 #if UNITY_EDITOR
@@ -185,6 +186,8 @@ namespace PixRenderPipline
 
         protected virtual void SetupGlobalUniform()
         {
+            var setting = PixRenderSetting.instance;
+
             if (!jitterUploaded)
             {
                 jitterUploaded = true;
@@ -192,9 +195,9 @@ namespace PixRenderPipline
                 int jitterIndex = (frameIndex + 1) % haltonSamples.Length;
                 taaJitter = haltonSamples[jitterIndex];
 
-                taaJitter *= asset.TAA_jitter;
+                taaJitter *= setting.TAA_jitter;
 
-                if (asset.enable_TAA)
+                if (setting.enable_TAA)
                     Shader.SetGlobalVector(_TAA_Jitter, new Vector2(taaJitter.x, taaJitter.y));
             }
 
@@ -204,7 +207,7 @@ namespace PixRenderPipline
             Matrix4x4 P = camera.projectionMatrix;
 
             // 只需要抖P矩阵
-            if (asset.enable_TAA)
+            if (setting.enable_TAA)
             {
                 float jitterX = taaJitter.x / size.x;
                 float jitterY = taaJitter.y / size.y;

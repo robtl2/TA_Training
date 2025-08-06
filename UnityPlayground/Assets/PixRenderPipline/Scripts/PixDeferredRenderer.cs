@@ -44,15 +44,17 @@ namespace PixRenderPipline
         public override void Render()
         {
             base.Render();
+            
+            var setting = PixRenderSetting.instance;
 
-            if (asset.enable_TAA)
+            if (setting.enable_TAA)
             {
                 if (!frontRT.ContainsKey(camera) || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
                 {
                     if (frontRT.ContainsKey(camera))
                         frontRT[camera].Release();
 
-                    frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Linear);
+                    frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
                     frontRT[camera].name = "_ColorTex_Front";
                     frontRT[camera].Create();
                 }
