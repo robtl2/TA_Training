@@ -5,14 +5,7 @@
 #define SAMPLER_QUALITY_MEDIUM 2
 #define SAMPLER_QUALITY_HIGH 3
 
-
-#if defined SSAO_QUALITY_POOR
-    #define SSAO_SAMPLER_COUNT 1
-
-    static half3 dirSamplers[1] = {
-        half3(0, 0, 1),
-    };
-#elif defined SSAO_QUALITY_LOW
+#if defined SSAO_QUALITY_LOW
     #define SSAO_SAMPLER_COUNT 4
 
     static half3 dirSamplers[4] = {

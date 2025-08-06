@@ -20,9 +20,9 @@ MonoBehaviour:
   Enable_SSAO: 1
   ssao_factor: 0.655
   ssao_radius: 20
-  ssao_stepCount: 3
-  ssao_jitterRadius: 0.02
-  ssao_quality: 1
+  ssao_stepCount: 2
+  ssao_jitterRadius: 0.01
+  ssao_quality: 0
   enable_TAA: 1
   TAA_jitter: 0.5
   TAA_histroy: 0.8

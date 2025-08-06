@@ -245,7 +245,7 @@ MonoBehaviour:
   contactShadowJitter: 1
   contactShadowJitterRadius: 1
   contactRayLength: 0.0038
-  contactSampleCount: 2
+  contactSampleCount: 1
   contactBias: 0.000057
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
