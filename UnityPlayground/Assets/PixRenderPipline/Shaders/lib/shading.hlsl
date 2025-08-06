@@ -64,16 +64,24 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
     half NoH = saturate(dot(N, H));
     float LoH = saturate(dot(L, H));
 
-    half3 specular = specularLobe(gbufferData, L, N, NoH, H, NoV, NoL, LoH);
-    half3 diffuse = diffuseLobe(gbufferData, NoV, NoL, LoH);
+    half3 diffuse = 0;
     half shadow = 1;
     shadow *= ContactShadow(light, gbufferData);
     shadow *= VisibilityShadow(light, gbufferData);
     shadow *= ShadowMap(light, gbufferData, srceenUV);
 
-    half occ = selfOcclusion(gbufferData, H, gbufferData.roughness);
+    if(light.enableDiffuse){
+        diffuse = diffuseLobe(gbufferData, NoV, NoL, LoH);
+    }
 
-    result += light.color * (specular*occ + diffuse) * shadow * NoL;
+    half3 specular = 0;
+    if(light.enableSpecular){
+        specular = specularLobe(gbufferData, L, N, NoH, H, NoV, NoL, LoH);
+        half occ = selfOcclusion(gbufferData, H, gbufferData.roughness);
+        specular *= occ;
+    }
+
+    result += light.color * (specular + diffuse) * shadow * NoL;
 }
 
 void evaluateLightSimple(PixLight light, half3 diffuse, half3 N, inout half3 result)

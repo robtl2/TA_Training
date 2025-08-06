@@ -76,12 +76,17 @@ Shader "Hidden/Pix/Deferred"
                 if(gbufferData.shadingModel == SHADING_MODEL_UNLIT)
                     return half4(gbufferData.albedo, 1);
 
+                // return selfOcclusion(gbufferData, gbufferData.reflectDir, 0.01);
+
                 half3 result = half3(0, 0, 0);
 
                 [loop]
-                for(int i = 0;i<PIX_LIGHT_COUNT;i++){
+                for(int i = 0;i<PIX_LIGHT_COUNT;i++)
+                {
                     PixLight light = GetPixLight(i);
-                    evaluateLight(light, gbufferData, uv, result);
+
+                    if(light.enabled)
+                        evaluateLight(light, gbufferData, uv, result);
                 }
                 
                 evaluateIBL(gbufferData, uv, result);

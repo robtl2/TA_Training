@@ -151,10 +151,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 0
-  shadowMapQuality: 1
   color: {r: 0.39684942, g: 0.76636696, b: 0.9245283, a: 1}
   intensity: 5.7
   spotAngle: 0
+  enableDiffuse: 0
+  enableSpecular: 1
   shadowMapType: 0
   shadowMapSize: 512
   shadowMapJitter: 1
@@ -168,7 +169,7 @@ MonoBehaviour:
   contactSampleCount: 6
   contactBias: 0.000057
   enableVisbilityShadow: 1
-  visibilityShadowSoftness: 0.363
+  visibilityShadowSoftness: 0.62
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &164846891
@@ -351,10 +352,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 0
-  shadowMapQuality: 1
   color: {r: 0.8679245, g: 0.8329262, b: 0.749199, a: 1}
   intensity: 3
   spotAngle: 0
+  enableDiffuse: 1
+  enableSpecular: 1
   shadowMapType: 1
   shadowMapSize: 512
   shadowMapJitter: 1
@@ -563,7 +565,7 @@ MonoBehaviour:
   style: 0
   colorSpace: 1
   GPU_OCC_Culling: 0
-  ao_factor: 0.779
+  ao_factor: 0.761
   Enable_SSAO: 1
   ssao_factor: 0.788
   ssao_radius: 20
@@ -571,12 +573,12 @@ MonoBehaviour:
   ssao_jitterRadius: 0.02
   ssao_quality: 1
   enable_TAA: 1
-  TAA_jitter: 1
+  TAA_jitter: 0.5
   TAA_histroy: 0.8
   Enable_Sharpen: 1
   Enable_Tonemapping: 1
   debugMode: 0
-  debugSize: 0.602
+  debugSize: 1
 --- !u!4 &1365793593
 Transform:
   m_ObjectHideFlags: 0

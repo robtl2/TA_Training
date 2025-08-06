@@ -77,11 +77,6 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     half2 bnor = bentNormalVS.xy*0.5+0.5;
     half ao = bentNormalVS.w;
 
-    ao = saturate(ao*20);
-    ao = 1-ao;
-    ao = pow5(ao);
-    ao = 1-ao;
-
     int metallicInt = (int)(metallic*31);
     float packedMetallicShadingModel = PackTwoIntToFloat(metallicInt,shadingModel);
 

@@ -56,6 +56,8 @@ PixLight GetPixLight(int index)
     light.direction = _PixLightsDirection[index].xyz;
     light.color = _PixLightsColor[index];
 
+    light.enabled = any(light.color>0);
+
     light.contactShadow = _PixLightsContactShadow[index].x;
     light.contactSampleCount = (int)_PixLightsContactShadow[index].y;
     light.contactBias = _PixLightsContactShadow[index].z;
@@ -63,10 +65,24 @@ PixLight GetPixLight(int index)
 
     light.shadowMapBias = _PixLightsShadowMap[index].x;
     light.shadowMapType = (int)_PixLightsShadowMap[index].y;
-    light.shadowMapQuality = (int)_PixLightsShadowMap[index].z;
     light.shadowMapJitter = _PixLightsShadowMap[index].w > 0;
     light.shadowMapSize = _PixLightsShadowMapSize[index].xy;
     light.visibilityShadow = _PixLightsShadowMapSize[index].z;
+
+    int shadingFilter = _PixLightsShadowMap[index].z;
+    bool enableDiffuse = true;
+    bool enableSpecular = true;
+
+    if(shadingFilter==0)
+        light.enabled = false;
+    else if(shadingFilter==1)
+        enableSpecular = false;
+    else if(shadingFilter==2)
+        enableDiffuse = false;
+    
+
+    light.enableDiffuse = enableDiffuse;
+    light.enableSpecular = enableSpecular;
     
     return light;
 }

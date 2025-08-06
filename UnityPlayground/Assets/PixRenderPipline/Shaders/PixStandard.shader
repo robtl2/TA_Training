@@ -156,7 +156,8 @@ Shader "Pix/Standard"
                 float4 bentNormalRaw = input.bentNormal;
                 float3 bentNormal =bentNormalRaw.xyz*2 - 1; 
                 float len = length(bentNormal);
-                float ao = bentNormalRaw.w * len;
+                float ao = saturate((len + bentNormalRaw.w)*3);
+                ao = sq(ao);
                 bentNormal /= len;
 
                 #ifdef GPU_SKIN

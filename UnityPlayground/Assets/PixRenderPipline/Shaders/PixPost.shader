@@ -14,12 +14,6 @@ Shader "Hidden/Pix/Post"
         ZTest Always
         Cull Off
 
-        // Stencil
-        // {
-        //     Ref 10
-        //     Comp Less
-        // }
-       
         Pass
         {
             Name "PixPost"
@@ -81,7 +75,7 @@ Shader "Hidden/Pix/Post"
                 x = rgb_t;
             }
 
-            void Sharpen(inout half3 color, half contrast = 0.05)
+            void Sharpen(inout half3 color, half contrast = 0.2)
             {
                 half3 luminanceWeights = half3(0.299, 0.587, 0.114);
                 half gray = dot(color.rgb, luminanceWeights);
@@ -91,7 +85,7 @@ Shader "Hidden/Pix/Post"
 
                 if (edge > 0.01)
                 {
-                    half factor = (contrast == 0.0f) ? 1.0f : (1.0f + contrast * 4.0f);
+                    half factor = (contrast == 0.0f) ? 1.0f : (1.0f + contrast);
                     half midpoint = 0.5f;
                     color = (color - midpoint) * factor + midpoint;
                 }
@@ -104,17 +98,17 @@ Shader "Hidden/Pix/Post"
 
                 half3 rgb = LDR2HDR(color.rgb);
 
-            #ifdef PP_SHARPEN
-                Sharpen(rgb);
-            #endif
+                #ifdef PP_SHARPEN
+                    Sharpen(rgb);
+                #endif
 
-            #ifdef PP_TONEMAPPING
-                Tonemap(rgb);
-            #endif
+                #ifdef PP_TONEMAPPING
+                    Tonemap(rgb);
+                #endif
 
-            #if 0
-                if(any(color>1))color.rgb = half3(1,0,0);
-            #endif
+                #if 0
+                    if(any(color>1))color.rgb = half3(1,0,0);
+                #endif
                 
                 return half4(rgb, 1);
             }

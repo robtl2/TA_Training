@@ -23,7 +23,7 @@
 // float4x4 unity_MatrixVP;
 
 struct PixLight{
-    float4x4 VP;
+    bool enabled;
 
     int lightType;
     int shadowMapIndex;
@@ -40,10 +40,15 @@ struct PixLight{
 
     half shadowMapBias;
     int shadowMapType;
-    int shadowMapQuality; //给pcf pcss用的
+    // int shadowMapQuality; //给pcf pcss用的
     bool shadowMapJitter;
 
+    bool enableDiffuse;
+    bool enableSpecular;
+
     half visibilityShadow;
+
+    float4x4 VP;
 };
 
 

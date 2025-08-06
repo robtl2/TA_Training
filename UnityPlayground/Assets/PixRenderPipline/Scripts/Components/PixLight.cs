@@ -9,6 +9,7 @@ namespace PixRenderPipline
     [ExecuteInEditMode]
     public class PixLight : MonoBehaviour
     {
+        #region static 
         public const int MAX_LIGHT_COUNT = 64;
 
         public static PixLight mainLight;
@@ -63,14 +64,18 @@ namespace PixRenderPipline
             Medium,
             High,
         }
+        #endregion
 
+        [Header("Main")]
         public LightType lightType = LightType.Directional;
-
-        public SampleQuality shadowMapQuality = SampleQuality.Medium;
 
         public Color color = Color.white;
         public float intensity = 10;
         public float spotAngle;
+
+        [Header("ShadingFilter")]
+        public bool enableDiffuse = true;
+        public bool enableSpecular = true;
 
         [Header("ShadowMap")]
         public ShadowMapType shadowMapType = ShadowMapType.None;
@@ -335,7 +340,15 @@ namespace PixRenderPipline
             Vector4 shadowMapParam = Vector4.zero;
             shadowMapParam.x = bias;
             shadowMapParam.y = (int)shadowMapType;
-            shadowMapParam.z = (int)shadowMapQuality;
+
+            int shadingFilter = 0;
+            if (enableDiffuse && !enableSpecular) shadingFilter = 1;
+            if (!enableDiffuse && enableSpecular) shadingFilter = 2;
+            if (enableDiffuse && enableSpecular) shadingFilter = 3;
+
+            // Debug.Log(shadingFilter);
+
+            shadowMapParam.z = shadingFilter;
             shadowMapParam.w = shadowMapJitter ? 1 : 0;
             shadowMapPropList[i] = shadowMapParam;
 
