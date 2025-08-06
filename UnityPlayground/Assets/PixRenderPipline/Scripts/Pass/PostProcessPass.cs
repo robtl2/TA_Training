@@ -9,6 +9,7 @@ namespace PixRenderPipline
 
         Material materialTAA;
         static int _HistroyWeight = Shader.PropertyToID("_HistroyWeight");
+        static int _SharpenAmount = Shader.PropertyToID("_SharpenAmount");
 
         public static readonly int ColorBuff_Front = Shader.PropertyToID("_PixColorTex_Front");
 
@@ -27,6 +28,8 @@ namespace PixRenderPipline
             renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, TransparentPass.ColorBuff);
             renderer.cmb.SetGlobalTexture(DeferredPass.DepthDownSample, DeferredPass.DepthDownSample);
+
+            postMaterial.SetFloat(_SharpenAmount, setting.SharpenStrength);
 
             TriggerEvent(PixRenderEventName.BeforePostProcess);
 
@@ -52,7 +55,7 @@ namespace PixRenderPipline
                 PixDeferredRenderer dr = renderer as PixDeferredRenderer;
 
                 materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
-                materialTAA.SetFloat("_HistroyWeight", setting.TAA_histroy);
+                materialTAA.SetFloat(_HistroyWeight, setting.TAA_histroy);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
                 renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera], EarlyZPass.depthID);
                 renderer.cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);

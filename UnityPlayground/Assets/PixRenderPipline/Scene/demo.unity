@@ -394,7 +394,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skyType: 2
   displayColor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 1}
-  color: {r: 0.6431373, g: 0.71042, b: 0.7529412, a: 1}
+  color: {r: 0.5235849, g: 0.62954855, b: 0.6981132, a: 1}
   detherStep: 64
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   shData:
@@ -478,7 +478,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 0
-  color: {r: 0.46431112, g: 0.8867924, b: 0.8867923, a: 1}
+  color: {r: 0.3973834, g: 0.8867924, b: 0.8867924, a: 1}
   intensity: 3
   spotAngle: 0
   enableDiffuse: 1
@@ -703,6 +703,7 @@ MonoBehaviour:
   TAA_jitter: 1
   TAA_histroy: 0.8
   Enable_Sharpen: 1
+  SharpenStrength: 1.2
   Enable_Tonemapping: 1
   debugMode: 0
   debugSize: 1

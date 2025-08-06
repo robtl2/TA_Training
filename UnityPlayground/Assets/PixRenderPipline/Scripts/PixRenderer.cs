@@ -164,6 +164,7 @@ namespace PixRenderPipline
         
         readonly int _MatrixVP_Prev = Shader.PropertyToID("_MatrixVP_Prev");
         readonly int _TAA_Jitter = Shader.PropertyToID("_TAA_Jitter");
+        readonly int _ScreenTexelSize = Shader.PropertyToID("_ScreenTexelSize");
         
         // 相机上一帧的VP
         static Dictionary<Camera, Matrix4x4> VP_pre_map = new();
@@ -187,6 +188,8 @@ namespace PixRenderPipline
         protected virtual void SetupGlobalUniform()
         {
             var setting = PixRenderSetting.instance;
+
+            Shader.SetGlobalVector(_ScreenTexelSize, new Vector4(1.0f / size.x, 1.0f / size.y, size.x, size.y));
 
             if (!jitterUploaded)
             {

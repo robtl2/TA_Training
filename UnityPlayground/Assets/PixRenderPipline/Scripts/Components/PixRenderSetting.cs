@@ -56,6 +56,8 @@ namespace PixRenderPipline
         #region PostProcessing
         [Header("PostProcessing")]
         public bool Enable_Sharpen = true;
+        [Range(0, 2)]
+        public float SharpenStrength = 1.0f;
         public bool Enable_Tonemapping = true;
         #endregion
 
@@ -97,5 +99,6 @@ namespace PixRenderPipline
         {
             instance = null;
         }
+
     }
 }

@@ -44,7 +44,7 @@ Shader "Hidden/Pix/Post"
             TEXTURE2D(_PixColorTex);SAMPLER(sampler_PixColorTex);
             half2 _PixColorTex_TexelSize;
 
-            half2 _OutLineDepthNormalThreshold;
+            half _SharpenAmount;
 
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -75,21 +75,22 @@ Shader "Hidden/Pix/Post"
                 x = rgb_t;
             }
 
-            void Sharpen(inout half3 color, half contrast = 0.2)
+            void Sharpen(inout half3 color, half2 uv, half mask)
             {
-                half3 luminanceWeights = half3(0.299, 0.587, 0.114);
-                half gray = dot(color.rgb, luminanceWeights);
+                // 模拟一个3x3的高斯模糊采样
+                float3 blurred = color;
 
-                half2 dxy = half2(ddx(gray), ddy(gray));
-                half edge = dot(dxy,dxy);
+                float2 offset = _PixColorTex_TexelSize;
 
-                if (edge > 0.01 && edge <0.08)
-                {
-                    half factor = (contrast == 0.0f) ? 1.0f : (1.0f + contrast);
-                    half midpoint = 0.5f;
-                    color = (color - midpoint) * factor + midpoint;
-                    // color = half3(1,0,0);
-                }
+                blurred += SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv + half2(offset.x, 0)).rgb;
+                blurred += SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv + half2(-offset.x,0)).rgb;
+                blurred += SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv + half2(0,offset.y)).rgb;
+                blurred += SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv + half2(0,-offset.y)).rgb;
+                blurred /= 5;
+
+                float3 diff = color - blurred;
+
+                color = color + diff*mask*_SharpenAmount;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
@@ -97,11 +98,13 @@ Shader "Hidden/Pix/Post"
                 half2 uv = input.uv;
                 half4 color = SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv);
 
-                half3 rgb = LDR2HDR(color.rgb);
+                half3 rgb = color.rgb;
 
                 #ifdef PP_SHARPEN
-                    Sharpen(rgb);
+                    Sharpen(rgb, uv, color.a);
                 #endif
+
+                rgb = LDR2HDR(rgb);
 
                 #ifdef PP_TONEMAPPING
                     Tonemap(rgb);

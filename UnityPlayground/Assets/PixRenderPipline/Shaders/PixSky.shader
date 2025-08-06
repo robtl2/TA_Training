@@ -89,7 +89,7 @@ Shader "Hidden/Pix/Sky"
                 if(_Dethering>0)
                     ldr = detherColor(ldr, input.uv, _Dethering);
 
-                return half4(ldr,_SkyDisplayColor.a*0.5);
+                return half4(ldr,0);
             }
             ENDHLSL
         }
