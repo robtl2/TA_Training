@@ -55,12 +55,18 @@ half3 diffuseLobe(GBufferData gbufferData,  float NoV, float NoL, float LoH) {
 void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inout half3 result) 
 {
     half3 N = gbufferData.normalWS;
-    half3 V = gbufferData.viewDir;
     half3 L = light.direction;
-    half3 H = normalize(L + V);
+    half NoL_full = dot(N, L);
+    
+    // 逆光时可以有大片连续的象素被跳过
+    if(NoL_full<0.05){
+        return;
+    }
 
+    half3 V = gbufferData.viewDir;
+    half3 H = normalize(L + V);
     half NoV = gbufferData.NoV;
-    half3 NoL = saturate(dot(N, L));
+    half3 NoL = saturate(NoL_full);
     half NoH = saturate(dot(N, H));
     float LoH = saturate(dot(L, H));
 
