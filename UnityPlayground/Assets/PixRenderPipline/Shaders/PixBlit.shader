@@ -79,7 +79,7 @@ Shader "Hidden/Pix/Blit"
                 float2 uv : TEXCOORD0;
             };
 
-            TEXTURE2D(_PixColorTex);SAMPLER(sampler_PixColorTex);
+            TEXTURE2D(_PixOpaqueTex);SAMPLER(sampler_PixOpaqueTex);
 
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -98,7 +98,7 @@ Shader "Hidden/Pix/Blit"
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
-                half4 color = SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, input.uv);
+                half4 color = SAMPLE_TEXTURE2D(_PixOpaqueTex, sampler_PixOpaqueTex, input.uv);
 
                 // half2 packed = PackFloatToR8G8(depthRaw);
                 return color;

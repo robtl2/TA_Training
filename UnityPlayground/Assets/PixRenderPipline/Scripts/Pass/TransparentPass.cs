@@ -38,19 +38,7 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.AfterTransparent);
 
-            if (renderer.asset.enable_TAA)
-            {
-                PixDeferredRenderer dr = renderer as PixDeferredRenderer;
 
-                materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
-                materialTAA.SetFloat("_HistroyWeight", renderer.asset.TAA_histroy);
-                renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
-                renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera], EarlyZPass.depthID);
-                renderer.cmb.SetGlobalTexture(ColorBuff, ColorBuff);
-                renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 1);
-
-                renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_3);
-            }
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

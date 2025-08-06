@@ -28,7 +28,7 @@ Shader "Hidden/Pix/Deferred"
             #pragma fragment frag
             #pragma multi_compile _ ORTHOGRAPHIC
             #pragma multi_compile PIX_STYLE_PBR PIX_STYLE_NPR
-            #pragma multi_compile SSAO_QUALITY_OFF SSAO_QUALITY_LOW SSAO_QUALITY_MEDIUM SSAO_QUALITY_HIGH
+            #pragma multi_compile SSAO_QUALITY_OFF SSAO_QUALITY_POOR SSAO_QUALITY_LOW SSAO_QUALITY_MEDIUM SSAO_QUALITY_HIGH
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/light.hlsl"

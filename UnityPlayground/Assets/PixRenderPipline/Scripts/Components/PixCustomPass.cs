@@ -27,7 +27,7 @@ namespace PixRenderPipline
 
         void WhenBeforeTransparent(PixRenderer renderer)
         {
-            // if (renderer.asset.enable_TAA) return;
+            if (!isActiveAndEnabled) return;
 
             foreach (var r in renderers)
             {

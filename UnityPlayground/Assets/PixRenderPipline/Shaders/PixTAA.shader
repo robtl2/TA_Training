@@ -71,6 +71,7 @@ Shader "Hidden/Pix/TAA"
                     return half4(0,0,0,0);
                 
                 half4 color = SAMPLE_TEXTURE2D(_PixColorTex_Front, sampler_PixColorTex_Front, uv);
+                // color.rgb = LDR2HDR(color.rgb);
 
                 half weight = _HistroyWeight;
                 

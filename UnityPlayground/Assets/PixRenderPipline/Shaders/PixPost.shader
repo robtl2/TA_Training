@@ -63,24 +63,45 @@ Shader "Hidden/Pix/Post"
                 return output;
             }
 
-            float3 Tonemap(float3 x)
+            half3 Tonemap(half3 x)
             {
-                float A = 1.3; 
-                float B = 1; 
-                float C = 3.3; 
-                float D = 0.63; 
-                float E = 1.15;
-                float F = 4.08; 
+                half A = 1.3; 
+                half B = 1; 
+                half C = 3.3; 
+                half D = 0.63; 
+                half E = 1.15;
+                half F = 4.08; 
                 
                 return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
             }
 
+            half3 Sharpen(half3 color, half contrast){
+                half3 luminanceWeights = half3(0.299, 0.587, 0.114);
+                half gray = dot(color.rgb, luminanceWeights);
+
+                half2 dxy = half2(ddx(gray), ddy(gray));
+                half edge = dot(dxy,dxy);
+
+                if (edge > 0.01)
+                {
+                    half factor = (contrast == 0.0f) ? 1.0f : (1.0f + contrast * 4.0f);
+                    half midpoint = 0.5f;
+                    return (color - midpoint) * factor + midpoint;
+                }
+                else
+                    return color;
+            }
+
             half4 frag(VaryingsDepth input) : SV_Target
             {
-                float2 uv = input.uv;
+                half2 uv = input.uv;
                 half4 color = SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv);
 
                 color.rgb = LDR2HDR(color.rgb);
+
+            #if 1
+                color.rgb = Sharpen(color.rgb,0.05);
+            #endif
 
             #if 1
                 color.rgb = Tonemap(color.rgb);

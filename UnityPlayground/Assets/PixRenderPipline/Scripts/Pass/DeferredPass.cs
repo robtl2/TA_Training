@@ -54,12 +54,16 @@ namespace PixRenderPipline
                 material.SetVector(_SSAO_Props, ssao_props);
 
                 material.DisableKeyword("SSAO_QUALITY_OFF");
+                material.DisableKeyword("SSAO_QUALITY_POOR");
                 material.DisableKeyword("SSAO_QUALITY_LOW");
                 material.DisableKeyword("SSAO_QUALITY_MEDIUM");
                 material.DisableKeyword("SSAO_QUALITY_HIGH");
 
                 switch (renderer.asset.ssao_quality)
                 {
+                    case PixRenderer.SamplerQuality.Poor:
+                        material.EnableKeyword("SSAO_QUALITY_POOR");
+                        break;
                     case PixRenderer.SamplerQuality.Low:
                         material.EnableKeyword("SSAO_QUALITY_LOW");
                         break;
@@ -74,6 +78,7 @@ namespace PixRenderPipline
             else
             {
                 material.EnableKeyword("SSAO_QUALITY_OFF");
+                material.DisableKeyword("SSAO_QUALITY_POOR");
                 material.DisableKeyword("SSAO_QUALITY_LOW");
                 material.DisableKeyword("SSAO_QUALITY_MEDIUM");
                 material.DisableKeyword("SSAO_QUALITY_HIGH");

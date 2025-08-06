@@ -7,9 +7,15 @@ namespace PixRenderPipline
     {
         Material postMaterial;
 
+        Material materialTAA;
+        static int _HistroyWeight = Shader.PropertyToID("_HistroyWeight");
+
+        public static readonly int ColorBuff_Front = Shader.PropertyToID("_PixColorTex_Front");
+
         public PostProcessPass(PixRenderer renderer) : base("PixPostProcessPass", renderer)
         {
             postMaterial = new Material(Shader.Find("Hidden/Pix/Post"));
+            materialTAA = new Material(Shader.Find("Hidden/Pix/TAA"));
         }
 
         public override void Execute()
@@ -28,6 +34,20 @@ namespace PixRenderPipline
             renderer.cmb.ReleaseTemporaryRT(DeferredPass.DepthDownSample);
 
             TriggerEvent(PixRenderEventName.AfterPostProcess);
+
+            if (renderer.asset.enable_TAA)
+            {
+                PixDeferredRenderer dr = renderer as PixDeferredRenderer;
+
+                materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
+                materialTAA.SetFloat("_HistroyWeight", renderer.asset.TAA_histroy);
+                renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
+                renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera], EarlyZPass.depthID);
+                renderer.cmb.SetGlobalTexture(DeferredPass.ColorBuff, DeferredPass.ColorBuff);
+                renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 1);
+
+                renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_3);
+            }
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

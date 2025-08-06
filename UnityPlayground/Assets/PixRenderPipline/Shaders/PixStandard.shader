@@ -434,8 +434,12 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile SSAO_QUALITY_OFF
-            #pragma multi_compile _ GPU_SKIN
+            #pragma multi_compile _ TAA
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            #ifdef TAA
+            #define GPU_SKIN
+            #endif
 
             #ifdef GPU_SKIN
             #include "lib/gpuskin.hlsl"
@@ -482,7 +486,7 @@ Shader "Pix/Standard"
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 
                 #ifdef GPU_SKIN
-                output.positionCS.z -= 0.00002;
+                output.positionCS.z -= 0.00001;
                 #endif
 
                 return output;
