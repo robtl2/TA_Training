@@ -97,6 +97,12 @@ namespace PixRenderPipline
         [Range(0f, 0.0001f)]
         public float contactBias = 0.000005f;
 
+        [Header("VisbilityShadow")]
+        public bool enableVisbilityShadow = false;
+
+        [Range(0.001f,1.0f)]
+        public float visibilityShadowSoftness = 0.2f;
+
         [Header("Volume Light")]
         public bool volumeLight = false;
 
@@ -302,7 +308,9 @@ namespace PixRenderPipline
         {
             index = i;
 
-            shadowmapSizePropList[i] = new Vector4(shadowMapSize, 1.0f / shadowMapSize, 0, 0);
+            float visibilityShadow = visibilityShadowSoftness;
+            if (!enableVisbilityShadow) visibilityShadow = 0;
+            shadowmapSizePropList[i] = new Vector4(shadowMapSize, 1.0f / shadowMapSize, visibilityShadow, 0);
 
             Vector3 pos = transform.position;
             Vector4 posProp = new Vector4(pos.x, pos.y, pos.z, (int)lightType);

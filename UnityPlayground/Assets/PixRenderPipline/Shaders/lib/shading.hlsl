@@ -68,7 +68,8 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
     half3 diffuse = diffuseLobe(gbufferData, NoV, NoL, LoH);
     half shadow = 1;
     shadow *= ContactShadow(light, gbufferData);
-    shadow *= ShadowMap(light, srceenUV, gbufferData);
+    shadow *= VisibilityShadow(light, gbufferData);
+    shadow *= ShadowMap(light, gbufferData, srceenUV);
 
     half occ = selfOcclusion(gbufferData, H, gbufferData.roughness);
 

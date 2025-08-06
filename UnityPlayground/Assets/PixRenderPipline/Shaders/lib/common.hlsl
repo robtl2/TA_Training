@@ -84,9 +84,6 @@ half2 PosWorldToScreenUV(float3 posWorld){
     return uv;
 }
 
-half Dether(half2 uv, half alpha){
-
-}
 
 half2 DirToThetaPhi(float3 dir)
 {

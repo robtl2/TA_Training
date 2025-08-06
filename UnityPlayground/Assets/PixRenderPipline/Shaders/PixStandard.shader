@@ -510,7 +510,7 @@ Shader "Pix/Standard"
                 evaluateIBLSimple(diffuse, normalWS, result);
 
                 result = HDR2LDR(result);
-                color.a = smoothstep(0,0.2,color.a);
+                color.a = smoothstep(0,0.5,color.a);
 
                 // return half4(1,0,0,color.a);
 

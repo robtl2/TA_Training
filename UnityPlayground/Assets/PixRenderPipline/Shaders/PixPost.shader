@@ -14,11 +14,11 @@ Shader "Hidden/Pix/Post"
         ZTest Always
         Cull Off
 
-        Stencil
-        {
-            Ref 10
-            Comp Less
-        }
+        // Stencil
+        // {
+        //     Ref 10
+        //     Comp Less
+        // }
        
         Pass
         {
@@ -27,6 +27,10 @@ Shader "Hidden/Pix/Post"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+
+            #pragma multi_compile _ PP_SHARPEN
+            #pragma multi_compile _ PP_TONEMAPPING
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/common.hlsl"
             #include "lib/gbuffer.hlsl"
@@ -63,7 +67,7 @@ Shader "Hidden/Pix/Post"
                 return output;
             }
 
-            half3 Tonemap(half3 x)
+            void Tonemap(inout half3 x)
             {
                 half A = 1.3; 
                 half B = 1; 
@@ -71,11 +75,14 @@ Shader "Hidden/Pix/Post"
                 half D = 0.63; 
                 half E = 1.15;
                 half F = 4.08; 
+
+                half3 rgb_t = ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
                 
-                return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+                x = rgb_t;
             }
 
-            half3 Sharpen(half3 color, half contrast){
+            void Sharpen(inout half3 color, half contrast = 0.05)
+            {
                 half3 luminanceWeights = half3(0.299, 0.587, 0.114);
                 half gray = dot(color.rgb, luminanceWeights);
 
@@ -86,10 +93,8 @@ Shader "Hidden/Pix/Post"
                 {
                     half factor = (contrast == 0.0f) ? 1.0f : (1.0f + contrast * 4.0f);
                     half midpoint = 0.5f;
-                    return (color - midpoint) * factor + midpoint;
+                    color = (color - midpoint) * factor + midpoint;
                 }
-                else
-                    return color;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
@@ -97,19 +102,21 @@ Shader "Hidden/Pix/Post"
                 half2 uv = input.uv;
                 half4 color = SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv);
 
-                color.rgb = LDR2HDR(color.rgb);
+                half3 rgb = LDR2HDR(color.rgb);
 
-            #if 1
-                color.rgb = Sharpen(color.rgb,0.05);
+            #ifdef PP_SHARPEN
+                Sharpen(rgb);
             #endif
 
-            #if 1
-                color.rgb = Tonemap(color.rgb);
-            #else
+            #ifdef PP_TONEMAPPING
+                Tonemap(rgb);
+            #endif
+
+            #if 0
                 if(any(color>1))color.rgb = half3(1,0,0);
             #endif
                 
-                return color;
+                return half4(rgb, 1);
             }
             ENDHLSL
         }

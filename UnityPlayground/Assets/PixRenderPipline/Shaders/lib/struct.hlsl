@@ -42,6 +42,8 @@ struct PixLight{
     int shadowMapType;
     int shadowMapQuality; //给pcf pcss用的
     bool shadowMapJitter;
+
+    half visibilityShadow;
 };
 
 

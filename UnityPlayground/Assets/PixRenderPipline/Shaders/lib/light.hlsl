@@ -5,6 +5,7 @@
 #include "common.hlsl"
 #include "gbuffer.hlsl"
 #include "random.hlsl"
+#include "bentnormal.hlsl"
 
 
 #define MAX_PIX_LIGHT_COUNT 64
@@ -49,7 +50,6 @@ PixLight GetPixLight(int index)
     PixLight light;
     light.lightType = (int)_PixLightsPosition[index].w;
     light.shadowMapIndex = (int)_PixLightsDirection[index].w;
-    light.shadowMapSize = _PixLightsShadowMapSize[index].xy;
 
     light.VP = _PixLights_VP[index];
     light.position = _PixLightsPosition[index].xyz;
@@ -65,11 +65,22 @@ PixLight GetPixLight(int index)
     light.shadowMapType = (int)_PixLightsShadowMap[index].y;
     light.shadowMapQuality = (int)_PixLightsShadowMap[index].z;
     light.shadowMapJitter = _PixLightsShadowMap[index].w > 0;
+    light.shadowMapSize = _PixLightsShadowMapSize[index].xy;
+    light.visibilityShadow = _PixLightsShadowMapSize[index].z;
     
     return light;
 }
 
-half ShadowMap(PixLight light, half2 screenUV, GBufferData gbufferData){
+half VisibilityShadow(PixLight light, GBufferData gbufferData){
+    if(light.visibilityShadow == 0)return 1.0h;
+
+    half3 L = light.direction;
+    half shadow = selfOcclusion(gbufferData, L, light.visibilityShadow);
+
+    return shadow;
+}
+
+half ShadowMap(PixLight light, GBufferData gbufferData, half2 screenUV){
     if(light.shadowMapBias==0.0)return 1.0h;
 
     float4 clipPos = mul(light.VP, float4(gbufferData.positionWS,1));

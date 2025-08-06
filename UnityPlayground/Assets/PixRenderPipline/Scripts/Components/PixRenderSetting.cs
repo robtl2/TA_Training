@@ -53,6 +53,12 @@ namespace PixRenderPipline
 
         #endregion
 
+        #region PostProcessing
+        [Header("PostProcessing")]
+        public bool Enable_Sharpen = true;
+        public bool Enable_Tonemapping = true;
+        #endregion
+
 
         #region GBuffer Debug
         public enum DebugMode

@@ -119,6 +119,126 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &164846889
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 164846893}
+  - component: {fileID: 164846892}
+  - component: {fileID: 164846891}
+  - component: {fileID: 164846890}
+  m_Layer: 0
+  m_Name: RimLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &164846890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164846889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0db0b948795fe41fc866dd97fa9f4137, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lightType: 0
+  shadowMapQuality: 1
+  color: {r: 0.39684942, g: 0.76636696, b: 0.9245283, a: 1}
+  intensity: 5.7
+  spotAngle: 0
+  shadowMapType: 0
+  shadowMapSize: 512
+  shadowMapJitter: 1
+  shadowMapBias: 0.0072
+  shadowMapArea: 1
+  boxArea: {fileID: 1795428412}
+  enableContactShadow: 0
+  contactShadowJitter: 1
+  contactShadowJitterRadius: 3
+  contactRayLength: 0.00912
+  contactSampleCount: 6
+  contactBias: 0.000057
+  enableVisbilityShadow: 1
+  visibilityShadowSoftness: 0.363
+  volumeLight: 0
+  bakedShadowMap: {fileID: 0}
+--- !u!23 &164846891
+MeshRenderer:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164846889}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &164846892
+MeshFilter:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164846889}
+  m_Mesh: {fileID: 0}
+--- !u!4 &164846893
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164846889}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.04328292, y: 0.24216454, z: 0.17422754, w: -0.9534819}
+  m_LocalPosition: {x: 0.198, y: 1.457, z: -0.076}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: -0.106, y: 331.518, z: -20.684}
 --- !u!1 &602252875
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,9 +269,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   skyType: 2
-  displayColor: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 1}
-  color: {r: 0.6415094, g: 0.60659415, b: 0.56585974, a: 1}
-  detherStep: 127
+  displayColor: {r: 0.16981131, g: 0.16260234, b: 0.16260234, a: 1}
+  color: {r: 0.64435744, g: 0.754717, b: 0.74574846, a: 1}
+  detherStep: 128
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   shData:
     shCoefficients:
@@ -165,7 +285,7 @@ MonoBehaviour:
     - {x: -0.086318225, y: -0.107339576, z: -0.13044548, w: -0.17397688}
     - {x: -0.4413207, y: -0.639625, z: -0.9142936, w: 0.084583916}
   blurLevel: 6.25
-  intensity: 1.64
+  intensity: 0.46
   fovScale: 1.3
 --- !u!4 &602252877
 Transform:
@@ -212,7 +332,7 @@ GameObject:
   - component: {fileID: 870345107}
   - component: {fileID: 870345106}
   m_Layer: 0
-  m_Name: PixMainLight
+  m_Name: KeyLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -233,7 +353,7 @@ MonoBehaviour:
   lightType: 0
   shadowMapQuality: 1
   color: {r: 0.8679245, g: 0.8329262, b: 0.749199, a: 1}
-  intensity: 3.87
+  intensity: 3
   spotAngle: 0
   shadowMapType: 1
   shadowMapSize: 512
@@ -243,10 +363,12 @@ MonoBehaviour:
   boxArea: {fileID: 1795428412}
   enableContactShadow: 1
   contactShadowJitter: 1
-  contactShadowJitterRadius: 1
-  contactRayLength: 0.0038
+  contactShadowJitterRadius: 3
+  contactRayLength: 0.00487
   contactSampleCount: 1
   contactBias: 0.000057
+  enableVisbilityShadow: 0
+  visibilityShadowSoftness: 0.001
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &870345107
@@ -441,9 +563,9 @@ MonoBehaviour:
   style: 0
   colorSpace: 1
   GPU_OCC_Culling: 0
-  ao_factor: 0.788
+  ao_factor: 0.779
   Enable_SSAO: 1
-  ssao_factor: 0.796
+  ssao_factor: 0.788
   ssao_radius: 20
   ssao_stepCount: 2
   ssao_jitterRadius: 0.02
@@ -451,6 +573,8 @@ MonoBehaviour:
   enable_TAA: 1
   TAA_jitter: 1
   TAA_histroy: 0.8
+  Enable_Sharpen: 1
+  Enable_Tonemapping: 1
   debugMode: 0
   debugSize: 0.602
 --- !u!4 &1365793593
@@ -518,7 +642,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7823293702887809713, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7823293702887809713, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -530,7 +654,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -6452266432751415832, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -6435399192587130656, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_IsActive
@@ -667,6 +791,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 611652130}
+    - targetCorrespondingSourceObject: {fileID: 2825678213733817759, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1887077510}
     - targetCorrespondingSourceObject: {fileID: -345174089952144456, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2088854910}
@@ -724,6 +851,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1887077504 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2825678213733817759, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
+  m_PrefabInstance: {fileID: 1472155546}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1887077510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1887077504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b6985768462f4498a248bf2924cf2d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pass: PixTransparent
+  insetEvent: 8
+  repeatTimes: 1
 --- !u!1 &2088854904 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -345174089952144456, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
@@ -751,6 +898,7 @@ SceneRoots:
   - {fileID: 1365793593}
   - {fileID: 961739753}
   - {fileID: 870345109}
-  - {fileID: 1795428413}
+  - {fileID: 164846893}
   - {fileID: 602252877}
+  - {fileID: 1795428413}
   - {fileID: 1472155546}

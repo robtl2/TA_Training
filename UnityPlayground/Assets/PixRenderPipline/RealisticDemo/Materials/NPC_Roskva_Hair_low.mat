@@ -93,7 +93,7 @@ Material:
     - _Metallic: 0
     - _MetallicOffset: -1
     - _Mode: 0
-    - _NormalIntensity: 1.201
+    - _NormalIntensity: 1.57
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.05
     - _OutlineZOffset: 0

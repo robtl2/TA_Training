@@ -30,6 +30,16 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.BeforePostProcess);
 
+            if (setting.Enable_Sharpen)
+                postMaterial.EnableKeyword("PP_SHARPEN");
+            else
+                postMaterial.DisableKeyword("PP_SHARPEN");
+
+            if (setting.Enable_Tonemapping)
+                postMaterial.EnableKeyword("PP_TONEMAPPING");
+            else
+                postMaterial.DisableKeyword("PP_TONEMAPPING");
+
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, postMaterial, 0, 0);
 
             renderer.cmb.ReleaseTemporaryRT(TransparentPass.ColorBuff);
