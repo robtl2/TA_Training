@@ -68,7 +68,6 @@ Shader "Pix/Standard"
 
             #include "lib/light.hlsl"
             #include "lib/gbuffer.hlsl"
-            #include "lib/random.hlsl"
             
             struct Attributes
             {
@@ -205,15 +204,7 @@ Shader "Pix/Standard"
                 screenUV = screenUV*0.5+0.5;
 
                 #if _ALPHATEST_ON
-                    #ifdef TAA
-                        half alpha = color.a;
-                        // half c = _Cutoff*0.5;
-                        alpha = smoothstep(0, 1-_Cutoff*0.5,alpha);
-                        half a = dether(screenUV, alpha) - 0.001;
-                        clip(a);
-                    #else
-                        clip(color.a - _Cutoff);
-                    #endif
+                    TestAlpha(color.a, _Cutoff, screenUV);
                 #endif
 
                 float3 normal = normalize(input.normalVS);
@@ -275,7 +266,7 @@ Shader "Pix/Standard"
             #pragma multi_compile _ TAA
             #pragma multi_compile _ GPU_SKIN
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "lib/random.hlsl"
+            #include "lib/common.hlsl"
 
             #ifdef TAA
             #define GPU_SKIN
@@ -326,35 +317,23 @@ Shader "Pix/Standard"
                 float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
 
                 output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
+                output.screenUV = output.positionCS;
                 
                 #ifdef _ALPHATEST_ON
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 #endif
-
-                // #ifdef TAA
-                output.screenUV = output.positionCS;
-                // #endif
 
                 return output;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
-            #ifdef _ALPHATEST_ON
+                #ifdef _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
-
-                #ifdef TAA
-                    half2 screenUV = input.screenUV.xy/input.screenUV.w;
-                    screenUV = screenUV*0.5+0.5;
-                    alpha = smoothstep(0,1 - _Cutoff*0.5,alpha);
-                    half a = dether(screenUV, alpha) - 0.001;
-                    clip(a);
-                #else
-                    clip(alpha - _Cutoff);
+                TestAlpha(alpha, _Cutoff, input.screenUV);
                 #endif
-            #endif
 
-                return 1;
+                return 0;
             }
             ENDHLSL
         }

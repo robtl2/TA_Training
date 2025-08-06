@@ -36,7 +36,6 @@ half sampleDepth(float2 uv){
     return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
 }
 
-
 half sampleDepthDownSample(float2 uv){
     return SAMPLE_TEXTURE2D(_PixDepthDownSample, sampler_PixDepthDownSample, uv).r;
 }

@@ -18,7 +18,7 @@ namespace PixRenderPipline
             // 创建深度缓冲区
             renderer.cmb.GetTemporaryRT(nameID, renderer.size.x, renderer.size.y, 32, FilterMode.Point, RenderTextureFormat.Depth);
             renderer.cmb.SetRenderTarget(depthID);
-            renderer.cmb.ClearRenderTarget(true, true, black);
+            renderer.cmb.ClearRenderTarget(true, true, Color.clear);
 
             TriggerEvent(PixRenderEventName.BeforeEarlyZ);
 

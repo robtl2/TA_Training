@@ -84,7 +84,7 @@ Material:
     - _BentNormal: 0
     - _BumpScale: 1
     - _CullMode: 0
-    - _Cutoff: 0.675
+    - _Cutoff: 0.8
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1

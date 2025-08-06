@@ -86,7 +86,6 @@ namespace PixRenderPipline
             this.camera = camera;
             this.asset = asset;
             this.frameIndex = frameIndex;
-            jitterUploaded = false;
 
             frustum = GeometryUtility.CalculateFrustumPlanes(camera);
         }
@@ -170,17 +169,17 @@ namespace PixRenderPipline
         
         static float2[] haltonSamples = new float2[]
         {
-            new float2(0.5f, 0.5f),
-            new float2(0.25f, 0.75f),
-            new float2(0.75f, 0.25f),
-            new float2(0.125f, 0.625f),
-            new float2(0.625f, 0.125f),
-            new float2(0.375f, 0.875f),
-            new float2(0.875f, 0.375f),
-            new float2(0.0625f, 0.5625f)
+            new (0.0f, 0.0f),
+            new (-0.5f, 0.5f),
+            new (0.5f, -0.5f),
+            new (-0.75f, 0.25f),
+            new (0.25f, -0.75f),
+            new (-0.25f, 0.75f),
+            new (0.75f, -0.25f),
+            new (-0.875f, 0.125f)
         };
 
-        bool jitterUploaded = false;
+        public bool jitterUploaded = false;
         float2 taaJitter = float2.zero;
 
         protected virtual void SetupGlobalUniform()
@@ -190,9 +189,8 @@ namespace PixRenderPipline
                 jitterUploaded = true;
 
                 int jitterIndex = (frameIndex + 1) % haltonSamples.Length;
-                float2 jitter = haltonSamples[jitterIndex];
+                taaJitter = haltonSamples[jitterIndex];
 
-                taaJitter = jitter * 2 - 1;
                 taaJitter *= asset.TAA_jitter;
 
                 if (asset.enable_TAA)

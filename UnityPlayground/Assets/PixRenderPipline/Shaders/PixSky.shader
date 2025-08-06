@@ -86,18 +86,8 @@ Shader "Hidden/Pix/Sky"
 
                 half3 ldr = HDR2LDR(sky);
 
-                if(_Dethering>0){
-                    ldr *= _Dethering;
-                    half3 rgb = floor(ldr);
-                    half3 f = frac(ldr);
-
-                    half3 d = dether(input.uv, f);
-
-                    rgb = lerp(rgb-1,rgb,d);
-                    rgb/=_Dethering;
-
-                    ldr = rgb;
-                }
+                if(_Dethering>0)
+                    ldr = detherColor(ldr, input.uv, _Dethering);
 
                 return half4(ldr,_SkyDisplayColor.a*0.5);
             }

@@ -35,6 +35,8 @@ namespace PixRenderPipline
                 renderer.Setup(context, camera, asset, frameIndex);
                 renderer.Render();
             }
+
+            renderer.jitterUploaded = false;
         }
 
         protected override void Dispose(bool disposing)

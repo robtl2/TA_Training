@@ -3,8 +3,24 @@
 
 #include "struct.hlsl"
 #include "mathacc.hlsl"
+#include "random.hlsl"
 
 #define MATH_ACC 1
+
+void TestAlpha(half alpha, half cutOff, half2 screenUV){
+    #ifdef TAA
+        clip(detherAlpha(alpha, cutOff, screenUV));
+    #else
+        clip(alpha - cutOff);
+    #endif
+}
+
+void TestAlpha(half alpha, half cuttOff, half4 clipPos){
+    half2 screenUV = clipPos.xy/clipPos.w;
+    screenUV = screenUV*0.5+0.5;
+
+    TestAlpha(alpha, cuttOff, screenUV);
+}
 
 // 将两个int打包成一个8bit的float
 // value1: 5bit (0-31) 用来装metallic
@@ -61,6 +77,10 @@ half2 PosWorldToScreenUV(float3 posWorld){
     uv.y = 1.0h - uv.y;
     #endif
     return uv;
+}
+
+half Dether(half2 uv, half alpha){
+
 }
 
 half2 DirToThetaPhi(float3 dir)

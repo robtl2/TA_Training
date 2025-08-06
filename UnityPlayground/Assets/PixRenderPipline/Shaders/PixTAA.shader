@@ -15,12 +15,6 @@ Shader "Hidden/Pix/TAA"
        
         Pass
         {
-            Stencil
-            {
-                Ref 0
-                Comp NotEqual
-            }
-
             Blend srcAlpha OneMinusSrcAlpha, Zero One
             Name "PixPost"
 
