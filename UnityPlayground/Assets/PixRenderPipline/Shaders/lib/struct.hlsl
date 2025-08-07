@@ -6,21 +6,29 @@
 #define LIGHT_TYPE_SPOT         1
 #define LIGHT_TYPE_POINT        2
 
-#define SHADOWMAP_TYPE_NONE     0
-#define SHADOWMAP_TYPE_HARD     1
-#define SHADOWMAP_TYPE_PCF      2
-#define SHADOWMAP_TYPE_PCSS     3
+#define SAMPLE_QUALITY_POOR     0
+#define SAMPLE_QUALITY_LOW      1
+#define SAMPLE_QUALITY_MEDIUM   2
+#define SAMPLE_QUALITY_HIGH     3
 
-#define SAMPLE_QUALITY_LOW      0
-#define SAMPLE_QUALITY_MEDIUM   1
-#define SAMPLE_QUALITY_HIGH     2
+#define SHADING_MODEL_UNLIT     0
+#define SHADING_MODEL_LIT       1
+#define SHADING_MODEL_HAIR      2
+#define SHADING_MODEL_SSS       3
 
-#define SHADING_MODEL_UNLIT  0
-#define SHADING_MODEL_LIT    1
-#define SHADING_MODEL_HAIR   2
 // ----------------------------------------------
 
-// float4x4 unity_MatrixVP;
+struct PixSSSProfile{
+    bool enabled;
+
+    half4 scatteringColor;
+    half scatteringRadius;
+    half scatteringIntensity;
+
+    half4 transmissionColor;
+    half transmissionRadius;
+    half transmissionIntensity;
+};
 
 struct PixLight{
     bool enabled;

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Text.RegularExpressions;
@@ -67,1539 +66,1557 @@ using System.Linq;
 
 public class PackedShaderInfo
 {
-	public static string currentGroupName = "";
+    public static string currentGroupName = "";
 
-	public static List<string> PackedFeatureNames = new List<string>();
-	public static List<string> PackedFeatureGroups = new List<string>();
+    public static List<string> PackedFeatureNames = new List<string>();
+    public static List<string> PackedFeatureGroups = new List<string>();
 
-	public static Dictionary<string, Dictionary<string, Shader>> PackedShaders = new Dictionary<string, Dictionary<string, Shader>>();
+    public static Dictionary<string, Dictionary<string, Shader>> PackedShaders = new Dictionary<string, Dictionary<string, Shader>>();
 
-	public string baseShader;
-	public string shaderHeader;
-	public string keywordGroup;
-	public string[] keywords;
-	public int maxFeatureCount;
+    public string baseShader;
+    public string shaderHeader;
+    public string keywordGroup;
+    public string[] keywords;
+    public int maxFeatureCount;
 
-	public PackedShaderInfo(string info, int maxFeatureCount)
-	{
-		this.maxFeatureCount = maxFeatureCount;
+    public PackedShaderInfo(string info, int maxFeatureCount)
+    {
+        this.maxFeatureCount = maxFeatureCount;
 
-		string[] infos = info.Split('|');
+        string[] infos = info.Split('|');
 
-		baseShader = infos[0];
-		shaderHeader = infos[1];
-		keywordGroup = infos[2];
-		keywords = infos[3].Split(',');
-	}
+        baseShader = infos[0];
+        shaderHeader = infos[1];
+        keywordGroup = infos[2];
+        keywords = infos[3].Split(',');
+    }
 
 
 
-	public static Dictionary<string, Dictionary<string, string>> CollectPackedShaders(List<PackedShaderInfo> packedShaderInfos, List<StripPackedRule> stripPackedRules)
-	{
-		Dictionary<string, Dictionary<string, string>> packedShaderNames = new Dictionary<string, Dictionary<string, string>>();
+    public static Dictionary<string, Dictionary<string, string>> CollectPackedShaders(List<PackedShaderInfo> packedShaderInfos, List<StripPackedRule> stripPackedRules)
+    {
+        Dictionary<string, Dictionary<string, string>> packedShaderNames = new Dictionary<string, Dictionary<string, string>>();
 
-		if (packedShaderInfos.Count == 0) return packedShaderNames;
+        if (packedShaderInfos.Count == 0) return packedShaderNames;
 
-		PackedFeatureNames.Clear();
+        PackedFeatureNames.Clear();
 
-		foreach (var packedShaderInfo in packedShaderInfos)
-		{
-			string PackedShaderHeader = packedShaderInfo.shaderHeader;
+        foreach (var packedShaderInfo in packedShaderInfos)
+        {
+            string PackedShaderHeader = packedShaderInfo.shaderHeader;
 
-			foreach (var name in packedShaderInfo.keywords)
-				if (!PackedFeatureNames.Contains(name))
-					PackedFeatureNames.Add(name);
-		}
+            foreach (var name in packedShaderInfo.keywords)
+                if (!PackedFeatureNames.Contains(name))
+                    PackedFeatureNames.Add(name);
+        }
 
-		foreach (var packedShaderInfo in packedShaderInfos)
-		{
-			List<int> ids = new List<int>();
-			foreach (var name in packedShaderInfo.keywords) {
-				int id = PackedFeatureNames.IndexOf(name);
-				ids.Add(id);
-			}
+        foreach (var packedShaderInfo in packedShaderInfos)
+        {
+            List<int> ids = new List<int>();
+            foreach (var name in packedShaderInfo.keywords)
+            {
+                int id = PackedFeatureNames.IndexOf(name);
+                ids.Add(id);
+            }
 
-			string groupName = packedShaderInfo.keywordGroup;
-			if (groupName == "__") groupName = "";
+            string groupName = packedShaderInfo.keywordGroup;
+            if (groupName == "__") groupName = "";
 
-			if(!PackedShaders.ContainsKey(groupName))
-				PackedShaders[groupName] = new Dictionary<string, Shader>();
+            if (!PackedShaders.ContainsKey(groupName))
+                PackedShaders[groupName] = new Dictionary<string, Shader>();
 
-			PackedShaders[groupName][""] = Shader.Find(packedShaderInfo.baseShader);
+            PackedShaders[groupName][""] = Shader.Find(packedShaderInfo.baseShader);
 
-			packedShaderNames[groupName] = new Dictionary<string, string>();
-			if (groupName != "") {
-				packedShaderNames[groupName][""] = packedShaderInfo.baseShader;
-			}
+            packedShaderNames[groupName] = new Dictionary<string, string>();
+            if (groupName != "")
+            {
+                packedShaderNames[groupName][""] = packedShaderInfo.baseShader;
+            }
 
-			PackedFeatureGroups.Add(packedShaderInfo.keywordGroup);
+            PackedFeatureGroups.Add(packedShaderInfo.keywordGroup);
 
-			List<List<int>> featureIDs = new List<List<int>>();
-			CollectPackedFeatureIDs(packedShaderInfo.maxFeatureCount, new List<int>(), 0, ids, featureIDs);
+            List<List<int>> featureIDs = new List<List<int>>();
+            CollectPackedFeatureIDs(packedShaderInfo.maxFeatureCount, new List<int>(), 0, ids, featureIDs);
 
-			foreach (var fIDs in featureIDs)
-			{
-				bool pass = true;
-				foreach (var rule in stripPackedRules) {
-					int A = PackedFeatureNames.IndexOf(rule.keyword);
+            foreach (var fIDs in featureIDs)
+            {
+                bool pass = true;
+                foreach (var rule in stripPackedRules)
+                {
+                    int A = PackedFeatureNames.IndexOf(rule.keyword);
 
-					if (fIDs.Contains(A)) {
-						foreach (var k in rule.keywords) {
-							int B = PackedFeatureNames.IndexOf(k);
-							if (fIDs.Contains(B)) {
-								pass = false;
-								break;
-							}
-						}
-					}
+                    if (fIDs.Contains(A))
+                    {
+                        foreach (var k in rule.keywords)
+                        {
+                            int B = PackedFeatureNames.IndexOf(k);
+                            if (fIDs.Contains(B))
+                            {
+                                pass = false;
+                                break;
+                            }
+                        }
+                    }
 
-					if (!pass) break;
-				}
+                    if (!pass) break;
+                }
 
-				if (!pass) continue;
+                if (!pass) continue;
 
-				string key = "";
-				string shaderName = packedShaderInfo.shaderHeader;
-				for (int i = 0; i < fIDs.Count; ++i)
-				{
-					key += fIDs[i].ToString();
-					shaderName += PackedFeatureNames[fIDs[i]];
-					if (i < fIDs.Count - 1)
-					{
-						key += ",";
-						shaderName += "_";
-					}
-				}
+                string key = "";
+                string shaderName = packedShaderInfo.shaderHeader;
+                for (int i = 0; i < fIDs.Count; ++i)
+                {
+                    key += fIDs[i].ToString();
+                    shaderName += PackedFeatureNames[fIDs[i]];
+                    if (i < fIDs.Count - 1)
+                    {
+                        key += ",";
+                        shaderName += "_";
+                    }
+                }
 
-				PackedShaders[groupName][key] = Shader.Find(shaderName);
-				packedShaderNames[groupName][key] = shaderName;
-			}
-		}
+                PackedShaders[groupName][key] = Shader.Find(shaderName);
+                packedShaderNames[groupName][key] = shaderName;
+            }
+        }
 
-		return packedShaderNames;
-	}
+        return packedShaderNames;
+    }
 
-	static void CollectPackedFeatureIDs(int maxFeatureCount, List<int> headIDs, int pid, List<int> cids, List<List<int>> featureIds)
-	{
-		List<int> curHeadIDs = new List<int>();
-		foreach (int i in headIDs) curHeadIDs.Add(i);
+    static void CollectPackedFeatureIDs(int maxFeatureCount, List<int> headIDs, int pid, List<int> cids, List<List<int>> featureIds)
+    {
+        List<int> curHeadIDs = new List<int>();
+        foreach (int i in headIDs) curHeadIDs.Add(i);
 
-		foreach (int i in cids)
-		{
-			List<int> curIDs = new List<int>();
-			foreach (int id in curHeadIDs) curIDs.Add(id);
-			curIDs.Add(i);
-			featureIds.Add(curIDs);
+        foreach (int i in cids)
+        {
+            List<int> curIDs = new List<int>();
+            foreach (int id in curHeadIDs) curIDs.Add(id);
+            curIDs.Add(i);
+            featureIds.Add(curIDs);
 
-			List<int> _cids = new List<int>();
-			foreach (int id in cids)
-			{
-				if (id > i) _cids.Add(id);
-			}
+            List<int> _cids = new List<int>();
+            foreach (int id in cids)
+            {
+                if (id > i) _cids.Add(id);
+            }
 
-			if (curIDs.Count < maxFeatureCount)
-				CollectPackedFeatureIDs(maxFeatureCount, curIDs, i, _cids, featureIds);
-		}
-	}
+            if (curIDs.Count < maxFeatureCount)
+                CollectPackedFeatureIDs(maxFeatureCount, curIDs, i, _cids, featureIds);
+        }
+    }
 }
 
 public class StripPackedRule
 {
-	public string keyword;
-	public List<string> keywords;
+    public string keyword;
+    public List<string> keywords;
 
-	public StripPackedRule(string ruleInfo)
-	{
-		keyword = "";
-		keywords = new List<string>();
+    public StripPackedRule(string ruleInfo)
+    {
+        keyword = "";
+        keywords = new List<string>();
 
-		Regex regex = new Regex(@"\s*\([^\)]*\)\s*");//所有()内的内容
-		Match match = regex.Match(ruleInfo);
+        Regex regex = new Regex(@"\s*\([^\)]*\)\s*");//所有()内的内容
+        Match match = regex.Match(ruleInfo);
 
-		if (match.Success)
-		{
-			keyword = match.Value.Substring(1, match.Value.Length - 2);
-		}
+        if (match.Success)
+        {
+            keyword = match.Value.Substring(1, match.Value.Length - 2);
+        }
 
-		regex = new Regex(@"/.*");         //  右斜杠右边的字符串
-		match = regex.Match(ruleInfo);
+        regex = new Regex(@"/.*");         //  右斜杠右边的字符串
+        match = regex.Match(ruleInfo);
 
-		if (match.Success)
-		{
-			string keywordStr = match.Value.Substring(1);
-			var keys = keywordStr.Split(',');
-			foreach (var k in keys) keywords.Add(k);
-		}
-	}
+        if (match.Success)
+        {
+            string keywordStr = match.Value.Substring(1);
+            var keys = keywordStr.Split(',');
+            foreach (var k in keys) keywords.Add(k);
+        }
+    }
 }
 
 public class ShaderPropertie
 {
-	#region type
-	public enum PType
-	{
-		Group,
-		ToggleWithKeyword,
-		Toggle,
-		TogglePass,
-		EnumWithKeywords,
-		Enum,
-		Label,
-		Vector,
-		VectorPlus,
-		Space,
-		KeywordLink,
-		KeywordStrip,
-		KeywordWithAnyEnumActive,
-		BlendMode,
-
-		FeatureChecker,
-		FeatureGroup,
-		
-		None,
-	}
-	#endregion
-
-	public static string PackedFeaturesKey = "";
-
-
-	#region parse helper
-	public const string PACKED_SHADER_NAME = "PACKED_SHADER";	//用于定义packedShader信息的属性
-	const string GROUP_NAME = "Group#";     //特殊情况:Group使用材质属性的name，而不是displayName来判断
-	const string IGNORE_DISPLAY = "__";     //需要先排除用于跳过显示的标识，然后再用PTypeDic中的Key作类型判断
-
-	static Regex BracketsRegex = new Regex(@"\s*\([^\)]*\)\s*");//所有()内的内容,包括()
-	static Regex FieldsRegex = new Regex(@"\[(.*)\]");          //[]内的字符串,包括[]
-	static Regex ImporterRuleRegex = new Regex(@"\{(.*)\}");    //{}内的字符串,包括{}
-	static Regex RightOfSharpRegex = new Regex(@"#.*");         //"#"右边的字符串,包括"#"
-	static Regex RightOfColonRegex = new Regex(@":.*");         //":"右边的字符串,包括":"
-	static Regex LeftOfColonRegex = new Regex(@"[^:]*");        //":"左边的字符串
-	static Regex LeftOfSemicolonRegex = new Regex(@"[^;]*");    //";"左边的字符串
-	static Regex RightOfSemicolonRegex = new Regex(@";.*");     //";"右边的字符串
-
-
-	//通过displayName字符串的前两个字符判断类型
-	static readonly Dictionary<string, PType> PTypeDic = new Dictionary<string, PType> {
-		{ "T(", PType.ToggleWithKeyword },
-		{ "T/", PType.Toggle },
-		{ "P(", PType.TogglePass },
-		{ "E(", PType.EnumWithKeywords },
-		{ "E/", PType.Enum},
-		{ "L/", PType.Label},
-		{ "V/", PType.Vector},
-		{ "V(", PType.VectorPlus},
-		{ " /", PType.Space },
-		{ "K&", PType.KeywordLink},
-		{ "K!", PType.KeywordStrip},
-		{ "K|", PType.KeywordWithAnyEnumActive},
-		{ "B/", PType.BlendMode},
-
-		{ "C(", PType.FeatureChecker},//跟据不同FeatureChecker的开关组合来切换不同的Shader(uber类Shader的editor替换方案)
-		{ "G(", PType.FeatureGroup},//跟据FeatureGroup的选项组合来切换不同的Shader(uber类Shader的editor替换方案)
-	};
-	#endregion
-
-
-	#region infos 提取各个信息字符段
-	public string fieldsInfo = "";              //[]内的fields信息段
-	public string keywordsInfo = "";            //()内的keywords信息段
-	public string importerRulesInfo = "";       //{}内的improterRules信息段
-	public string commonInfo = "";              //排除掉所有特殊字段，留下的通用信息段
-	#endregion
-
-
-	#region propertives 从上面的infos中根据不同type最终解析出的结果
-	public static Dictionary<string, string[]> LabelCaches = new Dictionary<string, string[]>();
-	
-
-	public bool ignoreDisplay = false;
-	public PType type = PType.None;
-	public List<GUITextureImporterChecker> textureImporterCheckers = new List<GUITextureImporterChecker>();
-	public string[] displayFields = new string[0];
-	public string[] keywords = new string[0];
-	public string[] labels = new string[0];
-	public List<int> enumVals = new List<int>();
-	public List<Vector2> ranges = new List<Vector2>();
-	public string keyword = "";
-	public string displayLabel = "";
-	public int lines = 0;
-	#endregion
-
-
-	public MaterialProperty materialProperty;
-
-	public ShaderPropertie(MaterialProperty mp, Material mat)
-	{
-		materialProperty = mp;
-		Parse(mp, mat);
-	}
-	
-
-	#region Parse
-	void Parse(MaterialProperty mp, Material mat)
-	{
-		ParseType(mp);
-		ParseInfos(mp);
-		ParseProperties(mp, mat);
-		ParseCachedLabels(mat);
-	}
-
-	/// <summary>
-	/// 解析属性类型
-	/// </summary>
-	void ParseType(MaterialProperty mp)
-	{
-		ignoreDisplay = false;
-
-		if (mp.name.StartsWith(PACKED_SHADER_NAME)) {
-			ignoreDisplay = true;
-			type = PType.None;
-			return;
-		}
-
-		if (mp.displayName.StartsWith("S(")) {
-			ignoreDisplay = true;
-			type = PType.None;
-			return;
-		}
-
-		if (mp.name.StartsWith(GROUP_NAME))
-		{
-			type = PType.Group;
-			return;
-		}
-		else
-		{
-			string header = mp.displayName.Substring(0, 2);
-			if (header == IGNORE_DISPLAY)
-			{
-				ignoreDisplay = true;
-				header = mp.displayName.Substring(2, 2);
-			}
-
-			if (PTypeDic.ContainsKey(header))
-			{
-				type = PTypeDic[header];
-
-				if (type == PType.KeywordLink || type == PType.KeywordStrip || type == PType.KeywordWithAnyEnumActive)
-					ignoreDisplay = true;
-
-				return;
-			}
-		}
-
-		type = PType.None;
-	}
-
-	/// <summary>
-	/// 预解析出不同功能的字段
-	/// </summary>
-	void ParseInfos(MaterialProperty mp)
-	{
-		commonInfo = mp.displayName;
-		if (commonInfo.StartsWith(IGNORE_DISPLAY))
-			commonInfo = commonInfo.Substring(2);
-
-		Match rexMatch;
-		string matchValue;
-		if (type != PType.None)
-		{
-			if (type == PType.Group)
-			{
-				matchValue = RightOfSharpRegex.Match(mp.name).Value;
-				keywordsInfo = matchValue.Substring(1);
-			}
-			else
-			{
-				rexMatch = BracketsRegex.Match(mp.displayName);
-
-				if (rexMatch.Success)
-				{
-					matchValue = rexMatch.Value;
-					commonInfo = commonInfo.Replace(matchValue, "");
-					keywordsInfo = matchValue.Substring(1, matchValue.Length - 2);
-				}
-
-				commonInfo = commonInfo.Substring(2);
-			}
-		}
-
-		rexMatch = FieldsRegex.Match(mp.displayName);
-		if (rexMatch.Success)
-		{
-			matchValue = rexMatch.Value;
-			commonInfo = commonInfo.Replace(matchValue, "");
-			fieldsInfo = matchValue.Substring(1, matchValue.Length - 2);
-		}
-
-		rexMatch = ImporterRuleRegex.Match(mp.displayName);
-		if (rexMatch.Success)
-		{
-			matchValue = rexMatch.Value;
-			commonInfo = commonInfo.Replace(matchValue, "");
-			importerRulesInfo = matchValue.Substring(1, matchValue.Length - 2);
-		}
-
-		if (commonInfo.StartsWith("/")) commonInfo = commonInfo.Substring(1);
-	}
-
-	void ParseProperties(MaterialProperty mp, Material mat)
-	{
-		#region prepair
-		if (!string.IsNullOrEmpty(fieldsInfo))
-			displayFields = fieldsInfo.Split(',');
-
-		keyword = keywordsInfo;
-		if (!string.IsNullOrEmpty(keywordsInfo))
-			keywords = keywordsInfo.Split(',');
-
-		if (type == PType.KeywordLink || type == PType.KeywordStrip)
-			keywords = commonInfo.Split(',');
-
-		for (int i = 0; i < keywords.Length; ++i)
-			if (keywords[i] == "_DUMMY" || keywords[i] == "__") keywords[i] = "";
-		#endregion
-
-
-		#region parse displayLabel
-		displayLabel = commonInfo;
-		if (type == PType.FeatureGroup || type == PType.Enum || type == PType.EnumWithKeywords || type == PType.Vector || type == PType.VectorPlus || type == PType.BlendMode)
-		{
-			displayLabel = LeftOfColonRegex.Match(commonInfo).Value;
-		}
-		#endregion
-
-
-		#region parse labels
-		labels = new string[0];
-		switch (type)
-		{
-			case PType.KeywordWithAnyEnumActive:
-				labels = commonInfo.Split(',');
-				break;
-			case PType.Label:
-				labels = commonInfo.Split('\n');
-				LabelCaches[mp.name] = labels;
-				break;
-			case PType.BlendMode:
-				labels = RightOfColonRegex.Match(commonInfo).Value.Substring(1).Split(',');
-				break;
-			default:
-				break;
-		}
-
-		commonInfo = commonInfo.Replace(displayLabel + ":", "");//后面的解析commonInfo不需要displayLabel部分了
-
-		string labelInfo = commonInfo;
-		Match rexMatch;
-		if (type == PType.Enum || type == PType.EnumWithKeywords || type == PType.FeatureGroup)
-		{
-			rexMatch = LeftOfSemicolonRegex.Match(labelInfo);
-			if (rexMatch.Success)
-				labelInfo = rexMatch.Value;
-
-			labels = labelInfo.Split(',');
-		}
-
-		if (type == PType.Vector || type == PType.VectorPlus)
-		{
-			labelInfo = BracketsRegex.Replace(labelInfo, "");
-
-			labels = labelInfo.Split(',');
-		}
-		#endregion
-
-
-		#region parse enumVals
-		if (type == PType.Enum || type == PType.EnumWithKeywords || type == PType.FeatureGroup)
-		{
-			enumVals.Clear();
-			for (int i = 0; i < labels.Length; ++i) enumVals.Add(i);
-
-			rexMatch = RightOfSemicolonRegex.Match(commonInfo);
-			if (rexMatch.Success)
-			{
-				string enumValsInfo = rexMatch.Value.Substring(1);
-				string[] vals = enumValsInfo.Split(',');
-
-				for (int i = 0; i < vals.Length; ++i)
-				{
-					if (i < enumVals.Count)
-					{
-						int v;
-						int.TryParse(vals[i], out v);
-						enumVals[i] = v;
-					}
-				}
-			}
-		}
-		#endregion
-
-
-		#region parse ranges
-		if (type == PType.Vector || type == PType.VectorPlus)
-		{
-			ranges.Clear();
-
-			string[] rangesInfo = commonInfo.Split(',');
-
-			foreach (string range in rangesInfo)
-			{
-				rexMatch = BracketsRegex.Match(range);
-				if (rexMatch.Success)
-				{
-					string rangeStr = range.Substring(1, rexMatch.Value.Length - 2);
-					string[] vs = rangeStr.Split(',');
-					float x = 0;
-					float y = 1;
-					float.TryParse(vs[0], out x);
-					float.TryParse(vs[1], out y);
-					ranges.Add(new Vector2(x, y));
-				}
-				else
-				{
-					ranges.Add(Vector2.zero);
-				}
-			}
-		}
-		#endregion
-
-
-		#region parse lines
-		lines = labels.Length;
-		switch (type)
-		{
-			case PType.Space:
-				lines = (int)mp.floatValue;
-				break;
-			case PType.EnumWithKeywords:
-				lines = enumVals.Count;
-				break;
-			case PType.Enum:
-				lines = enumVals.Count;
-				break;
-			case PType.FeatureGroup:
-				lines = enumVals.Count;
-				break;
-			case PType.VectorPlus:
-				lines = 1;
-				if (keyword == "xyz,w" || keyword == "xy,zw")
-					lines = 2;
-				else if (keyword == "xy,z,w")
-					lines = 3;
-				break;
-		}
-
-		#endregion
-
-
-		#region parse textureImporterCheckers
-		if (mp.type == MaterialProperty.PropType.Texture)
-		{
-			textureImporterCheckers.Clear();
-
-			if (!string.IsNullOrEmpty(importerRulesInfo))
-			{
-				string[] checkerInfo = importerRulesInfo.Split(',');
-
-				if (checkerInfo.Length > 0)
-				{
-					foreach (string info in checkerInfo)
-						textureImporterCheckers.Add(new GUITextureImporterChecker(mp.textureValue, info));
-				}
-			}
-		}
-		#endregion
-	}
-
-	void ParseCachedLabels(Material mat)
-	{
-		if (displayLabel.Contains("@"))
-		{
-			string[] cachedLabelInfo = displayLabel.Split('@');
-			string k = cachedLabelInfo[0];
-			string v = cachedLabelInfo[1];
-
-			if (!LabelCaches.ContainsKey(k) || !mat.HasProperty(v)) return;
-
-			int value = (int)mat.GetFloat(v);
-
-			if (LabelCaches[k].Length > value)
-			{
-				displayLabel = LabelCaches[k][value];
-			}
-		}
-	}
-
-	#endregion
-
-
-	#region Draw GUI
-
-	public void Draw(MaterialEditor materialEditor, Dictionary<string, bool> marcos, List<ShaderPropertie> featureCheckers)
-	{
-
-		switch (materialProperty.type)
-		{
-			case MaterialProperty.PropType.Float:
-				DrawFloat(materialEditor, marcos, featureCheckers);
-				break;
-			case MaterialProperty.PropType.Color:
-				DrawColor(materialEditor, marcos);
-				break;
-			case MaterialProperty.PropType.Range:
-				DrawRange(materialEditor, marcos);
-				break;
-			case MaterialProperty.PropType.Vector:
-				DrawVector(materialEditor, marcos);
-				break;
-			case MaterialProperty.PropType.Texture:
-				DrawTexture(materialEditor, marcos);
-				break;
-			default:
-				materialEditor.DefaultShaderProperty(materialProperty, displayLabel);
-				break;
-		}
-	}
-
-	static GUIStyle _bigFont;
-	static GUIStyle bigFont
-	{
-		get
-		{
-			if (_bigFont == null)
-			{
-				_bigFont = new GUIStyle(GUI.skin.label);
-				_bigFont.fontSize = 10;
-				_bigFont.richText = true;
-			}
-
-			return _bigFont;
-		}
-	}
-
-	Rect DrawNameLine(string displaystr, string descstr, int indent = 0, int heightOffset = 0)
-	{
-		var rect = EditorGUILayout.GetControlRect();
-		rect = new Rect(rect.xMin + indent, rect.yMin, rect.width - indent, rect.height);
-		var rectBg = new Rect(rect.xMin, rect.yMin, rect.width, rect.height * 2 + heightOffset + 2);
-		EditorGUI.DrawRect(rectBg, new Color(0.0f, 0.0f, 0.0f, 0.4f * (30 - indent) / 30.0f));
-
-		if (descstr.Length > 0) displaystr += "   " + "<color=#404040ff>" + descstr + "</color>";
-
-		var rectfont = new Rect(rect.xMin, rect.yMin + 2, rect.width, rect.height);
-		// EditorGUI.LabelField(rectfont, displaystr, bigFont);
+
+    SShaderGUI sShaderGUI;
+    #region type
+    public enum PType
+    {
+        Group,
+        ToggleWithKeyword,
+        Toggle,
+        TogglePass,
+        EnumWithKeywords,
+        Enum,
+        Label,
+        Vector,
+        VectorPlus,
+        Space,
+        KeywordLink,
+        KeywordStrip,
+        KeywordWithAnyEnumActive,
+        BlendMode,
+
+        FeatureChecker,
+        FeatureGroup,
+
+        None,
+    }
+    #endregion
+
+    public static string PackedFeaturesKey = "";
+
+
+    #region parse helper
+    public const string PACKED_SHADER_NAME = "PACKED_SHADER";   //用于定义packedShader信息的属性
+    const string GROUP_NAME = "Group#";     //特殊情况:Group使用材质属性的name，而不是displayName来判断
+    const string IGNORE_DISPLAY = "__";     //需要先排除用于跳过显示的标识，然后再用PTypeDic中的Key作类型判断
+
+    static Regex BracketsRegex = new Regex(@"\s*\([^\)]*\)\s*");//所有()内的内容,包括()
+    static Regex FieldsRegex = new Regex(@"\[(.*)\]");          //[]内的字符串,包括[]
+    static Regex ImporterRuleRegex = new Regex(@"\{(.*)\}");    //{}内的字符串,包括{}
+    static Regex RightOfSharpRegex = new Regex(@"#.*");         //"#"右边的字符串,包括"#"
+    static Regex RightOfColonRegex = new Regex(@":.*");         //":"右边的字符串,包括":"
+    static Regex LeftOfColonRegex = new Regex(@"[^:]*");        //":"左边的字符串
+    static Regex LeftOfSemicolonRegex = new Regex(@"[^;]*");    //";"左边的字符串
+    static Regex RightOfSemicolonRegex = new Regex(@";.*");     //";"右边的字符串
+
+
+    //通过displayName字符串的前两个字符判断类型
+    static readonly Dictionary<string, PType> PTypeDic = new Dictionary<string, PType> {
+        { "T(", PType.ToggleWithKeyword },
+        { "T/", PType.Toggle },
+        { "P(", PType.TogglePass },
+        { "E(", PType.EnumWithKeywords },
+        { "E/", PType.Enum},
+        { "L/", PType.Label},
+        { "V/", PType.Vector},
+        { "V(", PType.VectorPlus},
+        { " /", PType.Space },
+        { "K&", PType.KeywordLink},
+        { "K!", PType.KeywordStrip},
+        { "K|", PType.KeywordWithAnyEnumActive},
+        { "B/", PType.BlendMode},
+
+        { "C(", PType.FeatureChecker},//跟据不同FeatureChecker的开关组合来切换不同的Shader(uber类Shader的editor替换方案)
+        { "G(", PType.FeatureGroup},//跟据FeatureGroup的选项组合来切换不同的Shader(uber类Shader的editor替换方案)
+    };
+    #endregion
+
+
+    #region infos 提取各个信息字符段
+    public string fieldsInfo = "";              //[]内的fields信息段
+    public string keywordsInfo = "";            //()内的keywords信息段
+    public string importerRulesInfo = "";       //{}内的improterRules信息段
+    public string commonInfo = "";              //排除掉所有特殊字段，留下的通用信息段
+    #endregion
+
+
+    #region propertives 从上面的infos中根据不同type最终解析出的结果
+    public static Dictionary<string, string[]> LabelCaches = new Dictionary<string, string[]>();
+
+
+    public bool ignoreDisplay = false;
+    public PType type = PType.None;
+    public List<GUITextureImporterChecker> textureImporterCheckers = new List<GUITextureImporterChecker>();
+    public string[] displayFields = new string[0];
+    public string[] keywords = new string[0];
+    public string[] labels = new string[0];
+    public List<int> enumVals = new List<int>();
+    public List<Vector2> ranges = new List<Vector2>();
+    public string keyword = "";
+    public string displayLabel = "";
+    public int lines = 0;
+    #endregion
+
+
+    public MaterialProperty materialProperty;
+
+    public ShaderPropertie(SShaderGUI sShaderGUI, MaterialProperty mp, Material mat)
+    {
+        this.sShaderGUI = sShaderGUI;
+        materialProperty = mp;
+        Parse(mp, mat);
+    }
+
+
+    #region Parse
+    void Parse(MaterialProperty mp, Material mat)
+    {
+        ParseType(mp);
+        ParseInfos(mp);
+        ParseProperties(mp, mat);
+        ParseCachedLabels(mat);
+    }
+
+    /// <summary>
+    /// 解析属性类型
+    /// </summary>
+    void ParseType(MaterialProperty mp)
+    {
+        ignoreDisplay = false;
+
+        if (mp.name.StartsWith(PACKED_SHADER_NAME))
+        {
+            ignoreDisplay = true;
+            type = PType.None;
+            return;
+        }
+
+        if (mp.displayName.StartsWith("S("))
+        {
+            ignoreDisplay = true;
+            type = PType.None;
+            return;
+        }
+
+        if (mp.name.StartsWith(GROUP_NAME))
+        {
+            type = PType.Group;
+            return;
+        }
+        else
+        {
+            string header = mp.displayName.Substring(0, 2);
+            if (header == IGNORE_DISPLAY)
+            {
+                ignoreDisplay = true;
+                header = mp.displayName.Substring(2, 2);
+            }
+
+            if (PTypeDic.ContainsKey(header))
+            {
+                type = PTypeDic[header];
+
+                if (type == PType.KeywordLink || type == PType.KeywordStrip || type == PType.KeywordWithAnyEnumActive)
+                    ignoreDisplay = true;
+
+                return;
+            }
+        }
+
+        type = PType.None;
+    }
+
+    /// <summary>
+    /// 预解析出不同功能的字段
+    /// </summary>
+    void ParseInfos(MaterialProperty mp)
+    {
+        commonInfo = mp.displayName;
+        if (commonInfo.StartsWith(IGNORE_DISPLAY))
+            commonInfo = commonInfo.Substring(2);
+
+        Match rexMatch;
+        string matchValue;
+        if (type != PType.None)
+        {
+            if (type == PType.Group)
+            {
+                matchValue = RightOfSharpRegex.Match(mp.name).Value;
+                keywordsInfo = matchValue.Substring(1);
+            }
+            else
+            {
+                rexMatch = BracketsRegex.Match(mp.displayName);
+
+                if (rexMatch.Success)
+                {
+                    matchValue = rexMatch.Value;
+                    commonInfo = commonInfo.Replace(matchValue, "");
+                    keywordsInfo = matchValue.Substring(1, matchValue.Length - 2);
+                }
+
+                commonInfo = commonInfo.Substring(2);
+            }
+        }
+
+        rexMatch = FieldsRegex.Match(mp.displayName);
+        if (rexMatch.Success)
+        {
+            matchValue = rexMatch.Value;
+            commonInfo = commonInfo.Replace(matchValue, "");
+            fieldsInfo = matchValue.Substring(1, matchValue.Length - 2);
+        }
+
+        rexMatch = ImporterRuleRegex.Match(mp.displayName);
+        if (rexMatch.Success)
+        {
+            matchValue = rexMatch.Value;
+            commonInfo = commonInfo.Replace(matchValue, "");
+            importerRulesInfo = matchValue.Substring(1, matchValue.Length - 2);
+        }
+
+        if (commonInfo.StartsWith("/")) commonInfo = commonInfo.Substring(1);
+    }
+
+    void ParseProperties(MaterialProperty mp, Material mat)
+    {
+        #region prepair
+        if (!string.IsNullOrEmpty(fieldsInfo))
+            displayFields = fieldsInfo.Split(',');
+
+        keyword = keywordsInfo;
+        if (!string.IsNullOrEmpty(keywordsInfo))
+            keywords = keywordsInfo.Split(',');
+
+        if (type == PType.KeywordLink || type == PType.KeywordStrip)
+            keywords = commonInfo.Split(',');
+
+        for (int i = 0; i < keywords.Length; ++i)
+            if (keywords[i] == "_DUMMY" || keywords[i] == "__") keywords[i] = "";
+        #endregion
+
+
+        #region parse displayLabel
+        displayLabel = commonInfo;
+        if (type == PType.FeatureGroup || type == PType.Enum || type == PType.EnumWithKeywords || type == PType.Vector || type == PType.VectorPlus || type == PType.BlendMode)
+        {
+            displayLabel = LeftOfColonRegex.Match(commonInfo).Value;
+        }
+        #endregion
+
+
+        #region parse labels
+        labels = new string[0];
+        switch (type)
+        {
+            case PType.KeywordWithAnyEnumActive:
+                labels = commonInfo.Split(',');
+                break;
+            case PType.Label:
+                labels = commonInfo.Split('\n');
+                LabelCaches[mp.name] = labels;
+                break;
+            case PType.BlendMode:
+                labels = RightOfColonRegex.Match(commonInfo).Value.Substring(1).Split(',');
+                break;
+            default:
+                break;
+        }
+
+        commonInfo = commonInfo.Replace(displayLabel + ":", "");//后面的解析commonInfo不需要displayLabel部分了
+
+        string labelInfo = commonInfo;
+        Match rexMatch;
+        if (type == PType.Enum || type == PType.EnumWithKeywords || type == PType.FeatureGroup)
+        {
+            rexMatch = LeftOfSemicolonRegex.Match(labelInfo);
+            if (rexMatch.Success)
+                labelInfo = rexMatch.Value;
+
+            labels = labelInfo.Split(',');
+        }
+
+        if (type == PType.Vector || type == PType.VectorPlus)
+        {
+            labelInfo = BracketsRegex.Replace(labelInfo, "");
+
+            labels = labelInfo.Split(',');
+        }
+        #endregion
+
+
+        #region parse enumVals
+        if (type == PType.Enum || type == PType.EnumWithKeywords || type == PType.FeatureGroup)
+        {
+            enumVals.Clear();
+            for (int i = 0; i < labels.Length; ++i) enumVals.Add(i);
+
+            rexMatch = RightOfSemicolonRegex.Match(commonInfo);
+            if (rexMatch.Success)
+            {
+                string enumValsInfo = rexMatch.Value.Substring(1);
+                string[] vals = enumValsInfo.Split(',');
+
+                for (int i = 0; i < vals.Length; ++i)
+                {
+                    if (i < enumVals.Count)
+                    {
+                        int v;
+                        int.TryParse(vals[i], out v);
+                        enumVals[i] = v;
+                    }
+                }
+            }
+        }
+        #endregion
+
+
+        #region parse ranges
+        if (type == PType.Vector || type == PType.VectorPlus)
+        {
+            ranges.Clear();
+
+            string[] rangesInfo = commonInfo.Split(',');
+
+            foreach (string range in rangesInfo)
+            {
+                rexMatch = BracketsRegex.Match(range);
+                if (rexMatch.Success)
+                {
+                    string rangeStr = range.Substring(1, rexMatch.Value.Length - 2);
+                    string[] vs = rangeStr.Split(',');
+                    float x = 0;
+                    float y = 1;
+                    float.TryParse(vs[0], out x);
+                    float.TryParse(vs[1], out y);
+                    ranges.Add(new Vector2(x, y));
+                }
+                else
+                {
+                    ranges.Add(Vector2.zero);
+                }
+            }
+        }
+        #endregion
+
+
+        #region parse lines
+        lines = labels.Length;
+        switch (type)
+        {
+            case PType.Space:
+                lines = (int)mp.floatValue;
+                break;
+            case PType.EnumWithKeywords:
+                lines = enumVals.Count;
+                break;
+            case PType.Enum:
+                lines = enumVals.Count;
+                break;
+            case PType.FeatureGroup:
+                lines = enumVals.Count;
+                break;
+            case PType.VectorPlus:
+                lines = 1;
+                if (keyword == "xyz,w" || keyword == "xy,zw")
+                    lines = 2;
+                else if (keyword == "xy,z,w")
+                    lines = 3;
+                break;
+        }
+
+        #endregion
+
+
+        #region parse textureImporterCheckers
+        if (mp.type == MaterialProperty.PropType.Texture)
+        {
+            textureImporterCheckers.Clear();
+
+            if (!string.IsNullOrEmpty(importerRulesInfo))
+            {
+                string[] checkerInfo = importerRulesInfo.Split(',');
+
+                if (checkerInfo.Length > 0)
+                {
+                    foreach (string info in checkerInfo)
+                        textureImporterCheckers.Add(new GUITextureImporterChecker(mp.textureValue, info));
+                }
+            }
+        }
+        #endregion
+    }
+
+    void ParseCachedLabels(Material mat)
+    {
+        if (displayLabel.Contains("@"))
+        {
+            string[] cachedLabelInfo = displayLabel.Split('@');
+            string k = cachedLabelInfo[0];
+            string v = cachedLabelInfo[1];
+
+            if (!LabelCaches.ContainsKey(k) || !mat.HasProperty(v)) return;
+
+            int value = (int)mat.GetFloat(v);
+
+            if (LabelCaches[k].Length > value)
+            {
+                displayLabel = LabelCaches[k][value];
+            }
+        }
+    }
+
+    #endregion
+
+
+    #region Draw GUI
+
+    public void Draw(MaterialEditor materialEditor, Dictionary<string, bool> marcos, List<ShaderPropertie> featureCheckers)
+    {
+        if (sShaderGUI.DrawElse(materialEditor, materialProperty, displayLabel)) return;
+
+        switch (materialProperty.type)
+        {
+            case MaterialProperty.PropType.Float:
+                DrawFloat(materialEditor, marcos, featureCheckers);
+                break;
+            case MaterialProperty.PropType.Color:
+                DrawColor(materialEditor, marcos);
+                break;
+            case MaterialProperty.PropType.Range:
+                DrawRange(materialEditor, marcos);
+                break;
+            case MaterialProperty.PropType.Vector:
+                DrawVector(materialEditor, marcos);
+                break;
+            case MaterialProperty.PropType.Texture:
+                DrawTexture(materialEditor, marcos);
+                break;
+            default:
+                materialEditor.DefaultShaderProperty(materialProperty, displayLabel);
+                break;
+        }
+    }
+
+    
+
+    static GUIStyle _bigFont;
+    static GUIStyle bigFont
+    {
+        get
+        {
+            if (_bigFont == null)
+            {
+                _bigFont = new GUIStyle(GUI.skin.label);
+                _bigFont.fontSize = 10;
+                _bigFont.richText = true;
+            }
+
+            return _bigFont;
+        }
+    }
+
+    Rect DrawNameLine(string displaystr, string descstr, int indent = 0, int heightOffset = 0)
+    {
+        var rect = EditorGUILayout.GetControlRect();
+        rect = new Rect(rect.xMin + indent, rect.yMin, rect.width - indent, rect.height);
+        var rectBg = new Rect(rect.xMin, rect.yMin, rect.width, rect.height * 2 + heightOffset + 2);
+        EditorGUI.DrawRect(rectBg, new Color(0.0f, 0.0f, 0.0f, 0.4f * (30 - indent) / 30.0f));
+
+        if (descstr.Length > 0) displaystr += "   " + "<color=#404040ff>" + descstr + "</color>";
+
+        var rectfont = new Rect(rect.xMin, rect.yMin + 2, rect.width, rect.height);
+        // EditorGUI.LabelField(rectfont, displaystr, bigFont);
         EditorGUI.LabelField(rectfont, displaystr);
 
-		return rectBg;
-	}
+        return rectBg;
+    }
 
-	static Rect GetIndentRect(int indent = 20, int padding = 5)
-	{
-		Rect rect = EditorGUILayout.GetControlRect();
-		rect = new Rect(rect.xMin + indent + padding, rect.yMin, rect.width - indent - padding * 2, rect.height);
-		return rect;
-	}
+    static Rect GetIndentRect(int indent = 20, int padding = 5)
+    {
+        Rect rect = EditorGUILayout.GetControlRect();
+        rect = new Rect(rect.xMin + indent + padding, rect.yMin, rect.width - indent - padding * 2, rect.height);
+        return rect;
+    }
 
-	Rect GetIndentRectTex(int indent = 20, int padding = 5)
-	{
-		Rect rect = EditorGUILayout.GetControlRect();
-		rect = new Rect(rect.xMin + indent + padding, rect.yMin, rect.width - indent - padding * 2, 80);
-		return rect;
-	}
+    Rect GetIndentRectTex(int indent = 20, int padding = 5)
+    {
+        Rect rect = EditorGUILayout.GetControlRect();
+        rect = new Rect(rect.xMin + indent + padding, rect.yMin, rect.width - indent - padding * 2, 80);
+        return rect;
+    }
 
-	void DrawFloat(MaterialEditor materialEditor, Dictionary<string, bool> marcos, List<ShaderPropertie> featureCheckers)
-	{
-		Material mat = materialEditor.target as Material;
+    void DrawFloat(MaterialEditor materialEditor, Dictionary<string, bool> marcos, List<ShaderPropertie> featureCheckers)
+    {
+        Material mat = materialEditor.target as Material;
 
-		bool pre = mat.GetFloat(materialProperty.name) > 0;
+        bool pre = mat.GetFloat(materialProperty.name) > 0;
 
-		switch (type)
-		{
-			case PType.Group:
-				EditorGUILayout.Separator();
-				bool cur = EditorGUILayout.Foldout(pre, displayLabel);
-				if (cur != pre)
-					mat.SetFloat(materialProperty.name, cur ? 1 : 0);
-				break;
-			case PType.ToggleWithKeyword:
-				Rect rect = EditorGUILayout.GetControlRect();
-				cur = EditorGUI.Toggle(rect, "    " + displayLabel, marcos[keyword]);
-				if (cur != marcos[keyword])
-					marcos[keyword] = cur;
-				break;
-			case PType.Toggle:
-				rect = EditorGUILayout.GetControlRect();
-				cur = EditorGUI.Toggle(rect, "    " + displayLabel, pre);
+        switch (type)
+        {
+            case PType.Group:
+                EditorGUILayout.Separator();
+                bool cur = EditorGUILayout.Foldout(pre, displayLabel);
+                if (cur != pre)
+                    mat.SetFloat(materialProperty.name, cur ? 1 : 0);
+                break;
+            case PType.ToggleWithKeyword:
+                Rect rect = EditorGUILayout.GetControlRect();
+                cur = EditorGUI.Toggle(rect, "    " + displayLabel, marcos[keyword]);
+                if (cur != marcos[keyword])
+                    marcos[keyword] = cur;
+                break;
+            case PType.Toggle:
+                rect = EditorGUILayout.GetControlRect();
+                cur = EditorGUI.Toggle(rect, "    " + displayLabel, pre);
 
-				if (cur != pre)
-					mat.SetFloat(materialProperty.name, cur ? 1 : 0);
-				break;
-			case PType.TogglePass:
-				rect = EditorGUILayout.GetControlRect();
-				cur = EditorGUI.Toggle(rect, "    " + displayLabel, mat.GetShaderPassEnabled(keyword));
-				mat.SetShaderPassEnabled(keyword, cur);
-				mat.SetFloat(materialProperty.name, cur ? 1 : 0);
-				break;
-			case PType.Label:
-				EditorGUI.indentLevel++;
-				foreach (var tmpLabel in labels)
-				{
-					rect = EditorGUILayout.GetControlRect();
-					EditorGUI.LabelField(rect, tmpLabel, bigFont);
-				}
-				EditorGUI.indentLevel--;
-				break;
-			case PType.EnumWithKeywords:
-				int EnumNums = keywords.Length;
-				string[] Keys = new string[EnumNums];
-				for (int i = 0; i < EnumNums; ++i)
-				{
-					Keys[i] = keywords[i];
-					if (!marcos.ContainsKey(Keys[i]))
-					{
-						marcos[Keys[i]] = false;
-					}
-				}
+                if (cur != pre)
+                    mat.SetFloat(materialProperty.name, cur ? 1 : 0);
+                break;
+            case PType.TogglePass:
+                rect = EditorGUILayout.GetControlRect();
+                cur = EditorGUI.Toggle(rect, "    " + displayLabel, mat.GetShaderPassEnabled(keyword));
+                mat.SetShaderPassEnabled(keyword, cur);
+                mat.SetFloat(materialProperty.name, cur ? 1 : 0);
+                break;
+            case PType.Label:
+                EditorGUI.indentLevel++;
+                foreach (var tmpLabel in labels)
+                {
+                    rect = EditorGUILayout.GetControlRect();
+                    EditorGUI.LabelField(rect, tmpLabel, bigFont);
+                }
+                EditorGUI.indentLevel--;
+                break;
+            case PType.EnumWithKeywords:
+                int EnumNums = keywords.Length;
+                string[] Keys = new string[EnumNums];
+                for (int i = 0; i < EnumNums; ++i)
+                {
+                    Keys[i] = keywords[i];
+                    if (!marcos.ContainsKey(Keys[i]))
+                    {
+                        marcos[Keys[i]] = false;
+                    }
+                }
 
-				int lastValue = (int)mat.GetFloat(materialProperty.name);
-				int lastIndex = enumVals.IndexOf(lastValue);
+                int lastValue = (int)mat.GetFloat(materialProperty.name);
+                int lastIndex = enumVals.IndexOf(lastValue);
 
-				EditorGUI.indentLevel++;
-				int curIndex = EditorGUILayout.Popup(displayLabel, lastIndex, labels);
-				int curValue = enumVals[curIndex];
-				EditorGUI.indentLevel--;
+                EditorGUI.indentLevel++;
+                int curIndex = EditorGUILayout.Popup(displayLabel, lastIndex, labels);
+                int curValue = enumVals[curIndex];
+                EditorGUI.indentLevel--;
 
-				if (curValue != lastValue)
-				{
-					mat.SetFloat(materialProperty.name, (float)curValue);
-					marcos[Keys[lastIndex]] = false;
-					marcos[Keys[curIndex]] = true;
-				}
-				break;
-			case PType.Enum:
-				List<int> values = enumVals;
+                if (curValue != lastValue)
+                {
+                    mat.SetFloat(materialProperty.name, (float)curValue);
+                    marcos[Keys[lastIndex]] = false;
+                    marcos[Keys[curIndex]] = true;
+                }
+                break;
+            case PType.Enum:
+                List<int> values = enumVals;
 
-				lastValue = (int)mat.GetFloat(materialProperty.name);
-				lastValue = values.IndexOf(lastValue);
-				EditorGUI.indentLevel++;
-				curIndex = EditorGUILayout.Popup(displayLabel, lastValue, labels);
-				EditorGUI.indentLevel--;
-				curValue = values[curIndex];
+                lastValue = (int)mat.GetFloat(materialProperty.name);
+                lastValue = values.IndexOf(lastValue);
+                EditorGUI.indentLevel++;
+                curIndex = EditorGUILayout.Popup(displayLabel, lastValue, labels);
+                EditorGUI.indentLevel--;
+                curValue = values[curIndex];
 
-				if (curValue != lastValue)
-					mat.SetFloat(materialProperty.name, (float)curValue);
+                if (curValue != lastValue)
+                    mat.SetFloat(materialProperty.name, (float)curValue);
 
-				break;
-			case PType.Space:
-				GUILayout.Space(15 * lines);
-				break;
-			case PType.BlendMode:
-				SShaderGUIUtils.BlendModeGUI(materialEditor, displayLabel, materialProperty.name, labels[0], labels[1]);
-				break;
+                break;
+            case PType.Space:
+                GUILayout.Space(15 * lines);
+                break;
+            case PType.BlendMode:
+                SShaderGUIUtils.BlendModeGUI(materialEditor, displayLabel, materialProperty.name, labels[0], labels[1]);
+                break;
 
-			case PType.FeatureChecker:
-				rect = EditorGUILayout.GetControlRect();
-				cur = EditorGUI.Toggle(rect, "    " + displayLabel, pre);
+            case PType.FeatureChecker:
+                rect = EditorGUILayout.GetControlRect();
+                cur = EditorGUI.Toggle(rect, "    " + displayLabel, pre);
 
-				if (cur != pre) {
-					int curVal = cur ? 1 : 0;
-					mat.SetFloat(materialProperty.name, curVal);
-					materialProperty.floatValue = curVal;
+                if (cur != pre)
+                {
+                    int curVal = cur ? 1 : 0;
+                    mat.SetFloat(materialProperty.name, curVal);
+                    materialProperty.floatValue = curVal;
 
-					string lastKey = PackedFeaturesKey;
-					PackedFeaturesKey = CombineFeaturesKey(featureCheckers);
+                    string lastKey = PackedFeaturesKey;
+                    PackedFeaturesKey = CombineFeaturesKey(featureCheckers);
 
-					if (
-						!PackedShaderInfo.PackedShaders.ContainsKey(PackedShaderInfo.currentGroupName) || 
-						!PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName].ContainsKey(PackedFeaturesKey)
-					)
-					{
-						EditorUtility.DisplayDialog("提示", "不支持的特性组合", "OK");
-						mat.SetFloat(materialProperty.name, pre ? 1 : 0);
-						PackedFeaturesKey = lastKey;
-					}
-				}
-				break;
-			case PType.FeatureGroup:
-				lastValue = (int)materialProperty.floatValue;
-				EditorGUI.indentLevel++;
-				curValue = EditorGUILayout.Popup(displayLabel, lastValue, labels);
-				EditorGUI.indentLevel--;
+                    if (
+                        !PackedShaderInfo.PackedShaders.ContainsKey(PackedShaderInfo.currentGroupName) ||
+                        !PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName].ContainsKey(PackedFeaturesKey)
+                    )
+                    {
+                        EditorUtility.DisplayDialog("提示", "不支持的特性组合", "OK");
+                        mat.SetFloat(materialProperty.name, pre ? 1 : 0);
+                        PackedFeaturesKey = lastKey;
+                    }
+                }
+                break;
+            case PType.FeatureGroup:
+                lastValue = (int)materialProperty.floatValue;
+                EditorGUI.indentLevel++;
+                curValue = EditorGUILayout.Popup(displayLabel, lastValue, labels);
+                EditorGUI.indentLevel--;
 
-				if (curValue != lastValue) {
-					mat.SetFloat(materialProperty.name, curValue);
-					materialProperty.floatValue = curValue;
-					
-					string lastGroupName = PackedShaderInfo.currentGroupName;
-					PackedShaderInfo.currentGroupName = keywords[curValue];
+                if (curValue != lastValue)
+                {
+                    mat.SetFloat(materialProperty.name, curValue);
+                    materialProperty.floatValue = curValue;
 
-					string lastKey = PackedFeaturesKey;
-					PackedFeaturesKey = CombineFeaturesKey(featureCheckers);
+                    string lastGroupName = PackedShaderInfo.currentGroupName;
+                    PackedShaderInfo.currentGroupName = keywords[curValue];
 
-					if (
-						!PackedShaderInfo.PackedShaders.ContainsKey(PackedShaderInfo.currentGroupName) ||
-						!PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName].ContainsKey(PackedFeaturesKey)
-					)
-					{
-						EditorUtility.DisplayDialog("提示", "不支持的特性组合", "OK");
+                    string lastKey = PackedFeaturesKey;
+                    PackedFeaturesKey = CombineFeaturesKey(featureCheckers);
 
-						mat.SetFloat(materialProperty.name, lastValue);
-						PackedFeaturesKey = lastKey;
-						PackedShaderInfo.currentGroupName = lastGroupName;
-					}
-					
-				}
-				break;
-			default:
+                    if (
+                        !PackedShaderInfo.PackedShaders.ContainsKey(PackedShaderInfo.currentGroupName) ||
+                        !PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName].ContainsKey(PackedFeaturesKey)
+                    )
+                    {
+                        EditorUtility.DisplayDialog("提示", "不支持的特性组合", "OK");
 
-				rect = DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20, -14);
-				rect.y += 2;
-				rect.height -= 4;
-				rect.width -= 23;
-				materialEditor.FloatProperty(rect, materialProperty, " ");
-				GUILayout.Space(4);
+                        mat.SetFloat(materialProperty.name, lastValue);
+                        PackedFeaturesKey = lastKey;
+                        PackedShaderInfo.currentGroupName = lastGroupName;
+                    }
 
-				break;
-		}
-	}
+                }
+                break;
+            default:
 
-	void DrawColor(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
-	{
-		DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20);
-		materialEditor.ColorProperty(GetIndentRect(), materialProperty, "");
-	}
+                rect = DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20, -14);
+                rect.y += 2;
+                rect.height -= 4;
+                rect.width -= 23;
+                materialEditor.FloatProperty(rect, materialProperty, " ");
+                GUILayout.Space(4);
 
-	void DrawRange(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
-	{
-		DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20);
-		materialEditor.RangeProperty(GetIndentRect(), materialProperty, "");
-	}
+                break;
+        }
+    }
 
-	void DrawVector(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
-	{
-		Material mat = materialEditor.target as Material;
+    void DrawColor(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
+    {
+        DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20);
+        materialEditor.ColorProperty(GetIndentRect(), materialProperty, "");
+    }
 
-		switch (type)
-		{
-			case PType.Vector:
-				Vector4 values = mat.GetVector(materialProperty.name);
-				DrawNameLine(displayLabel, "", 20, 60 - 20 * (4 - lines));
-				EditorGUI.indentLevel += 3;
+    void DrawRange(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
+    {
+        DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20);
+        materialEditor.RangeProperty(GetIndentRect(), materialProperty, "");
+    }
 
-				EditorGUI.BeginChangeCheck();
-				for (int i = 0; i < lines; i++)
-				{
-					if (string.IsNullOrEmpty(labels[i]))
-						continue;
+    void DrawVector(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
+    {
+        Material mat = materialEditor.target as Material;
 
-					if (ranges[i] != Vector2.zero)
-						values[i] = EditorGUILayout.Slider(labels[i], values[i], ranges[i].x, ranges[i].y);
-					else
-						values[i] = EditorGUILayout.FloatField(labels[i], values[i]);
-				}
+        switch (type)
+        {
+            case PType.Vector:
+                Vector4 values = mat.GetVector(materialProperty.name);
+                DrawNameLine(displayLabel, "", 20, 60 - 20 * (4 - lines));
+                EditorGUI.indentLevel += 3;
 
-				if (EditorGUI.EndChangeCheck())
-					mat.SetVector(materialProperty.name, values);
+                EditorGUI.BeginChangeCheck();
+                for (int i = 0; i < lines; i++)
+                {
+                    if (string.IsNullOrEmpty(labels[i]))
+                        continue;
 
-				EditorGUI.indentLevel -= 3;
-				break;
-			case PType.VectorPlus:
-				if (lines == 1)
-				{
-					DrawNameLine(displayLabel, "", 20, 5);
-					materialEditor.VectorProperty(GetIndentRect(), materialProperty, "");
-				}
-				else
-				{
-					values = mat.GetVector(materialProperty.name);
-					DrawNameLine(displayLabel, "", 20, 60 - 20 * (4 - lines));
-					EditorGUI.indentLevel += 3;
+                    if (ranges[i] != Vector2.zero)
+                        values[i] = EditorGUILayout.Slider(labels[i], values[i], ranges[i].x, ranges[i].y);
+                    else
+                        values[i] = EditorGUILayout.FloatField(labels[i], values[i]);
+                }
 
-					switch (keyword)
-					{
-						case "xyz,w":
-							EditorGUI.BeginChangeCheck();
-							Vector3 v3 = new Vector3(values.x, values.y, values.z);
-							float v = values.w;
-							v3 = EditorGUILayout.Vector3Field(labels[0], v3);
-							if (ranges[1] != Vector2.zero)
-								v = EditorGUILayout.Slider(labels[1], v, ranges[1].x, ranges[1].y);
-							else
-								v = EditorGUILayout.FloatField(labels[1], v);
-							if (EditorGUI.EndChangeCheck())
-								values = new Vector4(v3.x, v3.y, v3.z, v);
-							break;
-						case "xy,zw":
-							EditorGUI.BeginChangeCheck();
-							Vector2 v2_0 = new Vector2(values.x, values.y);
-							Vector2 v2_1 = new Vector2(values.z, values.w);
-							v2_0 = EditorGUILayout.Vector2Field(labels[0], v2_0);
-							v2_1 = EditorGUILayout.Vector2Field(labels[1], v2_1);
-							if (EditorGUI.EndChangeCheck())
-								values = new Vector4(v2_0.x, v2_0.y, v2_1.x, v2_1.y);
-							break;
-						case "xy,z,w":
-							EditorGUI.BeginChangeCheck();
-							Vector2 v2 = new Vector2(values.x, values.y);
-							float v_1 = values.z;
-							float v_2 = values.w;
-							v2 = EditorGUILayout.Vector2Field(labels[0], v2);
-							if (ranges[1] != Vector2.zero)
-								v_1 = EditorGUILayout.Slider(labels[1], v_1, ranges[1].x, ranges[1].y);
-							else
-								v_1 = EditorGUILayout.FloatField(labels[1], v_1);
-							if (ranges[2] != Vector2.zero)
-								v_2 = EditorGUILayout.Slider(labels[2], v_2, ranges[2].x, ranges[2].y);
-							else
-								v_2 = EditorGUILayout.FloatField(labels[2], v_2);
-							if (EditorGUI.EndChangeCheck())
-								values = new Vector4(v2.x, v2.y, v_1, v_2);
-							break;
-					}
+                if (EditorGUI.EndChangeCheck())
+                    mat.SetVector(materialProperty.name, values);
 
-					mat.SetVector(materialProperty.name, values);
+                EditorGUI.indentLevel -= 3;
+                break;
+            case PType.VectorPlus:
+                if (lines == 1)
+                {
+                    DrawNameLine(displayLabel, "", 20, 5);
+                    materialEditor.VectorProperty(GetIndentRect(), materialProperty, "");
+                }
+                else
+                {
+                    values = mat.GetVector(materialProperty.name);
+                    DrawNameLine(displayLabel, "", 20, 60 - 20 * (4 - lines));
+                    EditorGUI.indentLevel += 3;
 
-					EditorGUI.indentLevel -= 3;
-					break;
-				}
-				break;
-			default:
-				DrawNameLine(displayLabel, "", 20, 5);
-				materialEditor.VectorProperty(GetIndentRect(), materialProperty, "");
-				break;
-		}
+                    switch (keyword)
+                    {
+                        case "xyz,w":
+                            EditorGUI.BeginChangeCheck();
+                            Vector3 v3 = new Vector3(values.x, values.y, values.z);
+                            float v = values.w;
+                            v3 = EditorGUILayout.Vector3Field(labels[0], v3);
+                            if (ranges[1] != Vector2.zero)
+                                v = EditorGUILayout.Slider(labels[1], v, ranges[1].x, ranges[1].y);
+                            else
+                                v = EditorGUILayout.FloatField(labels[1], v);
+                            if (EditorGUI.EndChangeCheck())
+                                values = new Vector4(v3.x, v3.y, v3.z, v);
+                            break;
+                        case "xy,zw":
+                            EditorGUI.BeginChangeCheck();
+                            Vector2 v2_0 = new Vector2(values.x, values.y);
+                            Vector2 v2_1 = new Vector2(values.z, values.w);
+                            v2_0 = EditorGUILayout.Vector2Field(labels[0], v2_0);
+                            v2_1 = EditorGUILayout.Vector2Field(labels[1], v2_1);
+                            if (EditorGUI.EndChangeCheck())
+                                values = new Vector4(v2_0.x, v2_0.y, v2_1.x, v2_1.y);
+                            break;
+                        case "xy,z,w":
+                            EditorGUI.BeginChangeCheck();
+                            Vector2 v2 = new Vector2(values.x, values.y);
+                            float v_1 = values.z;
+                            float v_2 = values.w;
+                            v2 = EditorGUILayout.Vector2Field(labels[0], v2);
+                            if (ranges[1] != Vector2.zero)
+                                v_1 = EditorGUILayout.Slider(labels[1], v_1, ranges[1].x, ranges[1].y);
+                            else
+                                v_1 = EditorGUILayout.FloatField(labels[1], v_1);
+                            if (ranges[2] != Vector2.zero)
+                                v_2 = EditorGUILayout.Slider(labels[2], v_2, ranges[2].x, ranges[2].y);
+                            else
+                                v_2 = EditorGUILayout.FloatField(labels[2], v_2);
+                            if (EditorGUI.EndChangeCheck())
+                                values = new Vector4(v2.x, v2.y, v_1, v_2);
+                            break;
+                    }
 
-		GUILayout.Space(5);
-	}
+                    mat.SetVector(materialProperty.name, values);
 
-	void DrawTexture(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
-	{
-		List<GUITextureImporterChecker> failedCheckers = new List<GUITextureImporterChecker>();
-		if (textureImporterCheckers.Count > 0)
-		{
+                    EditorGUI.indentLevel -= 3;
+                    break;
+                }
+                break;
+            default:
+                DrawNameLine(displayLabel, "", 20, 5);
+                materialEditor.VectorProperty(GetIndentRect(), materialProperty, "");
+                break;
+        }
 
-			foreach (var checker in textureImporterCheckers)
-			{
-				if (!checker.Check())
-				{
-					failedCheckers.Add(checker);
-				}
-			}
-		}
+        GUILayout.Space(5);
+    }
 
-		if (failedCheckers.Count > 0)
-		{
-			DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20, 70);
-			DrawNameLine(GUITextureImporterChecker.CHECKER_FAILED_WARRING, "", 20, -14);
+    void DrawTexture(MaterialEditor materialEditor, Dictionary<string, bool> marcos)
+    {
+        List<GUITextureImporterChecker> failedCheckers = new List<GUITextureImporterChecker>();
+        if (textureImporterCheckers.Count > 0)
+        {
 
-			Rect rect = GetIndentRect(240, 5);
-			rect.y -= 16;
+            foreach (var checker in textureImporterCheckers)
+            {
+                if (!checker.Check())
+                {
+                    failedCheckers.Add(checker);
+                }
+            }
+        }
 
-			if (GUI.Button(rect, "fix"))
-			{
-				foreach (var checker in failedCheckers)
-				{
-					checker.Fix();
-				}
+        if (failedCheckers.Count > 0)
+        {
+            DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20, 70);
+            DrawNameLine(GUITextureImporterChecker.CHECKER_FAILED_WARRING, "", 20, -14);
 
-				failedCheckers[0].importer.SaveAndReimport();
-			}
+            Rect rect = GetIndentRect(240, 5);
+            rect.y -= 16;
 
-			rect = GetIndentRectTex();
-			rect.y -= 16;
+            if (GUI.Button(rect, "fix"))
+            {
+                foreach (var checker in failedCheckers)
+                {
+                    checker.Fix();
+                }
 
-			materialEditor.TextureProperty(rect, materialProperty, "");
-		}
-		else
-		{
-			DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20, 50);
-			materialEditor.TextureProperty(GetIndentRectTex(), materialProperty, "");
-		}
+                failedCheckers[0].importer.SaveAndReimport();
+            }
 
-		GUILayout.Space(50);
-	}
+            rect = GetIndentRectTex();
+            rect.y -= 16;
 
-	public static string CombineFeaturesKey(List<ShaderPropertie> featureCheckers) {
-		string key = "";
-		List<int> featureIDs = new List<int>();
-		foreach (var prop in featureCheckers)
-		{
-			if (prop.materialProperty.floatValue < 1) continue;
+            materialEditor.TextureProperty(rect, materialProperty, "");
+        }
+        else
+        {
+            DrawNameLine(displayLabel + string.Format("({0})", materialProperty.name), "", 20, 50);
+            materialEditor.TextureProperty(GetIndentRectTex(), materialProperty, "");
+        }
 
-			string featureName = prop.keywordsInfo;
-			int featureID = PackedShaderInfo.PackedFeatureNames.IndexOf(featureName);
-			featureIDs.Add(featureID);
-		}
-		featureIDs.Sort();
-		for (int i = 0; i < featureIDs.Count; ++i)
-		{
-			key += featureIDs[i].ToString();
+        GUILayout.Space(50);
+    }
 
-			if (i < featureIDs.Count - 1) key += ",";
-		}
+    public static string CombineFeaturesKey(List<ShaderPropertie> featureCheckers)
+    {
+        string key = "";
+        List<int> featureIDs = new List<int>();
+        foreach (var prop in featureCheckers)
+        {
+            if (prop.materialProperty.floatValue < 1) continue;
 
-		return key;
-	}
+            string featureName = prop.keywordsInfo;
+            int featureID = PackedShaderInfo.PackedFeatureNames.IndexOf(featureName);
+            featureIDs.Add(featureID);
+        }
+        featureIDs.Sort();
+        for (int i = 0; i < featureIDs.Count; ++i)
+        {
+            key += featureIDs[i].ToString();
 
-	#endregion
+            if (i < featureIDs.Count - 1) key += ",";
+        }
+
+        return key;
+    }
+
+    #endregion
 }
 
 
 public class GUITextureImporterChecker
 {
-	public const string CHECKER_FAILED_WARRING = "<color=#ff4000ff>!ImporterSetting is not all correct!</color>";
+    public const string CHECKER_FAILED_WARRING = "<color=#ff4000ff>!ImporterSetting is not all correct!</color>";
 
-	public enum CheckType
-	{
-		sRGB,
-		Size,
-		Type,
-	}
+    public enum CheckType
+    {
+        sRGB,
+        Size,
+        Type,
+    }
 
-	/// <summary>
-	/// 检查贴图类型时对应的字符串
-	/// </summary>
-	Dictionary<string, TextureImporterType> texTypeNames = new Dictionary<string, TextureImporterType> {
-		{"default",TextureImporterType.Default},
-		{"normal",TextureImporterType.NormalMap},
-		{"gui",TextureImporterType.GUI},
-		{"sprite",TextureImporterType.Sprite},
-		{"cursor",TextureImporterType.Cursor},
-		{"cookie",TextureImporterType.Cookie},
-		{"lightmap",TextureImporterType.Lightmap},
-		{"single",TextureImporterType.SingleChannel},
-	};
+    /// <summary>
+    /// 检查贴图类型时对应的字符串
+    /// </summary>
+    Dictionary<string, TextureImporterType> texTypeNames = new Dictionary<string, TextureImporterType> {
+    {"default",TextureImporterType.Default},
+    {"normal",TextureImporterType.NormalMap},
+    {"gui",TextureImporterType.GUI},
+    {"sprite",TextureImporterType.Sprite},
+    {"cursor",TextureImporterType.Cursor},
+    {"cookie",TextureImporterType.Cookie},
+    {"lightmap",TextureImporterType.Lightmap},
+    {"single",TextureImporterType.SingleChannel},
+};
 
 
-	public CheckType checkType = CheckType.sRGB;
+    public CheckType checkType = CheckType.sRGB;
 
-	public TextureImporter importer;
+    public TextureImporter importer;
 
-	Texture texture;
-	bool toggle = true;
-	int value = 0;
-	string info = "";
+    Texture texture;
+    bool toggle = true;
+    int value = 0;
+    string info = "";
 
-	public GUITextureImporterChecker(Texture texture, string constructionLine)
-	{
-		this.texture = texture;
+    public GUITextureImporterChecker(Texture texture, string constructionLine)
+    {
+        this.texture = texture;
 
-		string texturePath = AssetDatabase.GetAssetPath(texture);
-		importer = (TextureImporter)AssetImporter.GetAtPath(texturePath);
+        string texturePath = AssetDatabase.GetAssetPath(texture);
+        importer = (TextureImporter)AssetImporter.GetAtPath(texturePath);
 
-		ParsePropertives(constructionLine);
-	}
+        ParsePropertives(constructionLine);
+    }
 
-	void ParsePropertives(string constructionLine)
-	{
-		string[] infoStrs = constructionLine.Split(':');
+    void ParsePropertives(string constructionLine)
+    {
+        string[] infoStrs = constructionLine.Split(':');
 
-		string typeStr = infoStrs[0].ToLower();
-		info = infoStrs[1].ToLower();
-		if (typeStr == "srgb")
-		{
-			checkType = CheckType.sRGB;
-			toggle = (info == "true" || info == "on" || info == "1");
-		}
-		else if (typeStr == "size")
-		{
-			checkType = CheckType.Size;
-			int.TryParse(info, out value);
-		}
-		else if (typeStr == "type")
-		{
-			checkType = CheckType.Type;
-		}
-	}
+        string typeStr = infoStrs[0].ToLower();
+        info = infoStrs[1].ToLower();
+        if (typeStr == "srgb")
+        {
+            checkType = CheckType.sRGB;
+            toggle = (info == "true" || info == "on" || info == "1");
+        }
+        else if (typeStr == "size")
+        {
+            checkType = CheckType.Size;
+            int.TryParse(info, out value);
+        }
+        else if (typeStr == "type")
+        {
+            checkType = CheckType.Type;
+        }
+    }
 
-	public bool Check()
-	{
-		bool pass = true;
+    public bool Check()
+    {
+        bool pass = true;
 
-		switch (checkType)
-		{
-			case CheckType.sRGB:
-				pass = CheckSRGB();
-				break;
-			case CheckType.Size:
-				pass = CheckSize();
-				break;
-			case CheckType.Type:
-				pass = CheckTexType();
-				break;
-		}
+        switch (checkType)
+        {
+            case CheckType.sRGB:
+                pass = CheckSRGB();
+                break;
+            case CheckType.Size:
+                pass = CheckSize();
+                break;
+            case CheckType.Type:
+                pass = CheckTexType();
+                break;
+        }
 
-		return pass;
-	}
+        return pass;
+    }
 
-	public void Fix()
-	{
-		switch (checkType)
-		{
-			case CheckType.sRGB:
-				FixSRGB();
-				break;
-			case CheckType.Size:
-				FixSize();
-				break;
-			case CheckType.Type:
-				FixTexType();
-				break;
-		}
-	}
+    public void Fix()
+    {
+        switch (checkType)
+        {
+            case CheckType.sRGB:
+                FixSRGB();
+                break;
+            case CheckType.Size:
+                FixSize();
+                break;
+            case CheckType.Type:
+                FixTexType();
+                break;
+        }
+    }
 
-	bool CheckSRGB()
-	{
-		if (!importer) return true;
+    bool CheckSRGB()
+    {
+        if (!importer) return true;
 
-		return importer.sRGBTexture == toggle && importer.textureType == TextureImporterType.Default;
-	}
+        return importer.sRGBTexture == toggle && importer.textureType == TextureImporterType.Default;
+    }
 
-	bool CheckSize()
-	{
-		if (!importer) return true;
+    bool CheckSize()
+    {
+        if (!importer) return true;
 
-		return importer.maxTextureSize <= value;
-	}
+        return importer.maxTextureSize <= value;
+    }
 
-	bool CheckTexType()
-	{
-		if (!importer) return true;
-		if (!texTypeNames.ContainsKey(info)) return true;
+    bool CheckTexType()
+    {
+        if (!importer) return true;
+        if (!texTypeNames.ContainsKey(info)) return true;
 
-		return importer.textureType == texTypeNames[info];
-	}
+        return importer.textureType == texTypeNames[info];
+    }
 
-	void FixSRGB()
-	{
-		if (!importer) return;
+    void FixSRGB()
+    {
+        if (!importer) return;
 
-		importer.textureType = TextureImporterType.Default;
-		importer.sRGBTexture = toggle;
-	}
+        importer.textureType = TextureImporterType.Default;
+        importer.sRGBTexture = toggle;
+    }
 
-	void FixSize()
-	{
-		if (!importer) return;
+    void FixSize()
+    {
+        if (!importer) return;
 
-		importer.maxTextureSize = value;
-	}
+        importer.maxTextureSize = value;
+    }
 
-	void FixTexType()
-	{
-		if (!importer) return;
-		importer.textureType = texTypeNames[info];
-	}
+    void FixTexType()
+    {
+        if (!importer) return;
+        importer.textureType = texTypeNames[info];
+    }
 }
 
 
 public class SShaderGUI : ShaderGUI
 {
-	protected Dictionary<string, bool> marcos = new Dictionary<string, bool>();
-	string[] keyWords = new string[] { };
-	bool hasPackedShaders = false;
-	bool skipDrawGUI = false;
-
-	bool checkDisplayToggle(Material targetMat, string displayField, ShaderPropertie mp, List<string> toggleFields, List<string> enumFields, bool isFirst, bool isNegative)
-	{
-		if (toggleFields.Contains(displayField))
-		{
-			if (targetMat.HasProperty(displayField))
-			{
-				bool toggle = targetMat.GetFloat(displayField) > 0.5f;
-
-				if (isNegative) toggle = !toggle;
-
-				if (!toggle) return false;
-			}
-		}
-
-		if (enumFields.Contains(displayField))
-		{
-			int mark = displayField.LastIndexOf('_');
-			string propertyName = displayField.Substring(0, mark);
-
-			if (targetMat.HasProperty(propertyName))
-			{
-				string fieldValueStr = displayField.Substring(mark + 1, displayField.Length - mark - 1);
-				int fieldValue;
-				int.TryParse(fieldValueStr, out fieldValue);
-
-				bool toggle = (int)targetMat.GetFloat(propertyName) == fieldValue;
-				if (isNegative) toggle = !toggle;
-				if (!toggle) return false;
-			}
-		}
-
-		if (mp.type != ShaderPropertie.PType.Group)
-		{
-			string groupName = "Group#" + displayField;
-			if (targetMat.HasProperty(groupName))
-			{
-				bool groupOpen = targetMat.GetFloat(groupName) > 0;
-				if (isNegative) groupOpen = !groupOpen;
-
-				if (!groupOpen && isFirst) return false;
-			}
-		}
-
-		if (isNegative)
-		{
-			if (marcos.ContainsKey(displayField) && keyWords.Contains(displayField))
-			{
-				return false;
-			}
-		}
-		else
-		{
-			if (marcos.ContainsKey(displayField) && !keyWords.Contains(displayField))
-			{
-				return false;
-			}
-		}
-
-
-		return true;
-	}
-
-
-	override public void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
-	{
-		if (skipDrawGUI)
-		{
-			skipDrawGUI = false;
-			materialEditor.Repaint();
-			return;
-		}
-
-		PackedShaderInfo.currentGroupName = "";
-
-		ShaderPropertie featureGroup = null;
-		Material mat = materialEditor.target as Material;
-		List<ShaderPropertie> shaderProperties = new List<ShaderPropertie>();
-		List<ShaderPropertie> allShaderProperties = new List<ShaderPropertie>();
-		List<ShaderPropertie> featureCheckers = new List<ShaderPropertie>();
-		List<PackedShaderInfo> packedShaderInfos = new List<PackedShaderInfo>();
-		List<StripPackedRule> stripPackedRules = new List<StripPackedRule>();
-
-		ShaderPropertie.LabelCaches = new Dictionary<string, string[]>();
-
-		#region prepair shaderProperties
-		PackedShaderInfo.PackedShaders.Clear();
-		hasPackedShaders = false;
-		foreach (var mp in properties)
-		{
-			if (mp.name.StartsWith(ShaderPropertie.PACKED_SHADER_NAME)) {
-				hasPackedShaders = true;
-				packedShaderInfos.Add(new PackedShaderInfo(mp.displayName,(int)mp.floatValue));
-				continue;
-			}
-
-			if (mp.displayName.StartsWith("S(")) {
-				stripPackedRules.Add(new StripPackedRule(mp.displayName));
-				continue;
-			}
-
-			ShaderPropertie sp = new ShaderPropertie(mp, mat);
-
-			if (sp.type == ShaderPropertie.PType.FeatureChecker)
-				featureCheckers.Add(sp);
-
-			if (sp.type == ShaderPropertie.PType.FeatureGroup)
-				featureGroup = sp;
-
-			if (!sp.ignoreDisplay)
-				shaderProperties.Add(sp);
-
-			allShaderProperties.Add(sp);
-		}
-		#endregion
-
-
-		#region switch packedShaders
-		if (hasPackedShaders)
-		{
-			PackedShaderInfo.CollectPackedShaders(packedShaderInfos, stripPackedRules);
-
-			ShaderPropertie.PackedFeaturesKey = ShaderPropertie.CombineFeaturesKey(featureCheckers);
-
-			PackedShaderInfo.currentGroupName = "";
-			if (featureGroup != null) {
-				int curGroup = (int)featureGroup.materialProperty.floatValue;
-				PackedShaderInfo.currentGroupName = featureGroup.keywords[curGroup];
-			}
-
-			if (PackedShaderInfo.PackedShaders.ContainsKey(PackedShaderInfo.currentGroupName)) {
-
-				if (PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName].ContainsKey(ShaderPropertie.PackedFeaturesKey) &&
-					PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName][ShaderPropertie.PackedFeaturesKey] &&
-					mat.shader != PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName][ShaderPropertie.PackedFeaturesKey])
-				{
-					mat.shader = PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName][ShaderPropertie.PackedFeaturesKey];
-					skipDrawGUI = true;
-					return;
-				}
-			}
-		}
-		#endregion
-
-
-		#region Prepair Keywords rules
-		List<string> toggleFields = new List<string>();
-		List<string> enumFields = new List<string>();
-		List<ShaderPropertie> keywordLinks = new List<ShaderPropertie>();
-		List<ShaderPropertie> keywordStrips = new List<ShaderPropertie>();
-		List<ShaderPropertie> keywordWithAnyEnumActives = new List<ShaderPropertie>();
-		Dictionary<ShaderPropertie, bool> keywordWithAnyEnumActiveDic = new Dictionary<ShaderPropertie, bool>();
-
-		foreach (var sp in allShaderProperties)
-		{
-			switch (sp.type)
-			{
-				case ShaderPropertie.PType.Toggle:
-					toggleFields.Add(sp.materialProperty.name);
-					break;
-				case ShaderPropertie.PType.TogglePass:
-					toggleFields.Add(sp.materialProperty.name);
-					break;
-				case ShaderPropertie.PType.Enum:
-					foreach (int v in sp.enumVals)
-						enumFields.Add(string.Format("{0}_{1}", sp.materialProperty.name, v));
-					break;
-				case ShaderPropertie.PType.KeywordLink:
-					keywordLinks.Add(sp);
-					break;
-				case ShaderPropertie.PType.KeywordStrip:
-					keywordStrips.Add(sp);
-					break;
-				case ShaderPropertie.PType.KeywordWithAnyEnumActive:
-					keywordWithAnyEnumActiveDic[sp] = false;
-					keywordWithAnyEnumActives.Add(sp);
-					break;
-			}
-		}
-		#endregion
-
-
-		#region refresh marcos
-		keyWords = mat.shaderKeywords;
-		Dictionary<string, bool> tempKey = new Dictionary<string, bool>();
-
-		foreach (var sp in shaderProperties)
-		{
-			if (sp.type == ShaderPropertie.PType.ToggleWithKeyword)
-			{
-				string keyword = sp.keyword;
-				if (!tempKey.ContainsKey(keyword))
-					tempKey.Add(sp.keyword, false);
-			}
-
-			if (sp.type == ShaderPropertie.PType.EnumWithKeywords)
-			{
-				var keywordArray = sp.keywords;
-
-				foreach (var word in keywordArray)
-				{
-					if (!tempKey.ContainsKey(word))
-						tempKey.Add(word, false);
-				}
-			}
-
-		}
-
-		foreach (var sp in keywordWithAnyEnumActiveDic.Keys)
-		{
-			if (sp.type == ShaderPropertie.PType.KeywordWithAnyEnumActive)
-			{
-				if (!string.IsNullOrEmpty(sp.keyword))
-				{
-					if (!tempKey.ContainsKey(sp.keyword))
-					{
-						tempKey.Add(sp.keyword, false);
-					}
-				}
-			}
-		}
-
-		foreach (var sp in keywordLinks)
-		{
-			if (!tempKey.ContainsKey(sp.keyword))
-			{
-				tempKey.Add(sp.keyword, false);
-			}
-		}
-
-
-		foreach (var sp in keywordStrips)
-		{
-			if (!tempKey.ContainsKey(sp.keyword))
-			{
-				tempKey.Add(sp.keyword, false);
-			}
-		}
-
-
-
-
-
-		marcos.Clear();
-		marcos = tempKey;
-
-		foreach (var sp in shaderProperties)
-		{
-			if (sp.type == ShaderPropertie.PType.ToggleWithKeyword)
-			{
-				string keyword = sp.keyword;
-				if (keyWords.Contains(keyword))
-					marcos[keyword] = true;
-				else
-					marcos[keyword] = false;
-			}
-			if (sp.type == ShaderPropertie.PType.EnumWithKeywords)
-			{
-				var keywordArray = sp.keywords;
-
-				bool allfalse = true;
-				for (int i = 0; i < keywordArray.Length; i++)
-				{
-					var word = keywordArray[i];
-					if (keyWords.Contains(word))
-					{
-						allfalse = false;
-						marcos[word] = true;
-					}
-					else
-					{
-						marcos[word] = false;
-					}
-
-				}
-				if (allfalse)
-				{
-					marcos[keywordArray[0]] = true;
-				}
-			}
-		}
-		#endregion
-
-
-		foreach (var prop in shaderProperties)
-		{
-			#region toggleDisplay
-			bool displayToggle = true;
-			for (int i = 0; i < prop.displayFields.Length; ++i)
-			{
-				string fieldStr = prop.displayFields[i];
-
-				string[] fields = fieldStr.Split('|');
-				displayToggle = false;
-				foreach (string f in fields)
-				{
-					bool isNegative = false;
-					string field = f;
-
-					if (field.StartsWith("!"))
-					{
-						field = field.Substring(1);
-						isNegative = true;
-					}
-
-					if (checkDisplayToggle(mat, field, prop, toggleFields, enumFields, i == 0, isNegative))
-					{
-						displayToggle = true;
-						break;
-					}
-				}
-
-				if (!displayToggle) break;
-			}
-			if (!displayToggle) continue;
-			#endregion
-
-			#region init EmumKeywords
-			if (prop.type == ShaderPropertie.PType.EnumWithKeywords)
-			{
-				int lastValue = (int)mat.GetFloat(prop.materialProperty.name);
-				int lastIndex = prop.enumVals.IndexOf(lastValue);
-				string keyword = prop.keywords[lastIndex];
-				if (!string.IsNullOrEmpty(keyword) && !mat.shaderKeywords.Contains<string>(keyword))
-				{
-					mat.EnableKeyword(keyword);
-					materialEditor.Repaint();
-				}
-			}
-			#endregion
-
-			prop.Draw(materialEditor, marcos, featureCheckers);
-
-			#region prepaire keywordWithAnyEnumActives
-			foreach (ShaderPropertie sp in keywordWithAnyEnumActives)
-			{
-				if (sp.labels.Contains<string>(prop.materialProperty.name))
-				{
-
-					int curVal = (int)prop.materialProperty.floatValue;
-					int curEnum = prop.enumVals[curVal];
-					int curRule = (int)sp.materialProperty.floatValue;
-
-					if (curEnum == curRule)
-						keywordWithAnyEnumActiveDic[sp] = true;
-				}
-			}
-			#endregion
-		}
-
-
-		#region Rule Keywords
-		foreach (var sp in keywordWithAnyEnumActiveDic.Keys)
-		{
-			if (keywordWithAnyEnumActiveDic[sp])
-				marcos[sp.keyword] = true;
-			else
-				marcos[sp.keyword] = false;
-		}
-
-		foreach (var sp in keywordLinks)
-		{
-			if (marcos.ContainsKey(sp.keyword) && marcos[sp.keyword])
-			{
-				foreach (string keyword in sp.keywords)
-					marcos[keyword] = true;
-			}
-		}
-
-		foreach (var sp in keywordStrips)
-		{
-			if (marcos.ContainsKey(sp.keyword) && marcos[sp.keyword])
-			{
-				foreach (string keyword in sp.keywords)
-					marcos[keyword] = false;
-			}
-		}
-		#endregion
-
-
-		#region update keywords
-		var newkeywords = new List<string> { };
-		foreach (var item in marcos)
-		{
-			if (item.Value)
-				newkeywords.Add(item.Key);
-		}
-
-		mat.shaderKeywords = newkeywords.ToArray();
-		EditorUtility.SetDirty(mat);
-		#endregion
-
-
-		EditorGUILayout.Separator();
-		materialEditor.RenderQueueField();
-		materialEditor.EnableInstancingField();
-	}
-
-
-
-
+    protected Dictionary<string, bool> marcos = new Dictionary<string, bool>();
+    string[] keyWords = new string[] { };
+    bool hasPackedShaders = false;
+    bool skipDrawGUI = false;
+
+    bool checkDisplayToggle(Material targetMat, string displayField, ShaderPropertie mp, List<string> toggleFields, List<string> enumFields, bool isFirst, bool isNegative)
+    {
+        if (toggleFields.Contains(displayField))
+        {
+            if (targetMat.HasProperty(displayField))
+            {
+                bool toggle = targetMat.GetFloat(displayField) > 0.5f;
+
+                if (isNegative) toggle = !toggle;
+
+                if (!toggle) return false;
+            }
+        }
+
+        if (enumFields.Contains(displayField))
+        {
+            int mark = displayField.LastIndexOf('_');
+            string propertyName = displayField.Substring(0, mark);
+
+            if (targetMat.HasProperty(propertyName))
+            {
+                string fieldValueStr = displayField.Substring(mark + 1, displayField.Length - mark - 1);
+                int fieldValue;
+                int.TryParse(fieldValueStr, out fieldValue);
+
+                bool toggle = (int)targetMat.GetFloat(propertyName) == fieldValue;
+                if (isNegative) toggle = !toggle;
+                if (!toggle) return false;
+            }
+        }
+
+        if (mp.type != ShaderPropertie.PType.Group)
+        {
+            string groupName = "Group#" + displayField;
+            if (targetMat.HasProperty(groupName))
+            {
+                bool groupOpen = targetMat.GetFloat(groupName) > 0;
+                if (isNegative) groupOpen = !groupOpen;
+
+                if (!groupOpen && isFirst) return false;
+            }
+        }
+
+        if (isNegative)
+        {
+            if (marcos.ContainsKey(displayField) && keyWords.Contains(displayField))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (marcos.ContainsKey(displayField) && !keyWords.Contains(displayField))
+            {
+                return false;
+            }
+        }
+
+
+        return true;
+    }
+
+    public virtual bool DrawElse(MaterialEditor materialEditor, MaterialProperty property, string displayLabel)
+    {
+        return false;
+    }
+
+    public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
+    {
+        if (skipDrawGUI)
+        {
+            skipDrawGUI = false;
+            materialEditor.Repaint();
+            return;
+        }
+
+        PackedShaderInfo.currentGroupName = "";
+
+        ShaderPropertie featureGroup = null;
+        Material mat = materialEditor.target as Material;
+        List<ShaderPropertie> shaderProperties = new List<ShaderPropertie>();
+        List<ShaderPropertie> allShaderProperties = new List<ShaderPropertie>();
+        List<ShaderPropertie> featureCheckers = new List<ShaderPropertie>();
+        List<PackedShaderInfo> packedShaderInfos = new List<PackedShaderInfo>();
+        List<StripPackedRule> stripPackedRules = new List<StripPackedRule>();
+
+        ShaderPropertie.LabelCaches = new Dictionary<string, string[]>();
+
+        #region prepair shaderProperties
+        PackedShaderInfo.PackedShaders.Clear();
+        hasPackedShaders = false;
+        foreach (var mp in properties)
+        {
+            if (mp.name.StartsWith(ShaderPropertie.PACKED_SHADER_NAME))
+            {
+                hasPackedShaders = true;
+                packedShaderInfos.Add(new PackedShaderInfo(mp.displayName, (int)mp.floatValue));
+                continue;
+            }
+
+            if (mp.displayName.StartsWith("S("))
+            {
+                stripPackedRules.Add(new StripPackedRule(mp.displayName));
+                continue;
+            }
+
+            ShaderPropertie sp = new ShaderPropertie(this, mp, mat);
+
+            if (sp.type == ShaderPropertie.PType.FeatureChecker)
+                featureCheckers.Add(sp);
+
+            if (sp.type == ShaderPropertie.PType.FeatureGroup)
+                featureGroup = sp;
+
+            if (!sp.ignoreDisplay)
+                shaderProperties.Add(sp);
+
+            allShaderProperties.Add(sp);
+        }
+        #endregion
+
+
+        #region switch packedShaders
+        if (hasPackedShaders)
+        {
+            PackedShaderInfo.CollectPackedShaders(packedShaderInfos, stripPackedRules);
+
+            ShaderPropertie.PackedFeaturesKey = ShaderPropertie.CombineFeaturesKey(featureCheckers);
+
+            PackedShaderInfo.currentGroupName = "";
+            if (featureGroup != null)
+            {
+                int curGroup = (int)featureGroup.materialProperty.floatValue;
+                PackedShaderInfo.currentGroupName = featureGroup.keywords[curGroup];
+            }
+
+            if (PackedShaderInfo.PackedShaders.ContainsKey(PackedShaderInfo.currentGroupName))
+            {
+
+                if (PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName].ContainsKey(ShaderPropertie.PackedFeaturesKey) &&
+                    PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName][ShaderPropertie.PackedFeaturesKey] &&
+                    mat.shader != PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName][ShaderPropertie.PackedFeaturesKey])
+                {
+                    mat.shader = PackedShaderInfo.PackedShaders[PackedShaderInfo.currentGroupName][ShaderPropertie.PackedFeaturesKey];
+                    skipDrawGUI = true;
+                    return;
+                }
+            }
+        }
+        #endregion
+
+
+        #region Prepair Keywords rules
+        List<string> toggleFields = new List<string>();
+        List<string> enumFields = new List<string>();
+        List<ShaderPropertie> keywordLinks = new List<ShaderPropertie>();
+        List<ShaderPropertie> keywordStrips = new List<ShaderPropertie>();
+        List<ShaderPropertie> keywordWithAnyEnumActives = new List<ShaderPropertie>();
+        Dictionary<ShaderPropertie, bool> keywordWithAnyEnumActiveDic = new Dictionary<ShaderPropertie, bool>();
+
+        foreach (var sp in allShaderProperties)
+        {
+            switch (sp.type)
+            {
+                case ShaderPropertie.PType.Toggle:
+                    toggleFields.Add(sp.materialProperty.name);
+                    break;
+                case ShaderPropertie.PType.TogglePass:
+                    toggleFields.Add(sp.materialProperty.name);
+                    break;
+                case ShaderPropertie.PType.Enum:
+                    foreach (int v in sp.enumVals)
+                        enumFields.Add(string.Format("{0}_{1}", sp.materialProperty.name, v));
+                    break;
+                case ShaderPropertie.PType.KeywordLink:
+                    keywordLinks.Add(sp);
+                    break;
+                case ShaderPropertie.PType.KeywordStrip:
+                    keywordStrips.Add(sp);
+                    break;
+                case ShaderPropertie.PType.KeywordWithAnyEnumActive:
+                    keywordWithAnyEnumActiveDic[sp] = false;
+                    keywordWithAnyEnumActives.Add(sp);
+                    break;
+            }
+        }
+        #endregion
+
+
+        #region refresh marcos
+        keyWords = mat.shaderKeywords;
+        Dictionary<string, bool> tempKey = new Dictionary<string, bool>();
+
+        foreach (var sp in shaderProperties)
+        {
+            if (sp.type == ShaderPropertie.PType.ToggleWithKeyword)
+            {
+                string keyword = sp.keyword;
+                if (!tempKey.ContainsKey(keyword))
+                    tempKey.Add(sp.keyword, false);
+            }
+
+            if (sp.type == ShaderPropertie.PType.EnumWithKeywords)
+            {
+                var keywordArray = sp.keywords;
+
+                foreach (var word in keywordArray)
+                {
+                    if (!tempKey.ContainsKey(word))
+                        tempKey.Add(word, false);
+                }
+            }
+
+        }
+
+        foreach (var sp in keywordWithAnyEnumActiveDic.Keys)
+        {
+            if (sp.type == ShaderPropertie.PType.KeywordWithAnyEnumActive)
+            {
+                if (!string.IsNullOrEmpty(sp.keyword))
+                {
+                    if (!tempKey.ContainsKey(sp.keyword))
+                    {
+                        tempKey.Add(sp.keyword, false);
+                    }
+                }
+            }
+        }
+
+        foreach (var sp in keywordLinks)
+        {
+            if (!tempKey.ContainsKey(sp.keyword))
+            {
+                tempKey.Add(sp.keyword, false);
+            }
+        }
+
+
+        foreach (var sp in keywordStrips)
+        {
+            if (!tempKey.ContainsKey(sp.keyword))
+            {
+                tempKey.Add(sp.keyword, false);
+            }
+        }
+
+
+        marcos.Clear();
+        marcos = tempKey;
+
+        foreach (var sp in shaderProperties)
+        {
+            if (sp.type == ShaderPropertie.PType.ToggleWithKeyword)
+            {
+                string keyword = sp.keyword;
+                if (keyWords.Contains(keyword))
+                    marcos[keyword] = true;
+                else
+                    marcos[keyword] = false;
+            }
+            if (sp.type == ShaderPropertie.PType.EnumWithKeywords)
+            {
+                var keywordArray = sp.keywords;
+
+                bool allfalse = true;
+                for (int i = 0; i < keywordArray.Length; i++)
+                {
+                    var word = keywordArray[i];
+                    if (keyWords.Contains(word))
+                    {
+                        allfalse = false;
+                        marcos[word] = true;
+                    }
+                    else
+                    {
+                        marcos[word] = false;
+                    }
+
+                }
+                if (allfalse)
+                {
+                    marcos[keywordArray[0]] = true;
+                }
+            }
+        }
+        #endregion
+
+
+        foreach (var prop in shaderProperties)
+        {
+            #region toggleDisplay
+            bool displayToggle = true;
+            for (int i = 0; i < prop.displayFields.Length; ++i)
+            {
+                string fieldStr = prop.displayFields[i];
+
+                string[] fields = fieldStr.Split('|');
+                displayToggle = false;
+                foreach (string f in fields)
+                {
+                    bool isNegative = false;
+                    string field = f;
+
+                    if (field.StartsWith("!"))
+                    {
+                        field = field.Substring(1);
+                        isNegative = true;
+                    }
+
+                    if (checkDisplayToggle(mat, field, prop, toggleFields, enumFields, i == 0, isNegative))
+                    {
+                        displayToggle = true;
+                        break;
+                    }
+                }
+
+                if (!displayToggle) break;
+            }
+            if (!displayToggle) continue;
+            #endregion
+
+            #region init EmumKeywords
+            if (prop.type == ShaderPropertie.PType.EnumWithKeywords)
+            {
+                int lastValue = (int)mat.GetFloat(prop.materialProperty.name);
+                int lastIndex = prop.enumVals.IndexOf(lastValue);
+                string keyword = prop.keywords[lastIndex];
+                if (!string.IsNullOrEmpty(keyword) && !mat.shaderKeywords.Contains<string>(keyword))
+                {
+                    mat.EnableKeyword(keyword);
+                    materialEditor.Repaint();
+                }
+            }
+            #endregion
+
+            prop.Draw(materialEditor, marcos, featureCheckers);
+
+            #region prepaire keywordWithAnyEnumActives
+            foreach (ShaderPropertie sp in keywordWithAnyEnumActives)
+            {
+                if (sp.labels.Contains<string>(prop.materialProperty.name))
+                {
+
+                    int curVal = (int)prop.materialProperty.floatValue;
+                    int curEnum = prop.enumVals[curVal];
+                    int curRule = (int)sp.materialProperty.floatValue;
+
+                    if (curEnum == curRule)
+                        keywordWithAnyEnumActiveDic[sp] = true;
+                }
+            }
+            #endregion
+        }
+
+
+        #region Rule Keywords
+        foreach (var sp in keywordWithAnyEnumActiveDic.Keys)
+        {
+            if (keywordWithAnyEnumActiveDic[sp])
+                marcos[sp.keyword] = true;
+            else
+                marcos[sp.keyword] = false;
+        }
+
+        foreach (var sp in keywordLinks)
+        {
+            if (marcos.ContainsKey(sp.keyword) && marcos[sp.keyword])
+            {
+                foreach (string keyword in sp.keywords)
+                    marcos[keyword] = true;
+            }
+        }
+
+        foreach (var sp in keywordStrips)
+        {
+            if (marcos.ContainsKey(sp.keyword) && marcos[sp.keyword])
+            {
+                foreach (string keyword in sp.keywords)
+                    marcos[keyword] = false;
+            }
+        }
+        #endregion
+
+
+        #region update keywords
+        var newkeywords = new List<string> { };
+        foreach (var item in marcos)
+        {
+            if (item.Value)
+                newkeywords.Add(item.Key);
+        }
+
+        mat.shaderKeywords = newkeywords.ToArray();
+        EditorUtility.SetDirty(mat);
+        #endregion
+
+
+        EditorGUILayout.Separator();
+        materialEditor.RenderQueueField();
+        materialEditor.EnableInstancingField();
+    }
 
 }

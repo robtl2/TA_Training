@@ -77,6 +77,7 @@ Material:
     - Group#Main: 1
     - Group#Nor: 1
     - Group#Param: 1
+    - Group#SSS: 1
     - _AlphaClip: 0
     - _Anisotropy: 0.5
     - _BentNormal: 0
@@ -99,6 +100,7 @@ Material:
     - _Rim: 0
     - _RoughnessOffset: 0
     - _Rule1: 0
+    - _SSS_Profile: 0
     - _ShadingModel: 1
     - _SmoothnessTextureChannel: 0
     - _Specular: 0

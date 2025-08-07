@@ -8,18 +8,14 @@ namespace PixRenderPipline
     {
         public TransparentPass(PixRenderer renderer) : base("PixTransparentPass", renderer)
         {
-            materialTAA = new Material(Shader.Find("Hidden/Pix/TAA"));
+            
         }
 
         readonly ShaderTagId[] tagID = new ShaderTagId[] {
             new("PixTransparent"),
         };
 
-        Material materialTAA;
-        
         public static readonly int ColorBuff = Shader.PropertyToID("_PixColorTex");
-        public static readonly int ColorBuff_Front = Shader.PropertyToID("_PixColorTex_Front");
-        static int _HistroyWeight = Shader.PropertyToID("_HistroyWeight");
         
         public override void Execute()
         {

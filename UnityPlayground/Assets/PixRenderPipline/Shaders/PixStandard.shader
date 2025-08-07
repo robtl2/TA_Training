@@ -3,9 +3,12 @@ Shader "Pix/Standard"
     Properties
     {
         Group#Feature("Feature", Int) = 1
-            _ShadingModel ("E/ShadingModel:Unlit,Lit,Hair[Feature]", Int) = 0
+            _ShadingModel ("E/ShadingModel:Unlit,Lit,Hair,SSS[Feature]", Int) = 0
             _CullMode("E/Cull:Off,Front,Back[Feature]", Int) = 2
             _BentNormal("T(ENABLE_BENTNORMAL)/BentNormal[Feature]", Int) = 0
+
+        Group#SSS("SSS[_ShadingModel_3]", Int) = 1
+            _SSS_Profile("SSS/profile[SSS,_ShadingModel_3]", Int) = 0
 
         Group#Main("Main", Int) = 1
             _Color ("Color[Main]", Color) = (1,1,1,1)
@@ -18,12 +21,14 @@ Shader "Pix/Standard"
             _RoughnessOffset("RoughnessOffset[Param]", Range(-1,1))=0
             _MetallicOffset("MetallicOffset[Param]", Range(-1,1))=0
 
-        Group#Nor("Normal[_ShadingModel_1|_ShadingModel_2]", Int) = 1
-            _NormalTex("NormalTex[Nor,_ShadingModel_1|_ShadingModel_2]{type:Normal}", 2D) = "bump" {}
-            _NormalIntensity("Intensity[Nor,_ShadingModel_1|_ShadingModel_2]", Range(0,2)) = 1
+        Group#Nor("Normal[!_ShadingModel_0]", Int) = 1
+            _NormalTex("NormalTex[Nor,!_ShadingModel_0]{type:Normal}", 2D) = "bump" {}
+            _NormalIntensity("Intensity[Nor,!_ShadingModel_0]", Range(0,2)) = 1
 
         Group#Hair("Hair[_ShadingModel_2]", Int) = 1
             _Anisotropy("Anisotropy[Hair,_ShadingModel_2]", Range(-1,1)) = 0.5
+
+        
 
         _Rule1("K|(EXPORT_TANGENT)/_ShadingModel" ,Int ) = 2
     }
@@ -521,5 +526,5 @@ Shader "Pix/Standard"
         }
     }
 
-    CustomEditor "SShaderGUI"
+    CustomEditor "PixShaderGUI"
 }

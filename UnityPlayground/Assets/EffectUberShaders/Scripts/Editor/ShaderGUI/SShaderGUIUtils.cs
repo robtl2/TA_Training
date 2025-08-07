@@ -1,12 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEditor;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 public class SShaderGUIUtils
 {

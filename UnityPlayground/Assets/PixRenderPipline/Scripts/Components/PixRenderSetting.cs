@@ -41,6 +41,14 @@ namespace PixRenderPipline
 
         #endregion
 
+        #region PostProcessing
+        [Header("PostProcessing")]
+        public bool Enable_Sharpen = true;
+        [Range(0, 2)]
+        public float SharpenStrength = 1.0f;
+        public bool Enable_Tonemapping = true;
+        #endregion
+
         #region TAA
         [Header("TAA")]
         public bool enable_TAA = false;
@@ -51,14 +59,6 @@ namespace PixRenderPipline
         [Range(0, 0.995f)]
         public float TAA_histroy = 0.95f;
 
-        #endregion
-
-        #region PostProcessing
-        [Header("PostProcessing")]
-        public bool Enable_Sharpen = true;
-        [Range(0, 2)]
-        public float SharpenStrength = 1.0f;
-        public bool Enable_Tonemapping = true;
         #endregion
 
 
