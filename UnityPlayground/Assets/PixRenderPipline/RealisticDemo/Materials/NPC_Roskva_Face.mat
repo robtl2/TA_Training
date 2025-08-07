@@ -92,7 +92,7 @@ Material:
     - _Metallic: 0
     - _MetallicOffset: 0
     - _Mode: 0
-    - _NormalIntensity: 0.87
+    - _NormalIntensity: 1.13
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.05
     - _OutlineZOffset: 0
@@ -101,7 +101,7 @@ Material:
     - _RoughnessOffset: 0
     - _Rule1: 0
     - _SSS_Profile: 1
-    - _ShadingModel: 3
+    - _ShadingModel: 1
     - _SmoothnessTextureChannel: 0
     - _Specular: 0
     - _SpecularHighlights: 1

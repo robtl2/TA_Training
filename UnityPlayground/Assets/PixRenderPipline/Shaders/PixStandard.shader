@@ -457,6 +457,7 @@ Shader "Pix/Standard"
             #endif
         
             #include "lib/light.hlsl"
+            #include "lib/sss.hlsl"
             #include "lib/shading.hlsl"
             #include "lib/ibl.hlsl"
 

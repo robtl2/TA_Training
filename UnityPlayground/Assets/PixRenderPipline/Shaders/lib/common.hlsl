@@ -27,6 +27,16 @@ half remap01(half from, half to, half x)
     return saturate((x - from) / (to - from));
 }
 
+half2 remap01(half from, half to, half2 x)
+{
+    return saturate((x - from) / (to - from));
+}
+
+half3 remap01(half from, half to, half3 x)
+{
+    return saturate((x - from) / (to - from));
+}
+
 // 将两个int打包成一个8bit的float
 // value1: 5bit (0-31) 用来装metallic
 // value2: 3bit (0-7) 用来装shadingModel

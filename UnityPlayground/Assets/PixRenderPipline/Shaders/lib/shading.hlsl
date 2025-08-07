@@ -91,6 +91,17 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
         specular *= occ;
     }
 
+    if(gbufferData.shadingModel == SHADING_MODEL_SSS){
+        PixSSSProfile sssProfile = GetPixSSSProfile(gbufferData.sssProfileIndex);
+
+        half radius = sssProfile.scatteringRadius*2;
+        half3 NoL_b = dot(gbufferData.bentNormal, L)+radius;
+        NoL_b = remap01(0, 1+radius, NoL_b);
+
+        NoL_b = lerp(NoL, NoL_b, sssProfile.scatteringColor * sssProfile.scatteringIntensity);
+        NoL = NoL_b;
+    }
+
     result += light.color * (specular + diffuse) * shadow * NoL;
 }
 

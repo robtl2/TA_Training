@@ -24,11 +24,17 @@ namespace PixRenderPipline
         public string profileName = "new profile";
 
         public Color scatteringColor = Color.red;
+
+        [Range(0,1)]
         public float scatteringRadius = 1.0f;
+
+        [Range(0,1)]
         public float scatteringIntensity = 1.0f;
 
         public Color transmissionColor = Color.red;
         public float transmissionRadius = 1.0f;
+
+        [Range(0,1)]
         public float transmissionIntensity = 1.0f;
         #endregion
 
@@ -80,7 +86,7 @@ namespace PixRenderPipline
 
                 var scatteringColor = profile.scatteringColor;
                 var transmissionColor = profile.transmissionColor;
-                float scatteringRadius = profile.scatteringRadius;
+                float scatteringRadius = profile.scatteringRadius*0.5f;
                 float transmissionRadius = profile.transmissionRadius;
                 float scatteringIntensity = profile.scatteringIntensity;
                 float transmissonIntensity = profile.transmissionIntensity;

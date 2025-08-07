@@ -45,6 +45,7 @@ Shader "Hidden/Pix/Post"
             half2 _PixColorTex_TexelSize;
 
             half _SharpenAmount;
+            half _Exposure;
 
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -106,9 +107,13 @@ Shader "Hidden/Pix/Post"
 
                 rgb = LDR2HDR(rgb);
 
+                rgb *= _Exposure;
+
                 #ifdef PP_TONEMAPPING
                     Tonemap(rgb);
                 #endif
+
+
 
                 #if 0
                     if(any(color>1))color.rgb = half3(1,0,0);

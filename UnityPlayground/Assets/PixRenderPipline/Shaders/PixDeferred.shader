@@ -33,8 +33,8 @@ Shader "Hidden/Pix/Deferred"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/light.hlsl"
             #include "lib/gbuffer.hlsl"
+            #include "lib/sss.hlsl"
             #include "lib/shading.hlsl"
-            
             #include "lib/ibl.hlsl"
 
             struct AttributesDepth

@@ -10,6 +10,7 @@ namespace PixRenderPipline
         Material materialTAA;
         static int _HistroyWeight = Shader.PropertyToID("_HistroyWeight");
         static int _SharpenAmount = Shader.PropertyToID("_SharpenAmount");
+        static int _Exposure = Shader.PropertyToID("_Exposure");
 
         public static readonly int ColorBuff_Front = Shader.PropertyToID("_PixColorTex_Front");
 
@@ -30,6 +31,7 @@ namespace PixRenderPipline
             renderer.cmb.SetGlobalTexture(DeferredPass.DepthDownSample, DeferredPass.DepthDownSample);
 
             postMaterial.SetFloat(_SharpenAmount, setting.SharpenStrength);
+            postMaterial.SetFloat(_Exposure, setting.Exposure);
 
             TriggerEvent(PixRenderEventName.BeforePostProcess);
 

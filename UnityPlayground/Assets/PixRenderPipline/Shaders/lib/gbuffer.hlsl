@@ -186,7 +186,7 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.sssProfileIndex = sssProfileIndex;
     gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
 #else
-    gbufferData.shadingModel = 1;
+    gbufferData.shadingModel = shadingModel;
     gbufferData.albedo = 0.5;
     gbufferData.diffuse = 0.5;
     gbufferData.f0 = 0;

@@ -125,16 +125,37 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
         Fr = getPrefilterAnisotropicSpecularLD(gbufferData);
     else
         Fr = prefilteredRadiance(gbufferData);
-    
-    #if 0
-    half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.bentNormal);
-    #else
-    half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
-    #endif
 
-    half ao = selfOcclusion(gbufferData, gbufferData.normalWS, 1);
+
+    half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
+    half3 ao = selfOcclusion(gbufferData, gbufferData.normalWS, 1);
+    
     if(_AO_Factor<0.999)
         ao = lerp(1,ao,_AO_Factor);
+    
+    Fd *= ao;
+
+    
+    
+    if(gbufferData.shadingModel == SHADING_MODEL_SSS)
+    {
+        PixSSSProfile sssProfile = GetPixSSSProfile(gbufferData.sssProfileIndex);
+
+        half3 Fd_b = gbufferData.diffuse * diffuseIrradiance(gbufferData.bentNormal);
+
+        half3 ao_b = selfOcclusion(gbufferData, gbufferData.bentNormal, 1);
+        ao_b = remap01(0, 1-sssProfile.scatteringRadius, ao_b);
+        
+        if(_AO_Factor<0.999)
+            ao_b = lerp(1,ao_b,_AO_Factor);
+
+        Fd_b *= ao_b;
+
+        Fd = lerp(Fd, Fd_b, sssProfile.scatteringColor*sssProfile.scatteringIntensity);
+    }
+
+
+    
 
     #ifndef SSAO_QUALITY_OFF
         half ssao = calculateSSAO(uv, gbufferData);
