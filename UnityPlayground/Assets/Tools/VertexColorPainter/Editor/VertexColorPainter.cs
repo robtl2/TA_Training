@@ -38,7 +38,7 @@ public class VertexColorPainter : EditorWindow
 	#endregion
 
 	#region channel
-	int channel = 0;
+	int channel = 3;
 	string[] channelLabels = new string[] {
 		"R",
 		"G",
@@ -534,35 +534,36 @@ public class VertexColorPainter : EditorWindow
 			Renderer renderer = renderers[i];
 
 			string assetPath = AssetDatabase.GetAssetPath(mesh);
-			if (!assetPath.EndsWith(".asset"))
-			{
-				string newAssetPath = System.IO.Path.GetDirectoryName(assetPath) + "/" + mesh.name + ".asset";
+            if (!assetPath.EndsWith(".asset"))
+            {
+                string newAssetPath = System.IO.Path.GetDirectoryName(assetPath) + "/" + mesh.name + ".asset";
 
-				if (newAssetPath.StartsWith("Library/"))
-					newAssetPath = newAssetPath.Replace("Library/", "Assets/");
+                if (newAssetPath.StartsWith("Library/"))
+                    newAssetPath = newAssetPath.Replace("Library/", "Assets/");
 
-				Mesh newMesh = new Mesh();
-				newMesh.vertices = mesh.vertices;
-				newMesh.triangles = mesh.triangles;
-				newMesh.normals = mesh.normals;
-				newMesh.tangents = mesh.tangents;
-				newMesh.colors = mesh.colors;
-				newMesh.uv = mesh.uv;
-				newMesh.uv2 = mesh.uv2;
-				newMesh.uv3 = mesh.uv3;
-				newMesh.uv4 = mesh.uv4;
-				newMesh.uv5 = mesh.uv5;
-				newMesh.uv6 = mesh.uv6;
-				newMesh.uv7 = mesh.uv7;
-				newMesh.uv8 = mesh.uv8;
-				newMesh.boneWeights = mesh.boneWeights;
-				newMesh.bindposes = mesh.bindposes;
-				newMesh.subMeshCount = mesh.subMeshCount;
-				for(int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++)
-					newMesh.SetTriangles(mesh.GetTriangles(subMeshIndex), subMeshIndex);
-				newMesh.bounds = mesh.bounds;
+                Mesh newMesh = new Mesh();
+                newMesh.vertices = mesh.vertices;
+                newMesh.triangles = mesh.triangles;
+                newMesh.normals = mesh.normals;
+                newMesh.tangents = mesh.tangents;
+                newMesh.colors = mesh.colors;
+                newMesh.uv = mesh.uv;
+                newMesh.uv2 = mesh.uv2;
+                newMesh.uv3 = mesh.uv3;
+                newMesh.uv4 = mesh.uv4;
+                newMesh.uv5 = mesh.uv5;
+                newMesh.uv6 = mesh.uv6;
+                newMesh.uv7 = mesh.uv7;
+                newMesh.uv8 = mesh.uv8;
+                newMesh.boneWeights = mesh.boneWeights;
+                newMesh.bindposes = mesh.bindposes;
+                newMesh.subMeshCount = mesh.subMeshCount;
+                for (int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++)
+                    newMesh.SetTriangles(mesh.GetTriangles(subMeshIndex), subMeshIndex);
+                newMesh.bounds = mesh.bounds;
+                newMesh.UploadMeshData(false);
 
-				AssetDatabase.CreateAsset(newMesh, newAssetPath);
+                AssetDatabase.CreateAsset(newMesh, newAssetPath);
                 if (isSkinned)
                 {
                     SkinnedMeshRenderer skinnedMeshRenderer = gameObject.GetComponent<SkinnedMeshRenderer>();
@@ -573,8 +574,9 @@ public class VertexColorPainter : EditorWindow
                     MeshFilter mf = gameObject.GetComponent<MeshFilter>();
                     mf.sharedMesh = newMesh;
                 }
-				
-				mesh = newMesh;
+
+                meshes[i] = newMesh;
+                mesh = newMesh;
 			}
 
 			Mesh colliderMesh = new Mesh();
