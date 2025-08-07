@@ -98,6 +98,8 @@ struct GBufferData
     half metallic;
     half anisotropy;
 
+    int sssProfileIndex;
+
 #ifdef MOTION_VECTOR_ON
     half2 motionVector;
 #endif

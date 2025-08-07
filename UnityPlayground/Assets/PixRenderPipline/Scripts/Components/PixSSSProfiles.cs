@@ -24,12 +24,12 @@ namespace PixRenderPipline
         public string profileName = "new profile";
 
         public Color scatteringColor = Color.red;
-        public float scatterRadius = 1.0f;
-        public float scatterIntensity = 1.0f;
+        public float scatteringRadius = 1.0f;
+        public float scatteringIntensity = 1.0f;
 
-        public Color transmisionColor = Color.red;
-        public float transmisionRadius = 1.0f;
-        public float transmisionIntensity = 1.0f;
+        public Color transmissionColor = Color.red;
+        public float transmissionRadius = 1.0f;
+        public float transmissionIntensity = 1.0f;
         #endregion
 
         void OnEnable()
@@ -79,16 +79,16 @@ namespace PixRenderPipline
                 var profile = profiles[i];
 
                 var scatteringColor = profile.scatteringColor;
-                var transmisionColor = profile.transmisionColor;
-                float scatteringRadius = profile.scatterRadius;
-                float transmisionRadius = profile.transmisionRadius;
-                float scatteringIntensity = profile.scatterIntensity;
-                float transmisonIntensity = profile.transmisionIntensity;
+                var transmissionColor = profile.transmissionColor;
+                float scatteringRadius = profile.scatteringRadius;
+                float transmissionRadius = profile.transmissionRadius;
+                float scatteringIntensity = profile.scatteringIntensity;
+                float transmissonIntensity = profile.transmissionIntensity;
 
                 var prop = props[i];
-                prop.SetRow(0, new Vector4(scatteringRadius, transmisionRadius, scatteringIntensity, transmisonIntensity));
+                prop.SetRow(0, new Vector4(scatteringRadius, transmissionRadius, scatteringIntensity, transmissonIntensity));
                 prop.SetRow(1, new Vector4(scatteringColor.r, scatteringColor.g, scatteringColor.b, scatteringColor.a));
-                prop.SetRow(2, new Vector4(transmisionColor.r, transmisionColor.g, transmisionColor.b, transmisionColor.a));
+                prop.SetRow(2, new Vector4(transmissionColor.r, transmissionColor.g, transmissionColor.b, transmissionColor.a));
                 props[i] = prop;
             }
 

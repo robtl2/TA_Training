@@ -112,6 +112,7 @@ Shader "Pix/Standard"
 
             float4 _Color;
             int _ShadingModel;
+            int _SSS_Profile;
             half _NormalIntensity;
             half _Anisotropy;
             half _RoughnessOffset;
@@ -236,7 +237,7 @@ Shader "Pix/Standard"
                 #endif
 
                 FragmentOutput output;
-                GBuffer gbuffer = PackGBuffer(color, _ShadingModel, normal, bentNormal, input.tangentWS, roughness, metalness, _Anisotropy);
+                GBuffer gbuffer = PackGBuffer(color, _ShadingModel, normal, bentNormal, input.tangentWS, roughness, metalness, _Anisotropy, _SSS_Profile);
                 output.gbuffer_0 = gbuffer.gbuffer_0;
                 output.gbuffer_1 = gbuffer.gbuffer_1;
                 output.gbuffer_2 = gbuffer.gbuffer_2;

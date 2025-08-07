@@ -63,12 +63,14 @@ half iorToF0(half transmittedIor, half incidentIor) {
 
 
 GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalVS,
-                    half3 tangentWS, half roughness, half metallic, half anisotropy){
+                    half3 tangentWS, half roughness, half metallic, half anisotropy, int sssProfileIndex){
     
     // 没有考虑各向异性的金属
     anisotropy = anisotropy*0.5 + 0.5;
     if (shadingModel == SHADING_MODEL_HAIR){
         metallic = anisotropy;
+    } else if(shadingModel == SHADING_MODEL_SSS){
+        metallic = sssProfileIndex/31;
     }
 
     half2 nor = normalVS.xy*0.5+0.5;
@@ -96,18 +98,6 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     
     return gbuffer;
 }
-
-#ifdef MOTION_VECTOR_ON
-GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalWS,
-                    half3 tangentWS, half roughness, half metallic, half anisotropy, half2 motionVector)
-{
-    GBuffer gbuffer = PackGBuffer(color, shadingModel, normalVS, bentNormalWS, tangentWS, roughness, metallic, anisotropy);
-    
-    half2 xy = PackFloatToR8G8(motionVector.x);
-    half2 zw = PackFloatToR8G8(motionVector.y);
-    gbuffer.gbuffer_3 = half4(xy,zw);
-}
-#endif
 
 GBufferData UnpackGBuffer(float2 uv)
 {
@@ -156,11 +146,15 @@ GBufferData UnpackGBuffer(float2 uv)
 
     half ior = IOR;
 
+    int sssProfileIndex = 0;
     // shadingModel是Hair时，是用metallic来装的anisotropy
     half anisotropy = metallic*2 - 1;
     if (shadingModel == SHADING_MODEL_HAIR){
         metallic = 0;
         ior *= 1.5;
+    }else if (shadingModel == SHADING_MODEL_SSS){
+        metallic = 0;
+        sssProfileIndex = metallicInt;
     }
     
     half reflectance = iorToF0(max(1.0, ior), 1.0);
@@ -179,6 +173,7 @@ GBufferData UnpackGBuffer(float2 uv)
     fresnel = pow5(fresnel);
 
     GBufferData gbufferData;
+
 #if 1
     gbufferData.shadingModel = shadingModel;
     gbufferData.albedo = albedo;
@@ -188,6 +183,7 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.roughness = roughness;
     gbufferData.metallic = metallic;
     gbufferData.anisotropy = anisotropy;
+    gbufferData.sssProfileIndex = sssProfileIndex;
     gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
 #else
     gbufferData.shadingModel = 1;
@@ -198,8 +194,10 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.roughness = 1;
     gbufferData.metallic = 0;
     gbufferData.anisotropy = 0;
+    gbufferData.sssProfileIndex = sssProfileIndex;
     gbufferData.fresnel = 0;
 #endif
+
     gbufferData.ao = ao;
     gbufferData.bentNormal = bentNormalWS;
     gbufferData.positionWS = worldPos;

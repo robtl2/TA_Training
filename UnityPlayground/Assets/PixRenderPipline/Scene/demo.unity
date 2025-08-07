@@ -692,11 +692,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profileName: skin_girl_default
   scatteringColor: {r: 1, g: 0, b: 0, a: 1}
-  scatterRadius: 1
-  scatterIntensity: 1
-  transmisionColor: {r: 1, g: 0, b: 0, a: 1}
-  transmisionRadius: 1
-  transmisionIntensity: 1
+  scatteringRadius: 1
+  scatteringIntensity: 1
+  transmissionColor: {r: 1, g: 0, b: 0, a: 1}
+  transmissionRadius: 1
+  transmissionIntensity: 1
 --- !u!4 &1304119042
 Transform:
   m_ObjectHideFlags: 0
@@ -749,10 +749,10 @@ MonoBehaviour:
   ssao_factor: 0.779
   ssao_radius: 20
   ssao_stepCount: 2
-  ssao_jitterRadius: 0.02
+  ssao_jitterRadius: 0.01
   ssao_quality: 1
   Enable_Sharpen: 1
-  SharpenStrength: 1.59
+  SharpenStrength: 1.5
   Enable_Tonemapping: 1
   enable_TAA: 1
   TAA_jitter: 1

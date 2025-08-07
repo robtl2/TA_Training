@@ -11,10 +11,11 @@ half4x4 _SSS_Profiles[MAX_PROFILE_COUNT];
 
 PixSSSProfile GetPixSSSProfile(int index){
     int i = max(0, index-1);
+    i = min(i, MAX_PROFILE_COUNT-1);
 
     half4x4 props = _SSS_Profiles[i];
 
-    bool enabled = index>0;
+    bool enabled = index>0 && index<=MAX_PROFILE_COUNT;
 
     half scatteringRadius = props._m00;
     half transmissionRadius = props._m01;
