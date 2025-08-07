@@ -46,6 +46,7 @@ namespace PixRenderPipline
         public bool Enable_Sharpen = true;
         [Range(0, 2)]
         public float SharpenStrength = 1.0f;
+        [Range(0,3)]
         public float Exposure = 1.0f;
         public bool Enable_Tonemapping = true;
         #endregion

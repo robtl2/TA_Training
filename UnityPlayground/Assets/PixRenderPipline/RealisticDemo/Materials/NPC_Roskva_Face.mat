@@ -13,7 +13,6 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - ENABLE_BENTNORMAL
-  - GPU_SKIN
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -101,7 +100,7 @@ Material:
     - _RoughnessOffset: 0
     - _Rule1: 0
     - _SSS_Profile: 1
-    - _ShadingModel: 1
+    - _ShadingModel: 3
     - _SmoothnessTextureChannel: 0
     - _Specular: 0
     - _SpecularHighlights: 1
