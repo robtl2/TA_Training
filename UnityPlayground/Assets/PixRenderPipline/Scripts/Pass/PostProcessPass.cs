@@ -10,8 +10,6 @@ namespace PixRenderPipline
 
         Material materialTAA;
 
-        // static int _PixColorDown = Shader.PropertyToID("_PixColorDown");
-
         static int _Bloom_Threshold = Shader.PropertyToID("_Bloom_Threshold");
 
         static int _BloomTex = Shader.PropertyToID("_BloomTex");
@@ -35,8 +33,7 @@ namespace PixRenderPipline
 
         RenderTextureDescriptor getTexDes(int2 size)
         { 
-            int2 _size = renderer.size/2;
-            RenderTextureDescriptor rtDescriptor = new RenderTextureDescriptor(_size.x, _size.y, RenderTextureFormat.ARGB32,0,4);
+            RenderTextureDescriptor rtDescriptor = new RenderTextureDescriptor(size.x, size.y, RenderTextureFormat.ARGB32,0,4);
             rtDescriptor.sRGB = false;
             rtDescriptor.mipCount = 8;
             rtDescriptor.useMipMap = true;
