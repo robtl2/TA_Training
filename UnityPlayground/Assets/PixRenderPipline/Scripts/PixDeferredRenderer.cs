@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using System.Collections.Generic;
-using UnityEngine.Diagnostics;
+using Unity.Mathematics;
 
 /// <summary>
 /// 呐，几乎干的所有事情就是写下来我给的菜品方案而已
@@ -26,6 +26,7 @@ namespace PixRenderPipline
         /// 上一帧后处理之前的渲染结果
         /// </summary>
         public Dictionary<Camera, RenderTexture> frontRT = new();
+        // public Dictionary<Camera, RenderTexture> bloomRT = new();
 
         public PixDeferredRenderer()
         {
@@ -46,20 +47,8 @@ namespace PixRenderPipline
             base.Render();
             
             var setting = PixRenderSetting.instance;
-
             if (setting.enable_TAA)
-            {
-                if (!frontRT.ContainsKey(camera) || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
-                {
-                    if (frontRT.ContainsKey(camera))
-                        frontRT[camera].Release();
-
-                    frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-                    frontRT[camera].name = "_ColorTex_Front";
-                    frontRT[camera].Create();
-                }
-            }
-            
+                PrepairTAA();
 
             ExecutePass(earlyZPass);
             ExecutePass(occlusionCullingPass);
@@ -85,6 +74,22 @@ namespace PixRenderPipline
         void ExecutePass(PixPassBase pass)
         {
             pass.Execute();
+        }
+
+        void PrepairTAA()
+        { 
+            // TAA用到的这张历史记录的颜色贴图之所以不用临时RT，是因为它会在下一帧时还得用到
+            if (!frontRT.ContainsKey(camera) || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
+            {
+                if (frontRT.ContainsKey(camera))
+                    frontRT[camera].Release();
+
+                frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
+                {
+                    name = "_ColorTex_Front"
+                };
+                frontRT[camera].Create();
+            }
         }
 
         public override void CleanUp()

@@ -43,11 +43,23 @@ namespace PixRenderPipline
 
         #region PostProcessing
         [Header("PostProcessing")]
-        public bool Enable_Sharpen = true;
-        [Range(0, 2)]
-        public float SharpenStrength = 1.0f;
-        [Range(0,3)]
+        [Range(0, 3)]
+        public float SharpenStrength = 2.0f;
+        [Range(0f, 1.0f)]
+        public float SharpenMid = 0.2f; 
+
+        [Space(10)]
+
+        [Range(0, 3)]
         public float Exposure = 1.0f;
+
+        [Space(10)]
+        public bool EnableBloom = true;
+        public float Bloom_Threshold = 0.5f;
+        public float Bloom_Radius = 1.0f;
+        public float Bloom_Intensity = 1.0f;
+
+        [Space(10)]
         public bool Enable_Tonemapping = true;
         #endregion
 
@@ -59,7 +71,7 @@ namespace PixRenderPipline
         public float TAA_jitter = 1.0f;
 
         [Range(0, 0.995f)]
-        public float TAA_histroy = 0.95f;
+        public float TAA_histroy = 0.8f;
 
         #endregion
 

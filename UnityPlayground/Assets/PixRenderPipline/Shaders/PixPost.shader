@@ -19,48 +19,32 @@ Shader "Hidden/Pix/Post"
             Name "PixPost"
 
             HLSLPROGRAM
-            #pragma vertex vert
+            #pragma vertex vertFullScreen
             #pragma fragment frag
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "lib/fullscreen.hlsl"
+
+            #pragma multi_compile _ TAA
 
             #pragma multi_compile _ PP_SHARPEN
+            #pragma multi_compile _ PP_BLOOM
             #pragma multi_compile _ PP_TONEMAPPING
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/common.hlsl"
             #include "lib/gbuffer.hlsl"
 
-            struct AttributesDepth
-            {
-                float4 positionOS : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
-            struct VaryingsDepth
-            {
-                float4 positionCS : SV_POSITION;
-                float2 uv : TEXCOORD0;
-            };
 
             TEXTURE2D(_PixColorTex);SAMPLER(sampler_PixColorTex);
             half2 _PixColorTex_TexelSize;
 
-            half _SharpenAmount;
+            half4 _SharpenProps;
             half _Exposure;
 
-            VaryingsDepth vert(AttributesDepth input)
-            {
-                VaryingsDepth output;
-                float2 uv = input.uv;
-                float2 pos = uv*2.0-1.0;
-
-                #if UNITY_UV_STARTS_AT_TOP
-                uv.y = 1.0 - uv.y;
-                #endif
-                
-                output.positionCS = float4(pos, 0.0, 1.0);
-                output.uv = uv;
-                return output;
-            }
+            #ifdef PP_BLOOM
+                TEXTURE2D(_BloomTex);SAMPLER(sampler_BloomTex);float2 _BloomTex_TexelSize;
+                half _BloomIntensity;
+            #endif
 
             void Tonemap(inout half3 x)
             {
@@ -88,13 +72,48 @@ Shader "Hidden/Pix/Post"
                 blurred += SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv + half2(0,offset.y)).rgb;
                 blurred += SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv + half2(0,-offset.y)).rgb;
                 blurred /= 5;
-
+                
                 float3 diff = color - blurred;
+                half d = Luminance(diff);
+                half b = Luminance(blurred);
+                half m = d*(b<_SharpenProps.y);
+                m = saturate(1-m*30);
+                m = sq(m);
 
-                color = color + diff*mask*_SharpenAmount;
+                diff *= _SharpenProps.x;
+                color = diff*mask*m + color;
             }
 
-            half4 frag(VaryingsDepth input) : SV_Target
+            #ifdef PP_BLOOM
+            void Bloom(inout half3 color, half2 uv)
+            {
+                // #ifdef TAA
+                // uv += _TAA_Jitter*_BloomTex_TexelSize;
+                // #endif
+
+                half3 bloom = 0;
+                int mipCount = 4;
+                half weightTotle = 0;
+                half weight = 1;
+                for(int i=0;i<mipCount;i++){
+
+                    half2 diagonal = _BloomTex_TexelSize * 3; 
+                    bloom += SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, uv).xyz*weight;
+                    bloom += SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, uv + half2(-diagonal.x, diagonal.y)).xyz*weight;
+                    bloom += SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, uv + half2(diagonal.x, -diagonal.y)).xyz*weight;
+                    bloom += SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, uv + half2(-diagonal.x, -diagonal.y)).xyz*weight;
+
+                    // bloom += SAMPLE_TEXTURE2D_LOD(_BloomTex, sampler_BloomTex, uv, i).rgb*weight;
+                    weightTotle += weight*4;
+                    weight *=0.8;
+                }
+                bloom /= weightTotle;
+
+                color += bloom * _BloomIntensity;
+            }
+            #endif
+
+            half4 frag(VarFullScreenQuad input) : SV_Target
             {
                 half2 uv = input.uv;
                 half4 color = SAMPLE_TEXTURE2D(_PixColorTex, sampler_PixColorTex, uv);
@@ -105,19 +124,20 @@ Shader "Hidden/Pix/Post"
                     Sharpen(rgb, uv, color.a);
                 #endif
 
-                rgb = LDR2HDR(rgb);
+                #ifdef PP_BLOOM
+                    Bloom(rgb, uv);
+                #endif
 
+                rgb = LDR2HDR(rgb);
                 rgb *= _Exposure;
 
                 #ifdef PP_TONEMAPPING
                     Tonemap(rgb);
                 #endif
 
-
-
-                #if 0
-                    if(any(color>1))color.rgb = half3(1,0,0);
-                #endif
+                // #if 0
+                //     if(any(color>1))color.rgb = half3(1,0,0);
+                // #endif
                 
                 return half4(rgb, 1);
             }

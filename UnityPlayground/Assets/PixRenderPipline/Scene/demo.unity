@@ -442,7 +442,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 611652128}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fbc2a0b95cd494323b3a8ce6cf95c9e2, type: 3}
   m_Name: 
@@ -751,13 +751,17 @@ MonoBehaviour:
   ssao_stepCount: 2
   ssao_jitterRadius: 0.01
   ssao_quality: 1
-  Enable_Sharpen: 1
-  SharpenStrength: 1.4
-  Exposure: 1.2
+  SharpenStrength: 2
+  SharpenMid: 0.2
+  Exposure: 1.14
+  EnableBloom: 1
+  Bloom_Threshold: 1.18
+  Bloom_Radius: 2
+  Bloom_Intensity: 1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 1
-  TAA_histroy: 0.8
+  TAA_jitter: 0.75
+  TAA_histroy: 0.85
   debugMode: 0
   debugSize: 1
 --- !u!4 &1365793593
@@ -845,7 +849,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -3371277038297954237, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -3371277038297954237, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -857,7 +861,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -179203690647629487, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -179203690647629487, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_RenderingLayerMask
@@ -889,7 +893,7 @@ PrefabInstance:
       objectReference: {fileID: 4300000, guid: 5394221b6ade04497a657e45366feca5, type: 2}
     - target: {fileID: 1492799238806561092, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1492799238806561092, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -897,7 +901,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 54ca34bc5db3243799f17da68400cda5, type: 2}
     - target: {fileID: 1630794972795428178, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1630794972795428178, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -909,7 +913,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2853768270042634523, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2853768270042634523, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -921,7 +925,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4927228362899884761, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4927228362899884761, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_CastShadows
@@ -937,7 +941,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6868716418057165105, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6868716418057165105, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -965,7 +969,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8166072703074800176, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8166072703074800176, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1080,7 +1084,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightType: 0
   color: {r: 0.3480331, g: 0.9339623, b: 0.9221209, a: 1}
-  intensity: 14.1
+  intensity: 15.4
   spotAngle: 0
   enableDiffuse: 0
   enableSpecular: 1

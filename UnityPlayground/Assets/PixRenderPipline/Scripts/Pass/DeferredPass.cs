@@ -7,6 +7,7 @@ namespace PixRenderPipline
     public class DeferredPass : PixPassBase
     {
         public static readonly int ColorBuff = Shader.PropertyToID("_PixOpaqueTex");
+        public static readonly RenderTargetIdentifier ColorBuffID = new(ColorBuff);
         public static readonly int DepthDownSample = Shader.PropertyToID("_PixDepthDownSample");
         static int _AO_Factor = Shader.PropertyToID("_AO_Factor");
         static int _SSAO_Props = Shader.PropertyToID("_SSAO_Props");

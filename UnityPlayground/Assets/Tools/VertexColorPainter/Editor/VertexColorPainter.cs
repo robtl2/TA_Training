@@ -474,6 +474,7 @@ public class VertexColorPainter : EditorWindow
 
 		AssetDatabase.SaveAssets();
 
+        if(gameObjects.Count < 1) return;
 		Selection.objects = gameObjects.ToArray();
 	}
 
