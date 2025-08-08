@@ -15,6 +15,7 @@ namespace PixRenderPipline
         public override void Execute()
         {
             base.Execute();
+            return;
 
             int2 size = renderer.tiledSize;
             GetTemporaryColorRT(tileID, size.x, size.y);
