@@ -8,7 +8,7 @@ current_keys = set()
 def execute_command():
     """执行 pwd 命令"""
     try:
-        result = subprocess.run(['pwd'], capture_output=True, text=True)
+        result = subprocess.run(['git pull'], capture_output=True, text=True)
         print(f"\nCommand output:\n{result.stdout}")
     except Exception as e:
         print(f"\nError executing command: {e}")
