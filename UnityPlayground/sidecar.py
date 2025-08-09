@@ -41,8 +41,8 @@ def toggle_sidecar(device_name="罗勇的iPad"):
                                 -- 获取所有菜单项的名称
                                 set menuItems to name of menu items of menu "添加" of pop up button "添加"
                                 -- 通过名字查找要准确一些，这里去找最后一个名字的索引，因为如果 ipadpro 有妙控键盘，就会出现两个名字，我们需要最后一个名字，第一个名字是连接键鼠的
-                                -- set targetIndex to (my findLastTargetIndex("罗勇的iPad", menuItems))
-                                set targetIndex to (my findLastTargetIndex("罗勇的MacBook Air", menuItems))
+                                set targetIndex to (my findLastTargetIndex("罗勇的iPad", menuItems))
+                                -- set targetIndex to (my findLastTargetIndex("罗勇的MacBook Air", menuItems))
                                 
                                 -- 点击目标菜单项
                                 click menu item targetIndex of menu "添加" of pop up button "添加"
