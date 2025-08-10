@@ -19,7 +19,6 @@ namespace PixRenderPipline
 
         MeshRenderer[] renderers;
 
-
         void OnEnable()
         {
             if (_PreviousLocalToWorldBlock == null)

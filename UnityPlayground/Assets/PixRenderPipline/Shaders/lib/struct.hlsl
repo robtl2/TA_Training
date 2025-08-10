@@ -68,8 +68,8 @@ struct PixLight{
 struct GBuffer
 {
     half4 gbuffer_0; //rgb:albedo a:ao
-    half4 gbuffer_1; //rg:normal b:roughness a:(metallic|anisotropy|sssProfileIndex)&shadingModel[5:3]
-    half4 gbuffer_2; //rg:tangent ba:bentNormal
+    half4 gbuffer_1; //rg:normal ba:bentNormal
+    half4 gbuffer_2; //rg:tangent b:roughness a:(metallic|anisotropy|sssProfileIndex)&shadingModel[5:3]
 
 #ifdef MOTION_VECTOR_ON
     half4 gbuffer_3; // movtionVector

@@ -770,7 +770,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.693
+      value: -0.879
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.y
@@ -941,7 +941,7 @@ MonoBehaviour:
   Enable_Tonemapping: 1
   enable_TAA: 1
   TAA_jitter: 0.75
-  TAA_histroy: 0.85
+  TAA_histroy: 0.8
   debugMode: 0
   debugSize: 1
 --- !u!4 &1365793593
