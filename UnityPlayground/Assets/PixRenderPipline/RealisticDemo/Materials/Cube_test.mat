@@ -7,16 +7,12 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NPC_Roskva_Hair_low
+  m_Name: Cube_test
   m_Shader: {fileID: 4800000, guid: 3e1a5a8e4d2c146a496a4831a4f42b73, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - ENABLE_BENTNORMAL
-  - EXPORT_TANGENT
-  - _ALPHATEST_ON
-  m_InvalidKeywords:
-  - GPU_SKIN
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -48,7 +44,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4c9049ce507ff4b3e83fd8d27f6bd7f9, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -56,7 +52,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalTex:
-        m_Texture: {fileID: 2800000, guid: 9e9565e6d830d4a6b89ac8fa02548e99, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -68,52 +64,46 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParamTex:
-        m_Texture: {fileID: 2800000, guid: 6b826fbe1944f4dfd960c51010f765a4, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - Group#Feature: 1
     - Group#Hair: 1
-    - Group#Lit: 1
     - Group#Main: 1
     - Group#Nor: 1
     - Group#Param: 1
     - Group#SSS: 1
     - _AlphaClip: 0
-    - _Anisotropy: 0.28
+    - _Anisotropy: 0.5
     - _BentNormal: 0
     - _BumpScale: 1
-    - _CullMode: 0
-    - _Cutoff: 0.335
+    - _CullMode: 2
+    - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.4472136
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _IsSkinnedMesh: 0
     - _Metallic: 0
-    - _MetallicOffset: -1
+    - _MetallicOffset: 1
     - _Mode: 0
-    - _NormalIntensity: 1.57
+    - _NormalIntensity: 1
     - _OcclusionStrength: 1
-    - _OutlineWidth: 0.05
-    - _OutlineZOffset: 0
     - _Parallax: 0.02
-    - _Rim: 0
-    - _RoughnessOffset: 0.04
+    - _RoughnessOffset: -0.852
     - _Rule1: 2
     - _SSS_Profile: 0
-    - _ShadingModel: 2
+    - _ShadingModel: 1
     - _SmoothnessTextureChannel: 0
-    - _Specular: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.4117647, g: 0.3019608, b: 0.22745098, a: 1}
+    - _Color: {r: 0.3962264, g: 0.3962264, b: 0.3962264, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

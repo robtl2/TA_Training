@@ -64,6 +64,7 @@ namespace PixRenderPipline
             if (list.isValid)
                 renderer.cmb.DrawRendererList(list);
 
+
             TriggerEvent(PixRenderEventName.AfterGBuffer);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);

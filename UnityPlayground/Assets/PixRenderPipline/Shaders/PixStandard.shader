@@ -3,6 +3,7 @@ Shader "Pix/Standard"
     Properties
     {
         Group#Feature("Feature", Int) = 1
+            _IsSkinnedMesh("T(SKINNED_MESH)/isSkinnedMesh[Main]", Int) = 0
             _ShadingModel ("E/ShadingModel:Unlit,Lit,Hair,SSS[Feature]", Int) = 0
             _CullMode("E/Cull:Off,Front,Back[Feature]", Int) = 2
             _BentNormal("T(ENABLE_BENTNORMAL)/BentNormal[Feature]", Int) = 0
@@ -51,21 +52,21 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
-            // #pragma multi_compile _ GPU_SKIN
+            #pragma multi_compile _ SKINNED_MESH
             #pragma multi_compile _ TAA
-            #pragma multi_compile _ MOTION_BLUR
             #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
             #pragma shader_feature EXPORT_TANGENT 
             #pragma shader_feature ENABLE_BENTNORMAL
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             #if defined TAA || defined MOTION_BLUR
-            #define MOTION_VECTOR_ON
+                #define MOTION_VECTOR_ON
+
+                #ifdef SKINNED_MESH
+                    #define GPU_SKIN
+                #endif
             #endif
 
-            #if defined MOTION_BLUR || defined MOTION_BLUR || defined TAA
-            #define GPU_SKIN
-            #endif
 
             #ifdef GPU_SKIN
             #include "lib/gpuskin.hlsl"
@@ -134,8 +135,9 @@ Shader "Pix/Standard"
 
             Varying vert(Attributes input)
             {
+                float4 prevPosOS = float4(input.positionOS.xyzw);
+
                 #ifdef GPU_SKIN
-                float4 prevPosOS = input.positionOS;
                 transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
                 transformSkinnedDir(input.boneWeights, input.boneIndices, input.normalOS);
                 transformSkinnedDir(input.boneWeights, input.boneIndices, input.tangentOS.xyz);
@@ -187,7 +189,11 @@ Shader "Pix/Standard"
             #endif
 
             #ifdef MOTION_VECTOR_ON
+                #ifdef GPU_SKIN
                 transformPreviousSkinnedPos(input.boneWeights, input.boneIndices, prevPosOS);
+                #endif
+                
+                // float4 prevPosWS = mul(unity_ObjectToWorld, prevPosOS);
                 float4 prevPosWS = mul(_PreviousLocalToWorld, prevPosOS);
                 output.prevPosCS = mul(_MatrixVP_Prev, prevPosWS);
                 output.screenUV = output.positionCS;
@@ -275,11 +281,11 @@ Shader "Pix/Standard"
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
             #pragma multi_compile _ TAA
-            #pragma multi_compile _ GPU_SKIN
+            #pragma multi_compile _ SKINNED_MESH
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/common.hlsl"
-
-            #ifdef TAA
+            
+            #if defined TAA && defined SKINNED_MESH
             #define GPU_SKIN
             #endif
 
@@ -363,8 +369,13 @@ Shader "Pix/Standard"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ _ALPHATEST_ON
-            #pragma multi_compile _ GPU_SKIN
+            #pragma multi_compile _ SKINNED_MESH
+            #pragma multi_compile _ TAA
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            #if defined TAA && defined SKINNED_MESH
+                #define GPU_SKIN
+            #endif
 
             #ifdef GPU_SKIN
             #include "lib/gpuskin.hlsl"
@@ -446,9 +457,10 @@ Shader "Pix/Standard"
             #pragma fragment frag
             #pragma multi_compile SSAO_QUALITY_OFF
             #pragma multi_compile _ TAA
+            #pragma multi_compile _ SKINNED_MESH
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            #ifdef TAA
+            #if defined TAA && defined SKINNED_MESH
             #define GPU_SKIN
             #endif
 

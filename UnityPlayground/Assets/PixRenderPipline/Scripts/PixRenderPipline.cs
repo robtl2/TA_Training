@@ -24,6 +24,7 @@ namespace PixRenderPipline
         /// </summary>
         /// <param name="context">厨房管事儿的给过来的空菜单</param>
         /// <param name="cameras">点菜的客人</param>
+        [System.Obsolete("说，这个方法快过时了")]
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
             if (!PixRenderSetting.instance) return;

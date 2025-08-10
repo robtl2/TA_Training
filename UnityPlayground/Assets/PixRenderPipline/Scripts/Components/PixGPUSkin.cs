@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 
@@ -45,7 +44,6 @@ namespace PixRenderPipline
                 PixRenderEvent.RemoveEvent(PixRenderEventName.BeforeShadowMap, UpLoadParams);
                 PixRenderEvent.RemoveEvent(PixRenderEventName.AfterEarlyZ, ExecuteGPUskinPass);
                 PixRenderEvent.RemoveEvent(PixRenderEventName.AfterGBuffer, ExecuteGPUskinPass);
-                // PixRenderEvent.RemoveEvent(PixRenderEventName.AfterTransparent, ExecuteGPUskinPass);
                 passAdded = false;
             }
 
@@ -54,7 +52,7 @@ namespace PixRenderPipline
                 var ren = m.Key;
                 var mat = ren.sharedMaterial;
                 ren.enabled = true;
-                mat.DisableKeyword("GPU_SKIN");
+                mat.DisableKeyword("SKINNED_MESH");
             }
         }
 
@@ -74,7 +72,7 @@ namespace PixRenderPipline
                         var ren = rm.Key;
                         var mat = ren.sharedMaterial;
                         ren.enabled = true;
-                        mat.DisableKeyword("GPU_SKIN");
+                        mat.DisableKeyword("SKINNED_MESH");
                     }
 
                     return;
@@ -82,7 +80,10 @@ namespace PixRenderPipline
                 else
                 {
                     foreach (var rm in meshInRenderer)
+                    {
                         rm.Key.enabled = false;
+                        rm.Key.sharedMaterial.EnableKeyword("SKINNED_MESH");
+                    }
                 }
             }
 
