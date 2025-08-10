@@ -52,7 +52,7 @@ struct PixLight{
     half contactShadowJitter;
 
     half shadowMapBias;
-    int shadowMapType;
+    // int shadowMapType;
     bool shadowMapJitter;
 
     bool enableDiffuse;
@@ -70,10 +70,7 @@ struct GBuffer
     half4 gbuffer_0; //rgb:albedo a:ao
     half4 gbuffer_1; //rg:normal ba:bentNormal
     half4 gbuffer_2; //rg:tangent b:roughness a:(metallic|anisotropy|sssProfileIndex)&shadingModel[5:3]
-
-#ifdef MOTION_VECTOR_ON
     half4 gbuffer_3; // movtionVector
-#endif
 };
 
 

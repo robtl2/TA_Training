@@ -122,7 +122,7 @@ namespace PixRenderPipline
                 materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
                 materialTAA.SetFloat(_HistroyWeight, setting.TAA_histroy);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
-                renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera], EarlyZPass.depthID);
+                renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera]);
                 renderer.cmb.SetGlobalTexture(_MainTex, DeferredPass.ColorBuff);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 1);
 

@@ -182,18 +182,22 @@ Shader "Pix/Standard"
                 output.normalVS = normalVS;
                 output.tangentVS = tangentVS;
                 output.bitangentVS = bitangentVS;
+                // output.normalVS = normalWS;
+                // output.tangentVS = tangentWS;
+                // output.bitangentVS = bitangentWS;
+
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.tangentWS = tangentWS;
             #ifdef ENABLE_BENTNORMAL
                 output.bentNormalVS = half4(bentNormalVS, ao);
             #endif
 
+
             #ifdef MOTION_VECTOR_ON
                 #ifdef GPU_SKIN
                 transformPreviousSkinnedPos(input.boneWeights, input.boneIndices, prevPosOS);
                 #endif
                 
-                // float4 prevPosWS = mul(unity_ObjectToWorld, prevPosOS);
                 float4 prevPosWS = mul(_PreviousLocalToWorld, prevPosOS);
                 output.prevPosCS = mul(_MatrixVP_Prev, prevPosWS);
                 output.screenUV = output.positionCS;
@@ -242,19 +246,25 @@ Shader "Pix/Standard"
                 bentNormal = input.bentNormalVS;
                 #endif
 
+                float2 motionVector = float2(0, 0);
+
+                #ifdef MOTION_VECTOR_ON
+                float2 preNdcPos = input.prevPosCS.xy / input.prevPosCS.w;
+                float2 preScreenUV = preNdcPos * 0.5 + 0.5;
+                motionVector = preScreenUV - screenUV;
+                #endif
+
                 FragmentOutput output;
-                GBuffer gbuffer = PackGBuffer(color, _ShadingModel, normal, bentNormal, input.tangentWS, roughness, metalness, _Anisotropy, _SSS_Profile);
+                GBuffer gbuffer = PackGBuffer(color, _ShadingModel, normal, bentNormal, input.tangentWS, 
+                    roughness, metalness, motionVector, _Anisotropy, _SSS_Profile);
+                
                 output.gbuffer_0 = gbuffer.gbuffer_0;
                 output.gbuffer_1 = gbuffer.gbuffer_1;
                 output.gbuffer_2 = gbuffer.gbuffer_2;
 
-            #ifdef MOTION_VECTOR_ON
-                float2 preNdcPos = input.prevPosCS.xy / input.prevPosCS.w;
-                float2 preScreenUV = preNdcPos * 0.5 + 0.5;
-
-                float2 motionVector = preScreenUV - screenUV;
-                output.gbuffer_3 = half4(motionVector*0.5 +0.5, 0, 0);
-            #endif
+                #ifdef MOTION_VECTOR_ON
+                output.gbuffer_3 = gbuffer.gbuffer_3;
+                #endif
 
                 return output;
             }

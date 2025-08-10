@@ -135,6 +135,8 @@ Shader "Hidden/Pix/Post"
                     Tonemap(rgb);
                 #endif
 
+                // rgb = detherColor(rgb, uv,64);
+
                 // #if 0
                 //     if(any(color>1))color.rgb = half3(1,0,0);
                 // #endif

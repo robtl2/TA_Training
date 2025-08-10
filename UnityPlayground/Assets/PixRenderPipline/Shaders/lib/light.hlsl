@@ -64,7 +64,7 @@ PixLight GetPixLight(int index)
     light.contactShadowJitter = _PixLightsContactShadow[index].w;
 
     light.shadowMapBias = _PixLightsShadowMap[index].x;
-    light.shadowMapType = (int)_PixLightsShadowMap[index].y;
+    // light.shadowMapType = (int)_PixLightsShadowMap[index].y;
     light.shadowMapJitter = _PixLightsShadowMap[index].w > 0;
     light.shadowMapSize = _PixLightsShadowMapSize[index].xy;
     light.visibilityShadow = _PixLightsShadowMapSize[index].z;

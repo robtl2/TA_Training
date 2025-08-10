@@ -172,7 +172,7 @@ MonoBehaviour:
   enableDiffuse: 1
   enableSpecular: 0
   f0: 1
-  shadowMapType: 0
+  enableShadowMap: 0
   shadowMapSize: 512
   shadowMapJitter: 1
   shadowMapBias: 0.0072
@@ -378,7 +378,7 @@ MonoBehaviour:
   enableDiffuse: 0
   enableSpecular: 1
   f0: 0.124
-  shadowMapType: 0
+  enableShadowMap: 0
   shadowMapSize: 512
   shadowMapJitter: 1
   shadowMapBias: 0.0072
@@ -584,10 +584,10 @@ MonoBehaviour:
   enableDiffuse: 1
   enableSpecular: 1
   f0: 1
-  shadowMapType: 1
+  enableShadowMap: 1
   shadowMapSize: 512
   shadowMapJitter: 1
-  shadowMapBias: 0.0052
+  shadowMapBias: 0.007
   shadowMapArea: 1
   boxArea: {fileID: 1795428412}
   enableContactShadow: 1
@@ -770,7 +770,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.879
+      value: -0.82
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.y
@@ -778,19 +778,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.103
+      value: -0.104
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.7133286
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: -0.7008298
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalRotation.z
@@ -802,7 +802,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -88.987
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -943,7 +943,7 @@ MonoBehaviour:
   TAA_jitter: 0.75
   TAA_histroy: 0.8
   debugMode: 0
-  debugSize: 1
+  debugSize: 0.391
 --- !u!4 &1365793593
 Transform:
   m_ObjectHideFlags: 0
@@ -1269,7 +1269,7 @@ MonoBehaviour:
   enableDiffuse: 0
   enableSpecular: 1
   f0: 0.142
-  shadowMapType: 0
+  enableShadowMap: 0
   shadowMapSize: 512
   shadowMapJitter: 1
   shadowMapBias: 0.0072

@@ -71,13 +71,6 @@ void UnpackFloatToTwoInt(float packedValue, out int value1, out int value2)
     value2 = packedInt & 7;
 }
 
-half3 UnpackNormal(half2 nor)
-{
-    half2 xy = nor*2-1;
-    half z = sqrt(1.0 - dot(xy, xy));
-    z = max(z, 0.004);
-    return half3(xy, z);
-}
 
 half3 HDR2LDR(half3 rgb, half maxVal = 2){
     return saturate(sqrt(rgb)/maxVal);

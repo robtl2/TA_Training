@@ -63,7 +63,7 @@ half iorToF0(half transmittedIor, half incidentIor) {
 
 
 GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalVS,
-                    half3 tangentWS, half roughness, half metallic, half anisotropy, int sssProfileIndex){
+                    half3 tangentWS, half roughness, half metallic, half2 motionVector, half anisotropy, int sssProfileIndex){
     
     // 没有考虑各向异性的金属
     anisotropy = anisotropy*0.5 + 0.5;
@@ -73,10 +73,17 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
         metallic = sssProfileIndex/31;
     }
 
+    #if 0
     half2 nor = normalVS.xy*0.5+0.5;
     half2 tan = tangentWS.xy*0.5+0.5;
-
     half2 bnor = bentNormalVS.xy*0.5+0.5;
+    #else
+    half2 nor = PackNormalHemiOctEncode(normalVS)*0.5 + 0.5;
+    half2 tan = PackNormalHemiOctEncode(tangentWS)*0.5 + 0.5;
+    half2 bnor = PackNormalHemiOctEncode(bentNormalVS)*0.5 + 0.5;
+    #endif
+
+
     half ao = bentNormalVS.w;
 
     int metallicInt = (int)(metallic*31);
@@ -90,10 +97,9 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     gbuffer.gbuffer_1 = half4(packedMetallicShadingModel,0, roughness, packedMetallicShadingModel);
 #else
     gbuffer.gbuffer_0 = half4(color.rgb, ao);
-    gbuffer.gbuffer_1 = half4(nor, roughness, packedMetallicShadingModel);
-    #if defined EXPORT_TANGENT || defined ENABLE_BENTNORMAL
-    gbuffer.gbuffer_2 = half4(tan, bnor);
-    #endif
+    gbuffer.gbuffer_1 = half4(nor, bnor);
+    gbuffer.gbuffer_2 = half4(tan, roughness, packedMetallicShadingModel);
+    gbuffer.gbuffer_3 = half4(motionVector.xy*0.5 + 0.5, 0, 0); // motion vector
 #endif
     
     return gbuffer;
@@ -102,12 +108,18 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
 GBufferData UnpackGBuffer(float2 uv)
 {
     half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
-    half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
     half4 gbuffer_2 = SAMPLE_TEXTURE2D(_PixGBuffer_2, sampler_PixGBuffer_2, uv);
 #ifdef MOTION_VECTOR_ON
     half4 gbuffer_3 = SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv);
 #endif
     float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
+
+#ifdef TAA
+    half2 jitter = hash22(uv) * _PixGBuffer_0_TexelSize;
+    // uv += jitter;
+#endif
+
+    half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
 
 #ifdef PIX_STYLE_NPR
     half3 shv = UnpackFromR5G6B5(gbuffer_0.xy);
@@ -117,8 +129,8 @@ GBufferData UnpackGBuffer(float2 uv)
     half3 tangentWS = half3(0,0,0);
 #else
     half3 albedo = gbuffer_0.rgb;
-    half3 normalVS = UnpackNormal(gbuffer_1.xy);
-    half3 tangentWS = UnpackNormal(gbuffer_2.xy);
+    half3 normalVS = UnpackNormalHemiOctEncode(gbuffer_1.xy*2-1);
+    half3 tangentWS = UnpackNormalHemiOctEncode(gbuffer_2.xy*2-1);
 #endif
 
     float3 worldPos = ReconstructWorldPos(uv, ndcDepth);
@@ -136,7 +148,7 @@ GBufferData UnpackGBuffer(float2 uv)
     half3 normalWS = mul(normalVS, viewToWorld);
     half3 bitangentWS = cross(normalWS, tangentWS);
 
-    half2 params = gbuffer_1.zw;
+    half2 params = gbuffer_2.zw;
     half perceptualRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, params.x);
     half roughness = perceptualRoughness*perceptualRoughness;
     half packedMetallicShadingModel = params.y;
@@ -166,7 +178,7 @@ GBufferData UnpackGBuffer(float2 uv)
     half3 diffuse = computeDiffuseColor(albedo, metallic);
 
     half ao = gbuffer_0.a;
-    half3 bentNormalVS = UnpackNormal(gbuffer_2.zw);
+    half3 bentNormalVS = UnpackNormalHemiOctEncode(gbuffer_1.zw*2-1);
     half3 bentNormalWS = mul(bentNormalVS, viewToWorld);
 
     half fresnel = 1-normalVS.z;

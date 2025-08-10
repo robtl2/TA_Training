@@ -41,17 +41,6 @@ namespace PixRenderPipline
             Point
         }
 
-        /// <summary>
-        /// 主光源才有实时ShadowMap
-        /// </summary>
-        public enum ShadowMapType
-        {
-            None,
-            Hard,
-            PCF,
-            PCSS,
-        }
-
         public enum ShadowMapArea
         {
             Camera,
@@ -82,7 +71,7 @@ namespace PixRenderPipline
         public float f0 = 1.0f;
 
         [Header("ShadowMap")]
-        public ShadowMapType shadowMapType = ShadowMapType.None;
+        public bool enableShadowMap = false;
         public int shadowMapSize = 512;
         public bool shadowMapJitter = false;
 
@@ -134,7 +123,7 @@ namespace PixRenderPipline
             lights.Add(this);
             lightListIsDirty = true;
 
-            if (enabled && !passAdded && shadowMapType != ShadowMapType.None && shadowMapBias > 0)
+            if (isActiveAndEnabled && !passAdded && enableShadowMap && shadowMapBias > 0)
             {
                 PixRenderEvent.AddEvent(PixRenderEventName.BeforeAll, ShadowMapPass);
                 passAdded = true;
@@ -156,12 +145,12 @@ namespace PixRenderPipline
         void OnValidate()
         {
             // 当满足这三个条件时才开启ShadowMapPass
-            if (enabled && !passAdded && shadowMapType != ShadowMapType.None && shadowMapBias > 0)
+            if (isActiveAndEnabled && !passAdded && enableShadowMap && shadowMapBias > 0)
             {
                 PixRenderEvent.AddEvent(PixRenderEventName.BeforeAll, ShadowMapPass);
                 passAdded = true;
             }
-            else if (!enabled || shadowMapType == ShadowMapType.None || shadowMapBias == 0)
+            else if (!isActiveAndEnabled || !enableShadowMap || shadowMapBias == 0)
             {
                 PixRenderEvent.RemoveEvent(PixRenderEventName.BeforeAll, ShadowMapPass);
                 passAdded = false;
@@ -285,21 +274,24 @@ namespace PixRenderPipline
             int index = 0;
             for (int i = 0; i < lightCount; i++)
             {
+                if(i>= MAX_LIGHT_COUNT) break;
+
                 var light = lights[i];
                 float bias = light.shadowMapBias;
-                if (light.shadowMapType == ShadowMapType.None) bias = 0;
-
+                if (!light.enableShadowMap) bias = 0;
+                 
                 bool requestShadowMap = bias > 0;
 
                 if (requestShadowMap)
                 {
-                    lights[i].shadowMapIndex = index;
+                    light.shadowMapIndex = index;
                     index++;
                 }
                 else
-                    lights[i].shadowMapIndex = -1;
+                    light.shadowMapIndex = -1;
 
-                lights[i].RefreshProperty(i, bias);
+
+                light.RefreshProperty(i, bias);
             }
 
             Shader.SetGlobalInt(_PixLightCount, lightCount);
@@ -343,14 +335,11 @@ namespace PixRenderPipline
 
             Vector4 shadowMapParam = Vector4.zero;
             shadowMapParam.x = bias;
-            shadowMapParam.y = (int)shadowMapType;
 
             int shadingFilter = 0;
             if (enableDiffuse && !enableSpecular) shadingFilter = 1;
             if (!enableDiffuse && enableSpecular) shadingFilter = 2;
             if (enableDiffuse && enableSpecular) shadingFilter = 3;
-
-            // Debug.Log(shadingFilter);
 
             shadowMapParam.z = shadingFilter;
             shadowMapParam.w = shadowMapJitter ? 1 : 0;

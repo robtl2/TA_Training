@@ -4,6 +4,9 @@ using UnityEngine;
 namespace PixRenderPipline
 {
     
+    /// <summary>
+    /// PixMesh用于把其下的MeshRenderer在LateUpdate阶段更新上一帧的局部到世界矩阵，以便给TAA使用。
+    /// </summary>
     [ExecuteInEditMode]
     public class PixMesh : MonoBehaviour
     {
