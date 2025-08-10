@@ -90,7 +90,7 @@ public class VertexColorPainter : EditorWindow
 	List<Mesh> colliderMeshes = new List<Mesh>();
 	Dictionary<GameObject, Collider> colliders = new Dictionary<GameObject, Collider>();
 	Dictionary<Collider, bool> colliderEnable = new Dictionary<Collider, bool>();
-	List<Collider> tmpColliders;
+    List<Collider> tmpColliders = new();
 	Dictionary<Material, Shader> originalShaders = new Dictionary<Material, Shader>();
 	Dictionary<Material, int> originalRenderQueue = new Dictionary<Material, int>();
 	List<Renderer> otherRenderers = new List<Renderer>();
@@ -444,8 +444,10 @@ public class VertexColorPainter : EditorWindow
         SceneView.duringSceneGui -= OnSceneGUI;
 		Undo.undoRedoPerformed -= UnDoCallback;
 
-		foreach(var tmpCollider in tmpColliders)
-			DestroyImmediate(tmpCollider, false);
+        if (tmpColliders.Count < 1) return;
+
+		foreach (var tmpCollider in tmpColliders)
+            DestroyImmediate(tmpCollider, false);
 
 		foreach (var colliderMesh in colliderMeshes)
 			DestroyImmediate(colliderMesh, false);

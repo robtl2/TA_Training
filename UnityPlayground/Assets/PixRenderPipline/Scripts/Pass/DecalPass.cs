@@ -21,7 +21,6 @@ namespace PixRenderPipline
         List<float> alphas = new();
         List<PixDecal> visibleDecals = new();
         
-        int _MainTex = Shader.PropertyToID("_MainTex");
         int _MainTex_ST = Shader.PropertyToID("_MainTex_ST");
         int _ShadingModel = Shader.PropertyToID("_ShadingModel");
         int _Alpha = Shader.PropertyToID("_Alpha");

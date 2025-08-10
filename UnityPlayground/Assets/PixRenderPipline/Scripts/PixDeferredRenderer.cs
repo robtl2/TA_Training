@@ -97,7 +97,11 @@ namespace PixRenderPipline
             base.CleanUp();
 
             foreach (var rt in frontRT)
-                rt.Value.Release();
+            {
+                if (rt.Value != null && rt.Value.IsCreated())
+                    rt.Value.Release();
+            }
+                
 
             frontRT.Clear();
         }
