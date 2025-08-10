@@ -21,7 +21,6 @@ namespace PixRenderPipline
             _720p,
             _1080p,
             _1280p,
-            _1440p,
         }
         public RenderSize renderSize;
     #endregion
@@ -56,9 +55,6 @@ namespace PixRenderPipline
                     break;
                 case RenderSize._1280p:
                     h = 1280;
-                    break;
-                case RenderSize._1440p:
-                    h = 1440;
                     break;
             }
             int2 size = new((int)(h * aspect), h);

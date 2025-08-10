@@ -1,6 +1,5 @@
 from pynput import keyboard
 import subprocess
-import threading
 
 # 记录当前按下的键
 current_keys = set()
