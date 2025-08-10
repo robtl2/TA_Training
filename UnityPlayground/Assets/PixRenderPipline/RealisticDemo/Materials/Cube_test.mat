@@ -88,12 +88,12 @@ Material:
     - _GlossyReflections: 1
     - _IsSkinnedMesh: 0
     - _Metallic: 0
-    - _MetallicOffset: 1
+    - _MetallicOffset: -1
     - _Mode: 0
     - _NormalIntensity: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RoughnessOffset: -0.72
+    - _RoughnessOffset: -0.71
     - _Rule1: 2
     - _SSS_Profile: 0
     - _ShadingModel: 1

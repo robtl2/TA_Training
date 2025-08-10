@@ -126,6 +126,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     else
         Fr = prefilteredRadiance(gbufferData);
 
+    Fr = detherColor(Fr, uv, 64);
 
     half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
     half3 ao = selfOcclusion(gbufferData, gbufferData.normalWS, 1);

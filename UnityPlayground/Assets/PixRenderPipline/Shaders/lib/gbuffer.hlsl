@@ -73,16 +73,9 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
         metallic = sssProfileIndex/31;
     }
 
-    #if 0
-    half2 nor = normalVS.xy*0.5+0.5;
-    half2 tan = tangentWS.xy*0.5+0.5;
-    half2 bnor = bentNormalVS.xy*0.5+0.5;
-    #else
     half2 nor = PackNormalHemiOctEncode(normalVS)*0.5 + 0.5;
     half2 tan = PackNormalHemiOctEncode(tangentWS)*0.5 + 0.5;
     half2 bnor = PackNormalHemiOctEncode(bentNormalVS)*0.5 + 0.5;
-    #endif
-
 
     half ao = bentNormalVS.w;
 
@@ -108,6 +101,7 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
 GBufferData UnpackGBuffer(float2 uv)
 {
     half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
+    half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
     half4 gbuffer_2 = SAMPLE_TEXTURE2D(_PixGBuffer_2, sampler_PixGBuffer_2, uv);
 #ifdef MOTION_VECTOR_ON
     half4 gbuffer_3 = SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv);
@@ -119,7 +113,6 @@ GBufferData UnpackGBuffer(float2 uv)
     // uv += jitter;
 #endif
 
-    half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
 
 #ifdef PIX_STYLE_NPR
     half3 shv = UnpackFromR5G6B5(gbuffer_0.xy);
