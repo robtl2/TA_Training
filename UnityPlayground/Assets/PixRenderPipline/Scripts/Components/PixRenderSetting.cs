@@ -101,9 +101,17 @@ namespace PixRenderPipline
 
         [Range(0, 1)]
         public float debugSize = 1;
-
         #endregion
 
+        #region 
+        [Header("Lighting Debug")]
+        public bool enableDebugLight = false;
+        public bool asWhiteMaterial = false;
+        public bool enableIBLIrradiance = true;
+        public bool enableIBLRadiance = true;
+        public bool enableLightDiffuse = true;
+        public bool enableLightSpecular = true;
+        #endregion
         void OnEnable()
         {
             instance = this;

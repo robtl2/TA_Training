@@ -27,11 +27,17 @@ namespace PixRenderPipline
         public Cubemap texture;
 
         public PixSHData shData = new();
+        [Range(0, 1)]
+        public float IrradianceColor = 0;
+
+        [Range(0, 3)]
+        public float intensity = 1;
+
+        [Range(0, 3.5f)]
+        public float IrradianceIntensity = 1.0f;
 
         [Range(0, 9)]
         public float blurLevel = 0;
-        [Range(0, 3)]
-        public float intensity = 1;
 
         [Range(0, 3)]
         public float fovScale = 1;
@@ -46,6 +52,8 @@ namespace PixRenderPipline
         readonly int _BlurLevel = Shader.PropertyToID("_BlurLevel");
         readonly int _SkyTexMipCount = Shader.PropertyToID("_SkyTexMipCount");
         readonly int _SkySH = Shader.PropertyToID("_SkySH");
+        readonly int _IrradianceColor = Shader.PropertyToID("_IrradianceColor");
+        readonly int _IrradianceIntensity = Shader.PropertyToID("_IrradianceIntensity");
 
         void OnEnable()
         {
@@ -77,6 +85,8 @@ namespace PixRenderPipline
             Shader.SetGlobalFloat(_SkyTexMipCount, texture ? texture.mipmapCount : 0);
             Shader.SetGlobalFloat(_RotateSky, yRotation);
             Shader.SetGlobalVectorArray(_SkySH, shData.shCoefficients);
+            Shader.SetGlobalFloat(_IrradianceColor, IrradianceColor);
+            Shader.SetGlobalFloat(_IrradianceIntensity, IrradianceIntensity);
 
             if (skyType == SkyType.Texture && texture != null)
                 Shader.SetGlobalTexture(_SkyTex, texture);

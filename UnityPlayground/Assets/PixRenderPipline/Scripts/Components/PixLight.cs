@@ -70,6 +70,9 @@ namespace PixRenderPipline
         [Range(0, 1)]
         public float f0 = 1.0f;
 
+        [Range(1,5)]
+        public float f90 = 1.0f;
+
         [Header("ShadowMap")]
         public bool enableShadowMap = false;
         public int shadowMapSize = 512;

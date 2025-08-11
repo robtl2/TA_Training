@@ -13,7 +13,8 @@ TEXTURECUBE(_SkyTex);SAMPLER(sampler_SkyTex);
 half _SkyTexMipCount;
 half _RotateSky;
 half3 _SkySH[9];
-
+half _IrradianceColor;
+half _IrradianceIntensity;
 half _AO_Factor;
 
 float perceptualRoughnessToLod(float perceptualRoughness) {
@@ -69,38 +70,29 @@ half3 prefilteredRadiance(GBufferData gbufferData) {
 }
 
 
-#define DEBUG_SH 0
 // 其实吧。。也不一定就非得把bake时的系数套进去
 // 咱们TA都是以视觉效果为主, 这里只套基函数效果还好些
+// 加入参数让美术自己决定Irradiance的颜色影响强度
 half3 diffuseIrradiance(half3 n) {
     n = rotate_y(n, _RotateSky);
     n = n.xzy;
+    half coff_0 = lerp(1.0h,0.282h, _IrradianceColor);
+    half4 coff_1 = half4(0.489h, 0.489h, 0.489h, 1.1h);
+    half4 coff_2 = half4(1.1h, 0.315h, 1.1h, 0.55h);
+    coff_1 = lerp(1, coff_1, _IrradianceColor);
+    coff_2 = lerp(1, coff_2, _IrradianceColor);
     
-#if DEBUG_SH
-    half Y00 = 0.282095f;
-    half Y1_1 = 0.488603f * n.y;
-    half Y10 = 0.488603f * n.z;
-    half Y11 = 0.488603f * n.x;
-    half Y2_2 = 1.092548f * n.x * n.y;
-    half Y2_1 = 1.092548f * n.y * n.z;
-    half Y20 = 0.315392f * (3.0f * n.z * n.z - 1.0f);
-    half Y21 = 1.092548f * n.x * n.z;
-    half Y22 = 0.546274f * (n.x * n.x - n.y * n.y);
+    half Y00 = coff_0;
+    half Y1_1 = coff_1.x * n.y;
+    half Y10 = coff_1.y * n.z;
+    half Y11 = coff_1.z * n.x;
+    half Y2_2 = coff_1.w * n.x * n.y;
+    half Y2_1 = coff_2.x * n.y * n.z;
+    half Y20 = coff_2.y * (3.0f * n.z * n.z - 1.0f);
+    half Y21 = coff_2.z * n.x * n.z;
+    half Y22 = coff_2.w * (n.x * n.x - n.y * n.y);
 
     half3 sh = _SkySH[0] * Y00;
-#else
-    half Y1_1 = n.y;
-    half Y10 = n.z;
-    half Y11 = n.x;
-    half Y2_2 = n.x * n.y;
-    half Y2_1 = n.y * n.z;
-    half Y20 = 3.0f * n.z * n.z - 1.0f;
-    half Y21 = n.x * n.z;
-    half Y22 = n.x * n.x - n.y * n.y;
-
-    half3 sh = _SkySH[0];
-#endif
-
     sh +=
     _SkySH[1] * Y1_1
     + _SkySH[2] * Y10
@@ -113,11 +105,7 @@ half3 diffuseIrradiance(half3 n) {
     + _SkySH[7] * Y21
     + _SkySH[8] * Y22;
 
-#if DEBUG_SH
-    sh *= 3.545;
-#endif
-
-    return max(sh, 0.0);
+    return max(sh*_IrradianceIntensity, 0.0);
 }
 
 void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
