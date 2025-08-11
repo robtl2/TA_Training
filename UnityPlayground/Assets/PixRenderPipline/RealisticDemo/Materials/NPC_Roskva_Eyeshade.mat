@@ -14,7 +14,6 @@ Material:
   m_ValidKeywords:
   - ENABLE_BENTNORMAL
   - EXPORT_TANGENT
-  - SKINNED_MESH
   - _ALPHATEST_ON
   m_InvalidKeywords:
   - GPU_SKIN

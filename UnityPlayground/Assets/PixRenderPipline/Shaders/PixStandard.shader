@@ -164,7 +164,7 @@ Shader "Pix/Standard"
                 float4 bentNormalRaw = input.bentNormal;
                 float3 bentNormal =bentNormalRaw.xyz*2 - 1; 
                 float len = length(bentNormal);
-                float ao = saturate((len + bentNormalRaw.w)*3);
+                float ao = saturate((len + bentNormalRaw.w)*2.5);
                 ao = sq(ao);
                 bentNormal /= len;
 
@@ -276,7 +276,7 @@ Shader "Pix/Standard"
             Name "PixEarlyZ"
             Tags { "LightMode"="PixEarlyZ" }
             ZWrite On
-            ZTest LEqual
+            ZTest LESS
             ColorMask 0
 
             Stencil

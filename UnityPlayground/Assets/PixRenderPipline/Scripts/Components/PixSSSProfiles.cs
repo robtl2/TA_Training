@@ -6,7 +6,13 @@ namespace PixRenderPipline
     [ExecuteInEditMode]
     public class PixSSSProfiles : MonoBehaviour
     {
-        #region static 
+        #region static
+
+        public enum SSSType
+        {
+            bentNormal,
+            screenSpace
+        }
 
         public static string[] profileNames = new string[0];
         
@@ -22,6 +28,8 @@ namespace PixRenderPipline
 
         #region properties
         public string profileName = "new profile";
+
+        public SSSType sssType = SSSType.bentNormal;
 
         public Color scatteringColor = Color.red;
 
@@ -92,9 +100,9 @@ namespace PixRenderPipline
                 float transmissonIntensity = profile.transmissionIntensity;
 
                 var prop = props[i];
-                prop.SetRow(0, new Vector4(scatteringRadius, transmissionRadius, scatteringIntensity, transmissonIntensity));
-                prop.SetRow(1, new Vector4(scatteringColor.r, scatteringColor.g, scatteringColor.b, scatteringColor.a));
-                prop.SetRow(2, new Vector4(transmissionColor.r, transmissionColor.g, transmissionColor.b, transmissionColor.a));
+                prop.SetRow(0, new Vector4(scatteringRadius, transmissionRadius, (int)sssType, 0));
+                prop.SetRow(1, new Vector4(scatteringColor.r, scatteringColor.g, scatteringColor.b, scatteringIntensity));
+                prop.SetRow(2, new Vector4(transmissionColor.r, transmissionColor.g, transmissionColor.b, transmissonIntensity));
                 props[i] = prop;
             }
 

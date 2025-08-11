@@ -378,8 +378,8 @@ MonoBehaviour:
   enableDiffuse: 0
   enableSpecular: 1
   f0: 0.124
-  enableShadowMap: 0
-  shadowMapSize: 512
+  enableShadowMap: 1
+  shadowMapSize: 256
   shadowMapJitter: 1
   shadowMapBias: 0.0072
   shadowMapArea: 1
@@ -387,11 +387,11 @@ MonoBehaviour:
   enableContactShadow: 0
   contactShadowJitter: 1
   contactShadowJitterRadius: 3
-  contactRayLength: 0.00912
-  contactSampleCount: 6
+  contactRayLength: 0.01
+  contactSampleCount: 1
   contactBias: 0.000057
-  enableVisbilityShadow: 1
-  visibilityShadowSoftness: 0.001
+  enableVisbilityShadow: 0
+  visibilityShadowSoftness: 0.174
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &164846891
@@ -493,7 +493,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skyType: 2
   displayColor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 1}
-  color: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 1}
+  color: {r: 0.5573603, g: 0.627963, b: 0.7075472, a: 1}
   detherStep: 64
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   shData:
@@ -518,7 +518,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 602252875}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.8576164, z: 0, w: 0.51429}
+  m_LocalRotation: {x: 0, y: 0.8699256, z: -0, w: -0.49318296}
   m_LocalPosition: {x: 0, y: 0.037, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -528,7 +528,7 @@ Transform:
   - {fileID: 164846893}
   - {fileID: 20128326}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -118.1, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -480.9, z: 0}
 --- !u!1 &611652128 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
@@ -770,15 +770,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.82
+      value: -0.735
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.969
+      value: 1.119
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.104
+      value: -0.105
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 11cfddafa26334b3a8bb86c9d62600ab, type: 3}
       propertyPath: m_LocalRotation.w
@@ -871,9 +871,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   profileName: skin_girl_default
-  scatteringColor: {r: 0.8962264, g: 0.17332679, b: 0.17332679, a: 1}
-  scatteringRadius: 0.241
-  scatteringIntensity: 1
+  sssType: 1
+  scatteringColor: {r: 0.9622642, g: 0, b: 0, a: 1}
+  scatteringRadius: 1
+  scatteringIntensity: 0.35
   transmissionColor: {r: 1, g: 0, b: 0, a: 1}
   transmissionRadius: 1
   transmissionIntensity: 1
@@ -924,9 +925,9 @@ MonoBehaviour:
   style: 0
   colorSpace: 1
   GPU_OCC_Culling: 0
-  ao_factor: 0.788
+  ao_factor: 0.74
   Enable_SSAO: 1
-  ssao_factor: 0.779
+  ssao_factor: 0.77
   ssao_radius: 20
   ssao_stepCount: 2
   ssao_jitterRadius: 0.01
@@ -935,15 +936,15 @@ MonoBehaviour:
   SharpenMid: 0.2
   Exposure: 1.14
   EnableBloom: 1
-  Bloom_Threshold: 1.18
-  Bloom_Radius: 2
-  Bloom_Intensity: 1
+  Bloom_Threshold: 1
+  Bloom_Radius: 2.38
+  Bloom_Intensity: 1.1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 0.75
-  TAA_histroy: 0.8
+  TAA_jitter: 0.7
+  TAA_histroy: 0.75
   debugMode: 0
-  debugSize: 0.391
+  debugSize: 1
 --- !u!4 &1365793593
 Transform:
   m_ObjectHideFlags: 0
@@ -1342,11 +1343,11 @@ MeshFilter:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1365793593}
-  - {fileID: 1304119042}
   - {fileID: 961739753}
-  - {fileID: 602252877}
   - {fileID: 1795428413}
-  - {fileID: 1472155546}
+  - {fileID: 602252877}
   - {fileID: 1070618337}
   - {fileID: 111936050}
+  - {fileID: 1472155546}
+  - {fileID: 1365793593}
+  - {fileID: 1304119042}

@@ -26,13 +26,15 @@ struct PixSSSProfile{
 
     int type;
 
-    half4 scatteringColor;
+    half3 scatteringColor;
     half scatteringRadius;
     half scatteringIntensity;
 
-    half4 transmissionColor;
+    half3 transmissionColor;
     half transmissionRadius;
     half transmissionIntensity;
+
+    half3 sssNormal;
 };
 
 struct PixLight{
@@ -100,11 +102,14 @@ struct GBufferData
     half metallic;
     half anisotropy;
 
-    int sssProfileIndex;
+    half3x3 viewToWorld;
 
-#ifdef MOTION_VECTOR_ON
+    // int sssProfileIndex;
+    PixSSSProfile sssProfile;
+
+// #ifdef MOTION_VECTOR_ON
     half2 motionVector;
-#endif
+// #endif
 };
 
 

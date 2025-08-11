@@ -17,7 +17,7 @@ half3 _SkySH[9];
 half _AO_Factor;
 
 float perceptualRoughnessToLod(float perceptualRoughness) {
-    return _SkyTexMipCount * perceptualRoughness  - perceptualRoughness;
+    return _SkyTexMipCount * perceptualRoughness  - perceptualRoughness - 1;
 }
 
 half3 getAnisotropicReflectionDir(half3 V, half3 T, half3 B, half3 N, half roughness, half anisotropic)
@@ -74,6 +74,7 @@ half3 prefilteredRadiance(GBufferData gbufferData) {
 // 咱们TA都是以视觉效果为主, 这里只套基函数效果还好些
 half3 diffuseIrradiance(half3 n) {
     n = rotate_y(n, _RotateSky);
+    n = n.xzy;
     
 #if DEBUG_SH
     half Y00 = 0.282095f;
@@ -129,7 +130,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     Fr = detherColor(Fr, uv, 64);
 
     half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
-    half3 ao = selfOcclusion(gbufferData, gbufferData.normalWS, 1);
+    half3 ao = selfOcclusion(gbufferData, gbufferData.bentNormal, 1);
     
     if(_AO_Factor<0.999)
         ao = lerp(1,ao,_AO_Factor);
@@ -140,11 +141,11 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     
     if(gbufferData.shadingModel == SHADING_MODEL_SSS)
     {
-        PixSSSProfile sssProfile = GetPixSSSProfile(gbufferData.sssProfileIndex);
+        PixSSSProfile sssProfile = gbufferData.sssProfile;
 
-        half3 Fd_b = gbufferData.diffuse * diffuseIrradiance(gbufferData.bentNormal);
+        half3 Fd_b = gbufferData.diffuse * diffuseIrradiance(sssProfile.sssNormal);
 
-        half3 ao_b = selfOcclusion(gbufferData, gbufferData.bentNormal, 1);
+        half3 ao_b = selfOcclusion(gbufferData, sssProfile.sssNormal, 1);
         ao_b = remap01(0, 1-sssProfile.scatteringRadius, ao_b);
         
         if(_AO_Factor<0.999)

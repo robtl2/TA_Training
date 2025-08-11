@@ -19,16 +19,20 @@ PixSSSProfile GetPixSSSProfile(int index){
 
     half scatteringRadius = props._m00;
     half transmissionRadius = props._m01;
-    half scatteringIntensity = props._m02;
-    half transmissionIntensity = props._m03;
+    int type = (int)props._m02;
+    
 
-    half4 scatteringColor = props[1];
-    half4 transmissionColor = props[2];
+    half3 scatteringColor = props[1].rgb;
+    half3 transmissionColor = props[2].rgb;
+
+    half scatteringIntensity = props[1].a;
+    half transmissionIntensity = props[2].a;
 
     if(all(half2(scatteringIntensity, transmissionIntensity) < 0.01)) enabled = false;
 
     PixSSSProfile sssProfile;
     sssProfile.enabled = enabled;
+    sssProfile.type = type;
     sssProfile.scatteringColor = scatteringColor;
     sssProfile.scatteringRadius = scatteringRadius;
     sssProfile.scatteringIntensity = scatteringIntensity;
@@ -36,6 +40,17 @@ PixSSSProfile GetPixSSSProfile(int index){
     sssProfile.transmissionRadius = transmissionRadius;
     sssProfile.transmissionIntensity = transmissionIntensity;
     return sssProfile;
+}
+
+half3 GetSSSNormalFromBentNorm(GBufferData gbufferData, half3 L, half NoL){
+    PixSSSProfile sssProfile = gbufferData.sssProfile;
+
+    half radius = sssProfile.scatteringRadius*2;
+    half3 NoL_b = dot(gbufferData.bentNormal, L)+radius;
+    NoL_b = remap01(0, 1+radius, NoL_b);
+
+    NoL = lerp(NoL, NoL_b, sssProfile.scatteringColor * sssProfile.scatteringIntensity);
+    return NoL;
 }
 
 

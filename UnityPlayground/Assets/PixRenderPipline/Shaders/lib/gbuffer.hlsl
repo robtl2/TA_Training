@@ -2,6 +2,7 @@
 #define GBUFFER_INCLUDED
 
 #include "common.hlsl"
+#include "sss.hlsl"
 
 #define MIN_PERCEPTUAL_ROUGHNESS 0.089
 #define MIN_ROUGHNESS            0.007921
@@ -61,6 +62,20 @@ half iorToF0(half transmittedIor, half incidentIor) {
     return sq((transmittedIor - incidentIor) / (transmittedIor + incidentIor));
 }
 
+half3 GetScreenSpaceBlurredNormal(PixSSSProfile sssProfile, half3x3 viewToWorld, half depth, half2 uv, half2 texelSize){
+    half2 offsetScale = texelSize * sssProfile.scatteringRadius*16 / depth;
+    half2 jitter = hash22(uv) * offsetScale;
+    half4 gbuffer_nor = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv+jitter);
+    gbuffer_nor += SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv-jitter);
+    gbuffer_nor += SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv+jitter.yx);
+    gbuffer_nor += SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv-jitter.yx);
+    gbuffer_nor *= 0.25;
+
+    half3 normalVS = UnpackNormalHemiOctEncode(gbuffer_nor.xy*2-1);
+    half3 normalWS = mul(normalVS, viewToWorld);
+
+    return normalWS;
+}
 
 GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNormalVS,
                     half3 tangentWS, half roughness, half metallic, half2 motionVector, half anisotropy, int sssProfileIndex){
@@ -152,6 +167,7 @@ GBufferData UnpackGBuffer(float2 uv)
     half ior = IOR;
 
     int sssProfileIndex = 0;
+    PixSSSProfile sssProfile;
     // shadingModel是Hair时，是用metallic来装的anisotropy
     half anisotropy = metallic*2 - 1;
     if (shadingModel == SHADING_MODEL_HAIR){
@@ -161,7 +177,8 @@ GBufferData UnpackGBuffer(float2 uv)
         metallic = 0;
         sssProfileIndex = metallicInt;
     }
-    
+    sssProfile = GetPixSSSProfile(sssProfileIndex);
+
     half reflectance = iorToF0(max(1.0, ior), 1.0);
     half3 f0 = computeF0(albedo, metallic, reflectance);
 
@@ -188,7 +205,6 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.roughness = roughness;
     gbufferData.metallic = metallic;
     gbufferData.anisotropy = anisotropy;
-    gbufferData.sssProfileIndex = sssProfileIndex;
     gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
 #else
     gbufferData.shadingModel = shadingModel;
@@ -199,7 +215,6 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.roughness = 1;
     gbufferData.metallic = 0;
     gbufferData.anisotropy = 0;
-    gbufferData.sssProfileIndex = sssProfileIndex;
     gbufferData.fresnel = 0;
 #endif
 
@@ -215,10 +230,22 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.NoV = normalVS.z;
     gbufferData.ndcDepth = ndcDepth;
     gbufferData.depth = depth;
+    gbufferData.viewToWorld = viewToWorld;
 
 #ifdef MOTION_VECTOR_ON
     gbufferData.motionVector = gbuffer_3.xy*2-1;
+#else
+    gbufferData.motionVector = half2(0, 0);
 #endif
+
+    if (shadingModel == SHADING_MODEL_SSS && sssProfile.type == 1){
+        half3 sssNormal = GetScreenSpaceBlurredNormal(sssProfile, viewToWorld, depth, uv, _PixGBuffer_0_TexelSize);
+        sssProfile.sssNormal = sssNormal;
+    }
+    else
+        sssProfile.sssNormal = bentNormalWS;
+
+    gbufferData.sssProfile = sssProfile;
 
     return gbufferData;
 }
