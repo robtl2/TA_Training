@@ -77,12 +77,50 @@ Shader "Hidden/Pix/Sky"
                 return output;
             }
 
+            half3 _SunDirection;
+
+            void proceduralSky(float3 dir, inout half3 sky)
+            {
+                float2 theta_phi = DirToThetaPhi(dir);
+
+                half phi = theta_phi.y*2-1;
+                half under = 1-saturate(-phi);
+                under = remap01(0.8, 1, under);
+                
+                phi = 1.0 - saturate(phi); 
+                phi = saturate(pow5(phi));
+
+                sky = lerp(sky*0.1,sky*5, phi);
+
+                float NoL_full = dot(dir, _SunDirection);
+                float NoL = saturate(NoL_full);
+                float scatter_outer = sq(remap01(0.5, 1, NoL));
+                scatter_outer *= scatter_outer;
+                float scatter_inter = pow5(remap01(0.95, 1.0, NoL));
+
+                phi = sq(phi);
+                scatter_outer += phi;
+                scatter_inter += remap01(0.5, 1, sq(phi));
+
+                under = pow5(under);
+                scatter_outer *= under*0.8+0.2;
+                scatter_inter *= sq(under);
+
+                scatter_outer*=1.2;
+
+                half3 scatter = lerp(scatter_outer.xxx, scatter_inter.xxx, _SkyDisplayColor.rgb);
+                sky += scatter;
+                sky *= lerp(under,half3(0.5,0.55,0.4),0.5);
+            }
+
             half4 frag(VaryingsDepth input) : SV_Target
             {
                 half3 sky = _SkyColor.rgb * _SkyDisplayColor;
 
                 if (_SkyType == 1)
                     sky *= SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, input.viewDir, _BlurLevel).rgb;
+                else if (_SkyType == 2)
+                    proceduralSky(normalize(input.viewDir), sky);
 
                 half3 ldr = HDR2LDR(sky);
 

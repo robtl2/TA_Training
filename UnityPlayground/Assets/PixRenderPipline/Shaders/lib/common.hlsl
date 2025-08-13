@@ -93,7 +93,28 @@ half2 PosWorldToScreenUV(float3 posWorld){
 }
 
 
-half2 DirToThetaPhi(float3 dir)
+float2 DirToThetaPhi(float3 dir)
+{
+    dir = normalize(dir);
+
+#if MATH_ACC 
+    float theta = fast_acos(dir.y);
+    float phi = fast_atan2(dir.x, dir.z);
+#else
+    float theta = acos(dir.y);
+    float phi = atan2(dir.x, dir.z);
+#endif
+    
+    float2 uv;
+    uv.y = theta / PI;
+    uv.x = (phi + PI) / (2.0 * PI);
+
+    uv = 1-uv;
+    
+    return uv;
+}
+
+half2 DirToThetaPhi(half3 dir)
 {
     dir = normalize(dir);
 

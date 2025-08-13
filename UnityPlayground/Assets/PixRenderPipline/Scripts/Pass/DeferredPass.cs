@@ -51,7 +51,7 @@ namespace PixRenderPipline
             {
                 Vector4 ssao_props = new();
                 ssao_props.x = setting.ssao_factor;
-                ssao_props.y = setting.ssao_radius * 0.001f / setting.ssao_stepCount;
+                ssao_props.y = setting.ssao_radius / setting.ssao_stepCount;
                 ssao_props.z = setting.ssao_stepCount;
                 ssao_props.w = setting.ssao_jitterRadius;
                 material.SetVector(_SSAO_Props, ssao_props);

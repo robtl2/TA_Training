@@ -22,7 +22,7 @@ half calculateSSAO(half2 uv, GBufferData gbufferData)
 
     #ifdef SSAO_QUALITY_POOR
         // TAA太畜牲了
-        half ao = ContactShadow(gbufferData, gbufferData.bentNormal, radius, stepCount, jitter, SSAO_SAMPLE_BIAS);
+        half ao = ContactShadow(gbufferData, gbufferData.bentNormal, radius, stepCount, jitter, SSAO_SAMPLE_BIAS, false);
     #else
         half3x3 tbn = half3x3(gbufferData.tangentWS, gbufferData.bitangentWS, gbufferData.normalWS);
 
@@ -30,7 +30,7 @@ half calculateSSAO(half2 uv, GBufferData gbufferData)
         for(int i = 0; i < SSAO_SAMPLER_COUNT; i++){
             half3 direction = dirSamplers[i];
             direction = mul(direction, tbn);
-            ao += ContactShadow(gbufferData, direction, radius, stepCount, jitter, SSAO_SAMPLE_BIAS);
+            ao += ContactShadow(gbufferData, direction, radius, stepCount, jitter, SSAO_SAMPLE_BIAS, false);
         }
         ao /= SSAO_SAMPLER_COUNT;
     #endif

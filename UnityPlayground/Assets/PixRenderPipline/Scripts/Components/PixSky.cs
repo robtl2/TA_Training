@@ -21,12 +21,17 @@ namespace PixRenderPipline
 
         public SkyType skyType = SkyType.None;
         public Color displayColor;
-        public Color color;
-
+        [Range(0, 9)]
+        public float blurLevel = 0;
+        [Range(0, 3)]
+        public float fovScale = 1;
         public int detherStep = 0;
+
+        public Color color;
         public Cubemap texture;
 
-        public PixSHData shData = new();
+        public Transform sunTransform;
+
         [Range(0, 1)]
         public float IrradianceColor = 0;
 
@@ -36,15 +41,13 @@ namespace PixRenderPipline
         [Range(0, 3.5f)]
         public float IrradianceIntensity = 1.0f;
 
-        [Range(0, 9)]
-        public float blurLevel = 0;
+        public PixSHData shData = new();
 
-        [Range(0, 3)]
-        public float fovScale = 1;
-
+        #region Shader Property IDs
         readonly int _SkyType = Shader.PropertyToID("_SkyType");
         readonly int _SkyColor = Shader.PropertyToID("_SkyColor");
         readonly int _SkyDisplayColor = Shader.PropertyToID("_SkyDisplayColor");
+        readonly int _SunDirection = Shader.PropertyToID("_SunDirection");
         readonly int _Dethering = Shader.PropertyToID("_Dethering");
         readonly int _FovScale = Shader.PropertyToID("_FovScale");
         readonly int _RotateSky = Shader.PropertyToID("_RotateSky");
@@ -54,6 +57,7 @@ namespace PixRenderPipline
         readonly int _SkySH = Shader.PropertyToID("_SkySH");
         readonly int _IrradianceColor = Shader.PropertyToID("_IrradianceColor");
         readonly int _IrradianceIntensity = Shader.PropertyToID("_IrradianceIntensity");
+        #endregion
 
         void OnEnable()
         {
@@ -90,6 +94,10 @@ namespace PixRenderPipline
 
             if (skyType == SkyType.Texture && texture != null)
                 Shader.SetGlobalTexture(_SkyTex, texture);
+
+            if (sunTransform == null) return;
+
+            Shader.SetGlobalVector(_SunDirection, Vector3.Normalize(-sunTransform.forward));
         }
 
         // 将 transform 的 y 轴旋转转换为 -π 到 π 之间的弧度值

@@ -118,7 +118,7 @@ half ShadowMap(PixLight light, GBufferData gbufferData, half2 screenUV){
     return depthSrc>depthDest;
 }
 
-half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias){
+half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias, bool clip = true){
     int sampleCount = stepCount + 1; 
     half rayLength = rayLengthDivStepCount*stepCount;
     half step = rayLengthDivStepCount; //采样步长
@@ -135,19 +135,18 @@ half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivSt
         if(jitterRadius>0)
             uv += hash22(uv).xy*jitterRadius;
 
-        // half depth_dest = sampleDepth(uv);
         half depth_dest = sampleDepthDownSample(uv);
         half3 pos_dest = ReconstructWorldPos(uv, depth_dest);
         
-        if(length(pos_ori - pos_src)>rayLength)return 1.0h;
+        half dist = length(pos_dest - pos_src);
+        if(clip && dist>rayLength)return 1.0h;
 
         half4 ndcPos = TransformWorldToHClip(pos_src);
         half depth_src = ndcPos.z/ndcPos.w;
         depth_src += bias;
         
-        if(depth_dest > depth_src){
+        if(depth_dest > depth_src)
             return 0.0h;
-        }
     }
     return 1.0h;
 }
