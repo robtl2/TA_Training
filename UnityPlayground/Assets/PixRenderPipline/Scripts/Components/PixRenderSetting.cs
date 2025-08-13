@@ -21,19 +21,32 @@ namespace PixRenderPipline
 
         public FilterMode defaultFilterMode = FilterMode.Bilinear;
 
+        [Header("Fog")]
+        public bool Enable_Fog = true;
+        public Vector4 FogParams = new Vector4(0.1f, 0.1f, 200f, 10f); // Density, Start, End, Height
+        public Color FogColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+
         [Header("AO")]
         [Range(0, 1)]
         public float ao_factor = 1;
-        public bool Enable_SSAO = true;
 
+        [Space(10)]
+        public bool Enable_SSAO = true;
         [Range(0, 1)]
         public float ssao_factor = 1.0f;
-        public float ssao_radius = 0.01f;
+        public float ssao_radius = 0.4f;
         public int ssao_stepCount = 4;
-        public float ssao_jitterRadius = 1.0f;
-
+        public float ssao_jitterRadius = 0.05f;
         public PixRenderer.SamplerQuality ssao_quality = PixRenderer.SamplerQuality.Low;
 
+        [Space(10)]
+
+        public bool Enable_SSAO_2nd = false;
+        [Range(0, 1)]
+        public float ssao_factor_2nd = 1.0f;
+        public float ssao_radius_2nd = 0.02f;
+        public int ssao_stepCount_2nd = 2;
+        public float ssao_jitterRadius_2nd = 0.01f;
         #endregion
 
         #region PostProcessing

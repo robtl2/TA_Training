@@ -84,10 +84,12 @@ Material:
     - _Anisotropy: 0.28
     - _BentNormal: 0
     - _BumpScale: 1
+    - _ColorMultiply: 1
     - _CullMode: 0
     - _Cutoff: 0.335
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _FlipNormal: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.4472136
     - _GlossyReflections: 1

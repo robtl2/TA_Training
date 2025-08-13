@@ -8,6 +8,7 @@
 
 //x:intensity y:radius z:stepCount w:jitter
 half4 _SSAO_Props;
+half4 _SSAO_Props_2nd;
 
 half calculateSSAO(half2 uv, GBufferData gbufferData)
 {
@@ -37,6 +38,20 @@ half calculateSSAO(half2 uv, GBufferData gbufferData)
 
     if(intensity<0.99)
         ao = lerp(1.0h, ao, intensity);
+
+    if(_SSAO_Props_2nd.x > 0.01)
+    {
+        half intensity_2nd = _SSAO_Props_2nd.x;
+        half radius_2nd = _SSAO_Props_2nd.y;
+        int stepCount_2nd = (int)_SSAO_Props_2nd.z;
+        half jitter_2nd = _SSAO_Props_2nd.w;
+
+        half ao_2nd = ContactShadow(gbufferData, gbufferData.bentNormal, radius_2nd, stepCount_2nd, jitter_2nd, SSAO_SAMPLE_BIAS, false);
+        if(intensity_2nd<1)
+            ao_2nd = lerp(1.0h, ao_2nd, intensity_2nd);
+        
+        ao *= ao_2nd;
+    }
 
     return ao;
 }

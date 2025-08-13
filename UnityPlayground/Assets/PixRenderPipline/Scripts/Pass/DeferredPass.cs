@@ -11,6 +11,7 @@ namespace PixRenderPipline
         public static readonly int DepthDownSample = Shader.PropertyToID("_PixDepthDownSample");
         static int _AO_Factor = Shader.PropertyToID("_AO_Factor");
         static int _SSAO_Props = Shader.PropertyToID("_SSAO_Props");
+        static int _SSAO_Props_2nd = Shader.PropertyToID("_SSAO_Props_2nd");
         public Material material;
         
 
@@ -55,6 +56,15 @@ namespace PixRenderPipline
                 ssao_props.z = setting.ssao_stepCount;
                 ssao_props.w = setting.ssao_jitterRadius;
                 material.SetVector(_SSAO_Props, ssao_props);
+
+                Vector4 ssao_props_2sec = new();
+                ssao_props_2sec.x = setting.ssao_factor_2nd;
+                if (!setting.Enable_SSAO_2nd)
+                    ssao_props_2sec.x = 0;
+                ssao_props_2sec.y = setting.ssao_radius_2nd / setting.ssao_stepCount_2nd;
+                ssao_props_2sec.z = setting.ssao_stepCount_2nd;
+                ssao_props_2sec.w = setting.ssao_jitterRadius_2nd;
+                material.SetVector(_SSAO_Props_2nd, ssao_props_2sec);
 
                 material.DisableKeyword("SSAO_QUALITY_OFF");
                 material.DisableKeyword("SSAO_QUALITY_POOR");

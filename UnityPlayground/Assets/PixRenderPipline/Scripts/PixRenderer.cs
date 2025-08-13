@@ -104,27 +104,7 @@ namespace PixRenderPipline
         /// </summary>
         public virtual void Render()
         {
-            var setting = PixRenderSetting.instance;
-            if (setting.style == PixRenderSetting.Style.PBR)
-            {
-                Shader.EnableKeyword("PIX_STYLE_PBR");
-                Shader.DisableKeyword("PIX_STYLE_NPR");
-            }
-            else
-            {
-                Shader.EnableKeyword("PIX_STYLE_NPR");
-                Shader.DisableKeyword("PIX_STYLE_PBR");
-            }
-
-            if (setting.enable_TAA)
-                Shader.EnableKeyword("TAA");
-            else
-                Shader.DisableKeyword("TAA");
-
-            if(setting.enableDebugLight)
-                Shader.EnableKeyword("DEBUG_LIGHT");
-            else
-                Shader.DisableKeyword("DEBUG_LIGHT");
+            
 
             size = asset.GetRenderSize(camera.aspect);
             tiledSize = size / 8;
@@ -191,6 +171,39 @@ namespace PixRenderPipline
         protected virtual void SetupGlobalUniform()
         {
             var setting = PixRenderSetting.instance;
+
+            if (setting.style == PixRenderSetting.Style.PBR)
+            {
+                Shader.EnableKeyword("PIX_STYLE_PBR");
+                Shader.DisableKeyword("PIX_STYLE_NPR");
+            }
+            else
+            {
+                Shader.EnableKeyword("PIX_STYLE_NPR");
+                Shader.DisableKeyword("PIX_STYLE_PBR");
+            }
+
+            if(setting.Enable_Fog)
+            {
+                Shader.EnableKeyword("FOG");
+                Shader.SetGlobalVector("_FogParams", setting.FogParams);
+                Shader.SetGlobalColor("_FogColor", setting.FogColor);
+            }
+            else
+            {
+                Shader.DisableKeyword("FOG");
+            }
+
+            if (setting.enable_TAA)
+                Shader.EnableKeyword("TAA");
+            else
+                Shader.DisableKeyword("TAA");
+
+            if(setting.enableDebugLight)
+                Shader.EnableKeyword("DEBUG_LIGHT");
+            else
+                Shader.DisableKeyword("DEBUG_LIGHT");
+
 
             Shader.SetGlobalVector(_ScreenTexelSize, new Vector4(1.0f / size.x, 1.0f / size.y, size.x, size.y));
 

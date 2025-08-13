@@ -90,13 +90,14 @@ Shader "Hidden/Pix/Sky"
                 phi = 1.0 - saturate(phi); 
                 phi = saturate(pow5(phi));
 
-                sky = lerp(sky*0.1,sky*5, phi);
+                sky = lerp(sky*0.21,sky*5, phi);
 
                 float NoL_full = dot(dir, _SunDirection);
                 float NoL = saturate(NoL_full);
                 float scatter_outer = sq(remap01(0.5, 1, NoL));
                 scatter_outer *= scatter_outer;
                 float scatter_inter = pow5(remap01(0.95, 1.0, NoL));
+                scatter_inter *= scatter_inter;
 
                 phi = sq(phi);
                 scatter_outer += phi;

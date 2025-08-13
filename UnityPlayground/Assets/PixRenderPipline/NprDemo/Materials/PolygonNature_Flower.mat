@@ -7,18 +7,17 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NPC_Roskva_Parts
+  m_Name: PolygonNature_Flower
   m_Shader: {fileID: 4800000, guid: 3e1a5a8e4d2c146a496a4831a4f42b73, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - ENABLE_BENTNORMAL
-  m_InvalidKeywords:
-  - GPU_SKIN
+  - _ALPHATEST_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -41,12 +40,24 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Emission:
+        m_Texture: {fileID: 2800000, guid: 99c4608ee9333d248989392de94081fd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Leaves_NoiseTexture:
+        m_Texture: {fileID: 2800000, guid: ccb2545f0a1b98248ae14305439c4e13, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: b9908c95f6ec74ad6bb05cebf2c32a45, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1bdaf65e23416284c887ab8e4b932c07, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTexture:
+        m_Texture: {fileID: 2800000, guid: f6719627c8a45d1459ff89b93a967b05, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -54,7 +65,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalTex:
-        m_Texture: {fileID: 2800000, guid: 14e821e59093c41539e19f7e59666f87, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -66,14 +77,29 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParamTex:
-        m_Texture: {fileID: 2800000, guid: 08d6969796f0a4963ae0e3e47d4b9947, type: 3}
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TextureSample0:
+        m_Texture: {fileID: 2800000, guid: 4aaf5eafc291ee24ba7cefe12e6677a8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TextureSample1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Tree_NoiseTexture:
+        m_Texture: {fileID: 2800000, guid: 4aaf5eafc291ee24ba7cefe12e6677a8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - Group#Feature: 1
     - Group#Hair: 1
-    - Group#Lit: 1
     - Group#Main: 1
     - Group#Nor: 1
     - Group#Param: 1
@@ -81,6 +107,9 @@ Material:
     - _AlphaClip: 0
     - _Anisotropy: 0.5
     - _BentNormal: 0
+    - _Big_Wave: 7.7
+    - _Big_WindAmount: 0.4
+    - _Big_Windspeed: 0.75
     - _BumpScale: 1
     - _ColorMultiply: 1
     - _CullMode: 0
@@ -89,31 +118,40 @@ Material:
     - _DstBlend: 0
     - _FlipNormal: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.4472136
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _IsSkinnedMesh: 0
+    - _Leaves_Wave: 6.06
+    - _Leaves_WindAmount: 0.26
+    - _Leaves_WindSpeed: 0.2
     - _Metallic: 0
-    - _MetallicOffset: 0
+    - _MetallicOffset: -1
     - _Mode: 0
     - _NormalIntensity: 1
     - _OcclusionStrength: 1
-    - _OutlineWidth: 0.05
-    - _OutlineZOffset: 0
     - _Parallax: 0.02
-    - _Rim: 0
-    - _RoughnessOffset: 0
-    - _Rule1: 0
+    - _RoughnessOffset: -0.25
+    - _Rule1: 2
     - _SSS_Profile: 0
     - _ShadingModel: 1
+    - _Small_Wave: 1.9
+    - _Small_WindAmount: 0.1
+    - _Small_WindSpeed: 0.01
     - _SmoothnessTextureChannel: 0
-    - _Specular: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _Tree_Wave: 7.97
+    - _Tree_WindAmount: 0.1
+    - _Tree_WindSpeed: 0
+    - _Tree_Windspeed: 0.49
     - _UVSec: 0
+    - _Wave: 8.42
+    - _WindSpeed: 0.1
     - _ZWrite: 1
+    - __dirty: 1
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Color: {r: 0.4728551, g: 0.6226415, b: 0.51150966, a: 1}
+    - _ColorTint: {r: 0.8308824, g: 0.791782, b: 0.4765355, a: 0}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

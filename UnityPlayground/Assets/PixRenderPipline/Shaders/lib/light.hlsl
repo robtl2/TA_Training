@@ -139,7 +139,9 @@ half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivSt
         half3 pos_dest = ReconstructWorldPos(uv, depth_dest);
         
         half dist = length(pos_dest - pos_src);
-        if(clip && dist>rayLength)return 1.0h;
+        
+        if(clip && dist>rayLength)
+            return 1.0h;
 
         half4 ndcPos = TransformWorldToHClip(pos_src);
         half depth_src = ndcPos.z/ndcPos.w;
