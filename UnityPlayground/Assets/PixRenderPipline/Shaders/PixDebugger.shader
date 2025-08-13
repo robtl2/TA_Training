@@ -4,6 +4,7 @@ Shader "Hidden/Pix/Debugger"
     {
         _Channel("Channel", Int) = 0
         _Size("Size", Range(0, 1)) = 1
+        _DepthScale("DepthScale", Float) = 1
     }
     SubShader
     {
@@ -53,6 +54,8 @@ Shader "Hidden/Pix/Debugger"
 
             int _Channel;
             float _Size;
+            half _DepthScale;
+
             VaryingsDepth vert(AttributesDepth input)
             {
                 float2 uv = input.uv;
@@ -98,8 +101,12 @@ Shader "Hidden/Pix/Debugger"
                 #endif
                 };
 
+                half3 rgb = debugColor[_Channel];
+                if(_Channel == 11)
+                    rgb *= _DepthScale;
+
                 half a = all(gbufferData.albedo > 0);
-                return half4(debugColor[_Channel], a);
+                return half4(rgb, a);
             }
             ENDHLSL
         }

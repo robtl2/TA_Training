@@ -7,6 +7,7 @@ namespace PixRenderPipline
     {
         readonly int _Channel = Shader.PropertyToID("_Channel");
         readonly int _Size = Shader.PropertyToID("_Size");
+        readonly int _DepthScale = Shader.PropertyToID("_DepthScale");
         readonly int _IsSceneView = Shader.PropertyToID("_IsSceneView");
         Material filterMaterial;
         Material debugMaterial;
@@ -43,6 +44,7 @@ namespace PixRenderPipline
                 {
                     debugMaterial.SetInt(_Channel, debugMode - 1);
                     debugMaterial.SetFloat(_Size, setting.debugSize);
+                    debugMaterial.SetFloat(_DepthScale, setting.depthScale);
 
                     if (setting.enable_TAA)
                         debugMaterial.EnableKeyword("MOTION_VECTOR_ON");

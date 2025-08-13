@@ -6,6 +6,7 @@ Shader "Pix/Standard"
             _IsSkinnedMesh("T(SKINNED_MESH)/isSkinnedMesh[Main]", Int) = 0
             _ShadingModel ("E/ShadingModel:Unlit,Lit,Hair,SSS[Feature]", Int) = 0
             _CullMode("E/Cull:Off,Front,Back[Feature]", Int) = 2
+            _FlipNormal("T/FlipNormal[Feature]", Int) = 0
             _BentNormal("T(ENABLE_BENTNORMAL)/BentNormal[Feature]", Int) = 0
 
         Group#SSS("SSS[_ShadingModel_3]", Int) = 1
@@ -13,6 +14,7 @@ Shader "Pix/Standard"
 
         Group#Main("Main", Int) = 1
             _Color ("Color[Main]", Color) = (1,1,1,1)
+            _ColorMultiply("ColorMultiply[Main]", Float) = 1
             _MainTex ("MainTex[Main]{sRGB:on}", 2D) = "white" {}
             _AlphaClip("T(_ALPHATEST_ON)/AlphaClip[Main]", Int) = 0
             _Cutoff("Cutoff[Main,_ALPHATEST_ON]", Range(0, 1)) = 0.5
@@ -51,6 +53,7 @@ Shader "Pix/Standard"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile _ _ALPHATEST_ON
             #pragma multi_compile _ SKINNED_MESH
             #pragma multi_compile _ TAA
@@ -89,6 +92,7 @@ Shader "Pix/Standard"
                 float4 boneWeights  : BLENDWEIGHTS; 
                 uint4 boneIndices   : BLENDINDICES; 
             #endif
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varying
@@ -109,9 +113,11 @@ Shader "Pix/Standard"
 
                 float4 screenUV     : TEXCOORD4;
             
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             float4 _Color;
+            half _ColorMultiply;
             int _ShadingModel;
             int _SSS_Profile;
             half _NormalIntensity;
@@ -119,14 +125,19 @@ Shader "Pix/Standard"
             half _RoughnessOffset;
             half _MetallicOffset;
 
+            half _FlipNormal;
+
             #ifdef _ALPHATEST_ON
             half _Cutoff;
             #endif
 
             #ifdef MOTION_VECTOR_ON
-            float4x4 _PreviousLocalToWorld;
-            float4x4 _MatrixVP_Prev;
-            float4x4 _CurrentLocalToWorld;
+            UNITY_INSTANCING_BUFFER_START(Props)
+            
+            UNITY_DEFINE_INSTANCED_PROP(float4x4, _PreviousLocalToWorld);
+            UNITY_DEFINE_INSTANCED_PROP(float4x4, _MatrixVP_Prev);
+            
+            UNITY_INSTANCING_BUFFER_END(Props)
             #endif
 
             TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _MainTex_ST;
@@ -135,7 +146,13 @@ Shader "Pix/Standard"
 
             Varying vert(Attributes input)
             {
+                UNITY_SETUP_INSTANCE_ID(input);
                 float4 prevPosOS = float4(input.positionOS.xyzw);
+
+                if(_FlipNormal){
+                    input.normalOS = -input.normalOS;
+                    input.tangentOS.xyz = -input.tangentOS.xyz;
+                }
 
                 #ifdef GPU_SKIN
                 transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
@@ -197,12 +214,16 @@ Shader "Pix/Standard"
                 #ifdef GPU_SKIN
                 transformPreviousSkinnedPos(input.boneWeights, input.boneIndices, prevPosOS);
                 #endif
+
+                float4x4 localToWorld_Prev = UNITY_ACCESS_INSTANCED_PROP(Props, _PreviousLocalToWorld);
+                float4x4 matrixVP_Prev = UNITY_ACCESS_INSTANCED_PROP(Props, _MatrixVP_Prev);
                 
-                float4 prevPosWS = mul(_PreviousLocalToWorld, prevPosOS);
-                output.prevPosCS = mul(_MatrixVP_Prev, prevPosWS);
+                float4 prevPosWS = mul(localToWorld_Prev, prevPosOS);
+                output.prevPosCS = mul(matrixVP_Prev, prevPosWS);
                 output.screenUV = output.positionCS;
             #endif
 
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
                 return output;
             }
 
@@ -219,7 +240,9 @@ Shader "Pix/Standard"
 
             FragmentOutput frag(Varying input)
             {
+                UNITY_SETUP_INSTANCE_ID(input);
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
+                color.rgb *= _ColorMultiply;
 
                 half2 screenUV = input.screenUV.xy/input.screenUV.w;
                 screenUV = screenUV*0.5+0.5;
@@ -289,6 +312,7 @@ Shader "Pix/Standard"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile _ _ALPHATEST_ON
             #pragma multi_compile _ TAA
             #pragma multi_compile _ SKINNED_MESH
@@ -314,6 +338,7 @@ Shader "Pix/Standard"
                 float4 boneWeights  : BLENDWEIGHTS; 
                 uint4 boneIndices   : BLENDINDICES; 
                 #endif
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct VaryingsDepth
@@ -324,6 +349,7 @@ Shader "Pix/Standard"
             #ifdef _ALPHATEST_ON
                 float2 uv : TEXCOORD1;
             #endif
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             #ifdef _ALPHATEST_ON
@@ -335,6 +361,8 @@ Shader "Pix/Standard"
 
             VaryingsDepth vert(AttributesDepth input)
             {
+                UNITY_SETUP_INSTANCE_ID(input);
+
                 VaryingsDepth output;
 
                 #ifdef GPU_SKIN
@@ -350,11 +378,13 @@ Shader "Pix/Standard"
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 #endif
 
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
                 return output;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
+                UNITY_SETUP_INSTANCE_ID(input);
                 #ifdef _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
                 TestAlpha(alpha, _Cutoff, input.screenUV);
@@ -378,6 +408,7 @@ Shader "Pix/Standard"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile _ _ALPHATEST_ON
             #pragma multi_compile _ SKINNED_MESH
             #pragma multi_compile _ TAA
@@ -405,6 +436,7 @@ Shader "Pix/Standard"
                 float4 boneWeights  : BLENDWEIGHTS; 
                 uint4 boneIndices   : BLENDINDICES; 
             #endif
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct VaryingsDepth
@@ -413,6 +445,7 @@ Shader "Pix/Standard"
             #if _ALPHATEST_ON
                 float2 uv : TEXCOORD0;
             #endif
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             #if _ALPHATEST_ON
@@ -425,6 +458,7 @@ Shader "Pix/Standard"
 
             VaryingsDepth vert(AttributesDepth input)
             {
+                UNITY_SETUP_INSTANCE_ID(input);
                 #ifdef GPU_SKIN
                 transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
                 #endif
@@ -438,11 +472,13 @@ Shader "Pix/Standard"
             #if _ALPHATEST_ON
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
             #endif
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
                 return output;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
+                UNITY_SETUP_INSTANCE_ID(input);
             #if _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
                 clip(alpha - _Cutoff);
@@ -465,6 +501,7 @@ Shader "Pix/Standard"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile SSAO_QUALITY_OFF
             #pragma multi_compile _ TAA
             #pragma multi_compile _ SKINNED_MESH
@@ -493,6 +530,7 @@ Shader "Pix/Standard"
                 float4 boneWeights  : BLENDWEIGHTS; 
                 uint4 boneIndices   : BLENDINDICES; 
             #endif
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct VaryingsDepth
@@ -500,6 +538,7 @@ Shader "Pix/Standard"
                 float4 positionCS : SV_POSITION;
                 float3 normalWS : NORMAL;
                 float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             float4 _Color;
@@ -507,6 +546,7 @@ Shader "Pix/Standard"
 
             VaryingsDepth vert(AttributesDepth input)
             {
+                UNITY_SETUP_INSTANCE_ID(input);
                 #ifdef GPU_SKIN
                 transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
                 transformSkinnedDir(input.boneWeights, input.boneIndices, input.normalOS);
@@ -523,11 +563,14 @@ Shader "Pix/Standard"
                 output.positionCS.z -= 0.00001;
                 #endif
 
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
                 return output;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
+                UNITY_SETUP_INSTANCE_ID(input);
+
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 half3 result = half3(0,0,0);
 

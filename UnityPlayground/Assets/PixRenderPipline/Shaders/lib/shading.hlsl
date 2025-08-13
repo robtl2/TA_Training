@@ -59,7 +59,7 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
     half NoL_full = dot(N, L);
     
     // 逆光时可以有大片连续的象素被跳过
-    if(NoL_full<0.05){
+    if(NoL_full<-0.1){
         return;
     }
 
@@ -100,6 +100,8 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
 
         NoL = lerp(NoL, NoL_b, sssProfile.scatteringColor * sssProfile.scatteringIntensity);
     }
+
+    // specular = 0;
 
     result += light.color * (specular + diffuse) * shadow * NoL;
 }

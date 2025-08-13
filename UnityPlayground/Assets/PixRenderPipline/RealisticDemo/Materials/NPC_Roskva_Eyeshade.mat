@@ -12,9 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - ENABLE_BENTNORMAL
   - EXPORT_TANGENT
-  - SKINNED_MESH
   - _ALPHATEST_ON
   m_InvalidKeywords:
   - GPU_SKIN

@@ -161,7 +161,8 @@ namespace PixRenderPipline
 
         public void GetTemporaryColorRT(int nameID, int width, int height)
         {
-            GetTemporaryColorRT(nameID, width, height, FilterMode.Point);
+            var setting = PixRenderSetting.instance;
+            GetTemporaryColorRT(nameID, width, height, setting.defaultFilterMode);
         }
 
         public void GetTemporaryColorRT(int nameID, int width, int height, FilterMode filterMode)

@@ -14,7 +14,6 @@ Material:
   m_ValidKeywords:
   - ENABLE_BENTNORMAL
   - EXPORT_TANGENT
-  - SKINNED_MESH
   - _ALPHATEST_ON
   m_InvalidKeywords:
   - GPU_SKIN
@@ -96,7 +95,7 @@ Material:
     - _Metallic: 0
     - _MetallicOffset: -1
     - _Mode: 0
-    - _NormalIntensity: 1.57
+    - _NormalIntensity: 0.91
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.05
     - _OutlineZOffset: 0

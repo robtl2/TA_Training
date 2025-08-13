@@ -121,12 +121,15 @@ namespace PixRenderPipline
             else
                 Shader.DisableKeyword("TAA");
 
+            if(setting.enableDebugLight)
+                Shader.EnableKeyword("DEBUG_LIGHT");
+            else
+                Shader.DisableKeyword("DEBUG_LIGHT");
+
             size = asset.GetRenderSize(camera.aspect);
             tiledSize = size / 8;
 
             colorSpace = RenderTextureReadWrite.Linear;
-            if (setting.colorSpace == PixRenderSetting.ColorSpace.Gamma)
-                colorSpace = RenderTextureReadWrite.sRGB;
 
 #if UNITY_EDITOR
             isSceneView = camera.cameraType == CameraType.SceneView;

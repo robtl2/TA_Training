@@ -89,7 +89,7 @@ namespace PixRenderPipline
         [Range(0,3)]
         public float contactShadowJitterRadius = 0.5f;
 
-        [Range(0f, 0.01f)]
+        [Range(0f, 0.5f)]
         public float contactRayLength = 0.25f;
 
         [Range(1, 16)]

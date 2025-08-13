@@ -122,7 +122,8 @@ half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivSt
     int sampleCount = stepCount + 1; 
     half rayLength = rayLengthDivStepCount*stepCount;
     half step = rayLengthDivStepCount; //采样步长
-    half3 pos_src = gbufferData.positionWS; //ray的起点
+    half3 pos_ori = gbufferData.positionWS; //ray的起点
+    half3 pos_src = pos_ori;
     
     //遍历次数不定加[loop]，避免编译器unroll优化时报错
     [loop]
@@ -134,10 +135,11 @@ half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivSt
         if(jitterRadius>0)
             uv += hash22(uv).xy*jitterRadius;
 
+        // half depth_dest = sampleDepth(uv);
         half depth_dest = sampleDepthDownSample(uv);
         half3 pos_dest = ReconstructWorldPos(uv, depth_dest);
-
-        if(length(pos_dest - pos_src)>rayLength*4)return 1.0h;
+        
+        if(length(pos_ori - pos_src)>rayLength)return 1.0h;
 
         half4 ndcPos = TransformWorldToHClip(pos_src);
         half depth_src = ndcPos.z/ndcPos.w;

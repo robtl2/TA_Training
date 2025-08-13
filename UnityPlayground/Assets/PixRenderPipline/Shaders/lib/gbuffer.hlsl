@@ -183,7 +183,7 @@ GBufferData UnpackGBuffer(float2 uv)
     half3 f0 = computeF0(albedo, metallic, reflectance);
 
     if (shadingModel == SHADING_MODEL_HAIR)
-        f0*=1.5;
+        f0*=1.3;
 
     half3 diffuse = computeDiffuseColor(albedo, metallic);
 
@@ -196,7 +196,6 @@ GBufferData UnpackGBuffer(float2 uv)
 
     GBufferData gbufferData;
 
-#if 1
     gbufferData.shadingModel = shadingModel;
     gbufferData.albedo = albedo;
     gbufferData.diffuse = diffuse;
@@ -206,16 +205,12 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.metallic = metallic;
     gbufferData.anisotropy = anisotropy;
     gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
-#else
+
+#ifdef DEBUG_LIGHT
     gbufferData.shadingModel = shadingModel;
     gbufferData.albedo = 0.5;
     gbufferData.diffuse = 0.5;
-    gbufferData.f0 = 0;
-    gbufferData.perceptualRoughness = 1;
-    gbufferData.roughness = 1;
     gbufferData.metallic = 0;
-    gbufferData.anisotropy = 0;
-    gbufferData.fresnel = 0;
 #endif
 
     gbufferData.ao = ao;

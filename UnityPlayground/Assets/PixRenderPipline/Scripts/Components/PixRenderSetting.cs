@@ -17,14 +17,9 @@ namespace PixRenderPipline
 
         public Style style;
 
-        public enum ColorSpace
-        {
-            Gamma,
-            Linear,
-        }
-        public ColorSpace colorSpace = ColorSpace.Linear;
-
         public bool GPU_OCC_Culling = true;
+
+        public FilterMode defaultFilterMode = FilterMode.Bilinear;
 
         [Header("AO")]
         [Range(0, 1)]
@@ -101,6 +96,9 @@ namespace PixRenderPipline
 
         [Range(0, 1)]
         public float debugSize = 1;
+
+        [Range(0, 1)]
+        public float depthScale = 1.0f;
         #endregion
 
         #region 

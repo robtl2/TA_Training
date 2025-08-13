@@ -92,7 +92,8 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.BeforeDeferred);
 
-            renderer.cmb.DrawMesh(TiledFullScreenQuad, Matrix4x4.identity, material, 0, 0);
+            // renderer.cmb.DrawMesh(TiledFullScreenQuad, Matrix4x4.identity, material, 0, 0);
+            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
             renderer.cmb.ReleaseTemporaryRT(TiledPass.tileID);
             
             TriggerEvent(PixRenderEventName.AfterDeferred);
