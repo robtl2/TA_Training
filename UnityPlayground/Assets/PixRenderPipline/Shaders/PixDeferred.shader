@@ -106,23 +106,25 @@ Shader "Hidden/Pix/Deferred"
 
                 evaluateIBL(gbufferData, uv, result);
 
-                [loop]
-                for(int i = 0;i<PIX_LIGHT_COUNT;i++)
-                {
-                    PixLight light = GetPixLight(i);
+                if(PIX_LIGHT_COUNT > 0){
+                    [loop]
+                    for(int i = 0;i<PIX_LIGHT_COUNT;i++)
+                    {
+                        PixLight light = GetPixLight(i);
 
-                    if(light.enabled && light.isPositive)
-                        evaluateLight(light, gbufferData, uv, result);
-                }
+                        if(light.enabled && light.isPositive)
+                            evaluateLight(light, gbufferData, uv, result);
+                    }
 
-                // 祛光灯
-                [loop]
-                for(int i = 0;i<PIX_LIGHT_COUNT;i++)
-                {
-                    PixLight light = GetPixLight(i);
+                    // 祛光灯
+                    [loop]
+                    for(int i = 0;i<PIX_LIGHT_COUNT;i++)
+                    {
+                        PixLight light = GetPixLight(i);
 
-                    if(light.enabled && !light.isPositive)
-                        evaluateLight(light, gbufferData, uv, result);
+                        if(light.enabled && !light.isPositive)
+                            evaluateLight(light, gbufferData, uv, result);
+                    }
                 }
 
                 #ifdef FOG

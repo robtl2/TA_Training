@@ -14,7 +14,6 @@ namespace PixRenderPipline
 
         public static PixLight mainLight;
         public static List<PixLight> lights = new();
-        static bool lightListIsDirty = true;
 
         static int lightCount = 0;
         static Vector4[] shadowmapSizePropList = new Vector4[MAX_LIGHT_COUNT];
@@ -132,7 +131,6 @@ namespace PixRenderPipline
                 mainLight = this;
 
             lights.Add(this);
-            lightListIsDirty = true;
 
             if (isActiveAndEnabled && !passAdded && enableShadowMap && shadowMapBias > 0)
             {
@@ -144,7 +142,18 @@ namespace PixRenderPipline
         void OnDisable()
         {
             lights.Remove(this);
-            lightListIsDirty = true;
+
+            Debug.Log(lights.Count);
+
+            if (this == mainLight)
+            {
+                mainLight = null;
+
+                if (lights.Count > 0)
+                    mainLight = lights[0];
+                else
+                    UpLoadParameters();
+            }
 
             if (passAdded)
             {
@@ -272,15 +281,9 @@ namespace PixRenderPipline
             UpdateBoxArea();
         }
 
-        void LateUpdate()
-        {
-            // mainLight负责提交数据给GPU
-            if (mainLight != this) return;
-
-            // 如果lightList有变动则刷新
-            if (lightListIsDirty) RefreshMainLight();
-
-            lightCount = Mathf.Min(lights.Count, MAX_LIGHT_COUNT);
+        void UpLoadParameters()
+        { 
+           lightCount = Mathf.Min(lights.Count, MAX_LIGHT_COUNT);
 
             int index = 0;
             for (int i = 0; i < lightCount; i++)
@@ -313,7 +316,15 @@ namespace PixRenderPipline
             Shader.SetGlobalVectorArray(_PixLightsContactShadow, contactShadowPropList);
             Shader.SetGlobalVectorArray(_PixLightsShadowMap, shadowMapPropList);
             Shader.SetGlobalMatrixArray(_PixLights_VP, shadowMapMatrixVP);
-            Shader.SetGlobalMatrixArray(_PixLightsEffectArea, effectAreaProps);
+            Shader.SetGlobalMatrixArray(_PixLightsEffectArea, effectAreaProps); 
+        }
+
+        void LateUpdate()
+        {
+            // mainLight负责提交数据给GPU
+            if (mainLight != this) return;
+
+            UpLoadParameters();
         }
 
         // 将自己的参数填充到全屏数组中
@@ -381,16 +392,6 @@ namespace PixRenderPipline
             effectAreaProps[i] = effectAreaProp;
 
             return bias > 0;
-        }
-
-        void RefreshMainLight()
-        {
-            if (lights.Count > 0)
-                mainLight = lights[0];
-            else
-                mainLight = null;
-
-            lightListIsDirty = false;
         }
 
         void UpdateBoxArea()

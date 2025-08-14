@@ -5910,9 +5910,9 @@ MonoBehaviour:
   ssao_stepCount_2nd: 3
   ssao_jitterRadius_2nd: 0.01
   SharpenStrength: 1
-  SharpenMid: 0.22
+  SharpenMid: 0.2
   Exposure: 1
-  EnableBloom: 1
+  EnableBloom: 0
   Bloom_Threshold: 0.9
   Bloom_Radius: 2
   Bloom_Intensity: 1.11
