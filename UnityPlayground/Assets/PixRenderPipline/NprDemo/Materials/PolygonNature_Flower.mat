@@ -130,7 +130,7 @@ Material:
     - _NormalIntensity: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RoughnessOffset: -0.25
+    - _RoughnessOffset: 0.3
     - _Rule1: 2
     - _SSS_Profile: 0
     - _ShadingModel: 1
@@ -150,7 +150,7 @@ Material:
     - _ZWrite: 1
     - __dirty: 1
     m_Colors:
-    - _Color: {r: 0.4728551, g: 0.6226415, b: 0.51150966, a: 1}
+    - _Color: {r: 0.5234959, g: 0.6415094, b: 0.55144644, a: 1}
     - _ColorTint: {r: 0.8308824, g: 0.791782, b: 0.4765355, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

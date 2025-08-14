@@ -79,7 +79,7 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
     half NoL_full = dot(N, L);
     
     // 逆光时可以有大片连续的象素被跳过
-    if(NoL_full<-0.1){
+    if(NoL_full<-0.1 && light.isPositive){
         return;
     }
 

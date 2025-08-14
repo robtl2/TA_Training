@@ -89,15 +89,19 @@ namespace PixRenderPipline
             material.SetColor(_SkyDisplayColor, displayColor);
             material.SetInt(_Dethering, detherStep);
 
-            Shader.SetGlobalColor(_SkyColor, color * intensity);
+            Color _color = color;
+            _color.r *= intensity;
+            _color.g *= intensity;
+            _color.b *= intensity;
+            Shader.SetGlobalColor(_SkyColor, _color);
             Shader.SetGlobalFloat(_SkyTexMipCount, texture ? texture.mipmapCount : 0);
             Shader.SetGlobalFloat(_RotateSky, yRotation);
             Shader.SetGlobalVectorArray(_SkySH, shData.shCoefficients);
             Shader.SetGlobalFloat(_IrradianceColor, IrradianceColor);
             Shader.SetGlobalFloat(_IrradianceIntensity, IrradianceIntensity);
 
-            if (skyType == SkyType.Texture && texture != null)
-                Shader.SetGlobalTexture(_SkyTex, texture);
+            // if (skyType == SkyType.Texture && texture != null)
+            Shader.SetGlobalTexture(_SkyTex, texture);
 
             if (sun == null) return;
 

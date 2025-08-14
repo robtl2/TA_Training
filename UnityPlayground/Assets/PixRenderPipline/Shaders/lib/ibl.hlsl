@@ -39,7 +39,7 @@ half3 getSpecularDominantDir(half3 N, half3 R, half roughness)
     return lerp(N, R, factor);
 }
 
-half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData)
+half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData, half2 uv)
 {
     half3 V = gbufferData.viewDir;
     half3 T = gbufferData.tangentWS;
@@ -52,18 +52,20 @@ half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData)
     half3 dominantDir = getSpecularDominantDir(N, L, gbufferData.roughness);
     dominantDir = lerp(dominantDir, L, abs(gbufferData.anisotropy));
 
-    half v = selfOcclusion(gbufferData, dominantDir, gbufferData.roughness);
+    half v = selfOcclusion(gbufferData, dominantDir, gbufferData.roughness) * _SkyColor.a;
 
     dominantDir = rotate_y(dominantDir, _RotateSky);
     
     return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, dominantDir, mipLevel) * gbufferData.fresnel*v;
 }
 
-half3 prefilteredRadiance(GBufferData gbufferData) {
-    half v = selfOcclusion(gbufferData, gbufferData.reflectDir, gbufferData.roughness);
+half3 prefilteredRadiance(GBufferData gbufferData, half2 uv) {
+    half v = selfOcclusion(gbufferData, gbufferData.reflectDir, gbufferData.roughness) * _SkyColor.a;
 
     half3 r = gbufferData.reflectDir;
     r = rotate_y(r, _RotateSky);
+    // half3 jitter = hash23(uv)*0.5h/gbufferData.depth;
+    // r = normalize(r + jitter);
     float lod = perceptualRoughnessToLod(gbufferData.perceptualRoughness);
 
     return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, r, lod) * gbufferData.fresnel*v;
@@ -112,9 +114,9 @@ half3 diffuseIrradiance(half3 n) {
 void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     half3 Fr = 0;
     if(gbufferData.shadingModel == SHADING_MODEL_HAIR)
-        Fr = getPrefilterAnisotropicSpecularLD(gbufferData);
+        Fr = getPrefilterAnisotropicSpecularLD(gbufferData, uv);
     else
-        Fr = prefilteredRadiance(gbufferData);
+        Fr = prefilteredRadiance(gbufferData, uv);
 
     Fr = detherColor(Fr, uv, 64);
 
@@ -125,8 +127,6 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
         ao = lerp(1,ao,_AO_Factor);
     
     Fd *= ao;
-
-    
     
     if(gbufferData.shadingModel == SHADING_MODEL_SSS)
     {
@@ -144,9 +144,6 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
 
         Fd = lerp(Fd, Fd_b, sssProfile.scatteringColor*sssProfile.scatteringIntensity);
     }
-
-
-    
 
     #ifndef SSAO_QUALITY_OFF
         half ssao = calculateSSAO(uv, gbufferData);
