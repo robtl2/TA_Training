@@ -97,6 +97,8 @@ Shader "Hidden/Pix/Deferred"
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
 
+                // return half4(gbufferData.albedo, 1);
+
                 if(gbufferData.shadingModel == SHADING_MODEL_UNLIT)
                     return half4(gbufferData.albedo, 1);
 

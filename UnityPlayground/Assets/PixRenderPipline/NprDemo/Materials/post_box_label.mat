@@ -106,6 +106,7 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
+    - _ColorMultiply: 1
     - _Cull: 2
     - _CullMode: 2
     - _Cutoff: 0.5

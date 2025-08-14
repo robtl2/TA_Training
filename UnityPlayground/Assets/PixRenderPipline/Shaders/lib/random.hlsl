@@ -60,8 +60,6 @@ half3 detherColor(half3 col, half2 uv, int step){
 }
 
 half detherAlpha(half alpha, half cutOff, half2 screenUV){
-    screenUV += _TAA_Jitter.xy;
-
     alpha = smoothstep(0, 0.5, alpha);
     return dether(screenUV, alpha) - 0.001;
 }

@@ -9,7 +9,7 @@
 
 static half IOR  = half(2.0);
 
-TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);float2 _PixGBuffer_0_TexelSize;
+TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);
 TEXTURE2D(_PixGBuffer_1);SAMPLER(sampler_PixGBuffer_1);
 TEXTURE2D(_PixGBuffer_2);SAMPLER(sampler_PixGBuffer_2);
 #ifdef MOTION_VECTOR_ON
@@ -18,8 +18,12 @@ TEXTURE2D(_PixGBuffer_3);SAMPLER(sampler_PixGBuffer_3);
 TEXTURE2D(_PixEarlyZDepth);SAMPLER(sampler_PixEarlyZDepth);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
-TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);half2 _PixDepthDownSample_TexelSize;
+TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);
 
+UNITY_INSTANCING_BUFFER_START(Props)
+float2 _PixGBuffer_0_TexelSize;
+half2 _PixDepthDownSample_TexelSize;
+UNITY_INSTANCING_BUFFER_END(Props)
 
 float3 ReconstructWorldPos(float2 uv, float ndcDepth) 
 {
@@ -85,7 +89,7 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     if (shadingModel == SHADING_MODEL_HAIR){
         metallic = anisotropy;
     } else if(shadingModel == SHADING_MODEL_SSS){
-        metallic = sssProfileIndex/31;
+        metallic = sssProfileIndex/(uint)31;
     }
 
     half2 nor = PackNormalHemiOctEncode(normalVS)*0.5 + 0.5;
@@ -98,17 +102,10 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     float packedMetallicShadingModel = PackTwoIntToFloat(metallicInt,shadingModel);
 
     GBuffer gbuffer;
-#ifdef PIX_STYLE_NPR
-    half3 hsv = RgbToHsv(color.rgb);
-    half2 rgb = PackToR5G6B5(hsv.yxz);
-    gbuffer.gbuffer_0 = half4(rgb,nor);
-    gbuffer.gbuffer_1 = half4(packedMetallicShadingModel,0, roughness, packedMetallicShadingModel);
-#else
     gbuffer.gbuffer_0 = half4(color.rgb, ao);
     gbuffer.gbuffer_1 = half4(nor, bnor);
     gbuffer.gbuffer_2 = half4(tan, roughness, packedMetallicShadingModel);
     gbuffer.gbuffer_3 = half4(motionVector.xy*0.5 + 0.5, 0, 0); // motion vector
-#endif
     
     return gbuffer;
 }
@@ -123,23 +120,18 @@ GBufferData UnpackGBuffer(float2 uv)
 #endif
     float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
 
+    half2 pixGBuffer_0_TexelSize = UNITY_ACCESS_INSTANCED_PROP(Props, _PixGBuffer_0_TexelSize);
+    half2 pixDepthDownSample_TexelSize = UNITY_ACCESS_INSTANCED_PROP(Props, _PixDepthDownSample_TexelSize);
+
 #ifdef TAA
-    half2 jitter = hash22(uv) * _PixGBuffer_0_TexelSize;
+    
+    half2 jitter = hash22(uv) * pixGBuffer_0_TexelSize;
     // uv += jitter;
 #endif
 
-
-#ifdef PIX_STYLE_NPR
-    half3 shv = UnpackFromR5G6B5(gbuffer_0.xy);
-    half3 albedo = HsvToRgb(shv.yxz);
-    half3 normalVS = UnpackNormal(gbuffer_0.zw);
-    // TODO:
-    half3 tangentWS = half3(0,0,0);
-#else
     half3 albedo = gbuffer_0.rgb;
     half3 normalVS = UnpackNormalHemiOctEncode(gbuffer_1.xy*2-1);
     half3 tangentWS = UnpackNormalHemiOctEncode(gbuffer_2.xy*2-1);
-#endif
 
     float3 worldPos = ReconstructWorldPos(uv, ndcDepth);
 
@@ -234,7 +226,7 @@ GBufferData UnpackGBuffer(float2 uv)
 #endif
 
     if (shadingModel == SHADING_MODEL_SSS && sssProfile.type == 1){
-        half3 sssNormal = GetScreenSpaceBlurredNormal(sssProfile, viewToWorld, depth, uv, _PixGBuffer_0_TexelSize);
+        half3 sssNormal = GetScreenSpaceBlurredNormal(sssProfile, viewToWorld, depth, uv, pixGBuffer_0_TexelSize);
         sssProfile.sssNormal = sssNormal;
     }
     else

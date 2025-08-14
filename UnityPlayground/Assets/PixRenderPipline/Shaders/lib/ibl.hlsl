@@ -56,7 +56,7 @@ half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData, half2 uv)
 
     dominantDir = rotate_y(dominantDir, _RotateSky);
     
-    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, dominantDir, mipLevel) * gbufferData.fresnel*v;
+    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, dominantDir, mipLevel) * gbufferData.fresnel * v;
 }
 
 half3 prefilteredRadiance(GBufferData gbufferData, half2 uv) {
@@ -68,7 +68,7 @@ half3 prefilteredRadiance(GBufferData gbufferData, half2 uv) {
     // r = normalize(r + jitter);
     float lod = perceptualRoughnessToLod(gbufferData.perceptualRoughness);
 
-    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, r, lod) * gbufferData.fresnel*v;
+    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, r, lod) * gbufferData.fresnel * v;
 }
 
 

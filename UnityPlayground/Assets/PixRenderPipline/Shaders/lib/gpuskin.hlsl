@@ -4,24 +4,27 @@
 
 
 #define MAX_BONE_COUNT  256
-
+UNITY_INSTANCING_BUFFER_START(Props_gpu_skin)
 float4x4 _CurrentPoses[MAX_BONE_COUNT];
 float4x4 _PreviousPoses[MAX_BONE_COUNT];
+UNITY_INSTANCING_BUFFER_END(Props_gpu_skin)
 
 void transformSkinnedPos(float4 boneWeights, uint4 boneIndices, inout float4 positionOS){
     float4 pos = 0;
     float4x4 skinMatrix;
 
-    skinMatrix = _CurrentPoses[boneIndices.x];
+    float4x4 currentPoses[MAX_BONE_COUNT] = UNITY_ACCESS_INSTANCED_PROP(Props_gpu_skin, _CurrentPoses);
+
+    skinMatrix = currentPoses[boneIndices.x];
     pos += mul(skinMatrix, positionOS) * boneWeights.x;
 
-    skinMatrix = _CurrentPoses[boneIndices.y];
+    skinMatrix = currentPoses[boneIndices.y];
     pos += mul(skinMatrix, positionOS) * boneWeights.y;
 
-    skinMatrix = _CurrentPoses[boneIndices.z];
+    skinMatrix = currentPoses[boneIndices.z];
     pos += mul(skinMatrix, positionOS) * boneWeights.z;
 
-    skinMatrix = _CurrentPoses[boneIndices.w];
+    skinMatrix = currentPoses[boneIndices.w];
     pos += mul(skinMatrix, positionOS) * boneWeights.w;
 
     positionOS = pos;
@@ -31,16 +34,18 @@ void transformPreviousSkinnedPos(float4 boneWeights, uint4 boneIndices, inout fl
     float4 pos = 0;
     float4x4 skinMatrix;
 
-    skinMatrix = _PreviousPoses[boneIndices.x];
+    float4x4 previousPoses[MAX_BONE_COUNT] = UNITY_ACCESS_INSTANCED_PROP(Props_gpu_skin, _PreviousPoses);
+
+    skinMatrix = previousPoses[boneIndices.x];
     pos += mul(skinMatrix, positionOS) * boneWeights.x;
 
-    skinMatrix = _PreviousPoses[boneIndices.y];
+    skinMatrix = previousPoses[boneIndices.y];
     pos += mul(skinMatrix, positionOS) * boneWeights.y;
 
-    skinMatrix = _PreviousPoses[boneIndices.z];
+    skinMatrix = previousPoses[boneIndices.z];
     pos += mul(skinMatrix, positionOS) * boneWeights.z;
 
-    skinMatrix = _PreviousPoses[boneIndices.w];
+    skinMatrix = previousPoses[boneIndices.w];
     pos += mul(skinMatrix, positionOS) * boneWeights.w;
 
     positionOS = pos;
@@ -50,16 +55,18 @@ void transformSkinnedDir(float4 boneWeights, uint4 boneIndices, inout float3 nor
     float3 dir = 0;
     float3x3 skinMatrix;
 
-    skinMatrix = (float3x3)_CurrentPoses[boneIndices.x];
+    float4x4 currentPoses[MAX_BONE_COUNT] = UNITY_ACCESS_INSTANCED_PROP(Props_gpu_skin, _CurrentPoses);
+
+    skinMatrix = (float3x3)currentPoses[boneIndices.x];
     dir += mul(skinMatrix, normalOS) * boneWeights.x;
 
-    skinMatrix = (float3x3)_CurrentPoses[boneIndices.y];
+    skinMatrix = (float3x3)currentPoses[boneIndices.y];
     dir += mul(skinMatrix, normalOS) * boneWeights.y;
 
-    skinMatrix = (float3x3)_CurrentPoses[boneIndices.z];
+    skinMatrix = (float3x3)currentPoses[boneIndices.z];
     dir += mul(skinMatrix, normalOS) * boneWeights.z;
 
-    skinMatrix = (float3x3)_CurrentPoses[boneIndices.w];
+    skinMatrix = (float3x3)currentPoses[boneIndices.w];
     dir += mul(skinMatrix, normalOS) * boneWeights.w;
 
     normalOS = dir;

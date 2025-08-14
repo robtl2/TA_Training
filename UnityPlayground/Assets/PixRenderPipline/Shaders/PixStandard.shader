@@ -18,11 +18,11 @@ Shader "Pix/Standard"
             _MainTex ("MainTex[Main]{sRGB:on}", 2D) = "white" {}
             _AlphaClip("T(_ALPHATEST_ON)/AlphaClip[Main]", Int) = 0
             _Cutoff("Cutoff[Main,_ALPHATEST_ON]", Range(0, 1)) = 0.5
-            _ParamTex("ParamTex[Main]{sRGB:off}", 2D) = "white" {}
+            _ParamTex("ParamTex[Main,!_ShadingModel_0]{sRGB:off}", 2D) = "white" {}
 
-        Group#Param("Param", Int) = 1
-            _RoughnessOffset("RoughnessOffset[Param]", Range(-1,1))=0
-            _MetallicOffset("MetallicOffset[Param]", Range(-1,1))=0
+        Group#Param("Param[!_ShadingModel_0]", Int) = 1
+            _RoughnessOffset("RoughnessOffset[Param,!_ShadingModel_0]", Range(-1,1))=0
+            _MetallicOffset("MetallicOffset[Param,!_ShadingModel_0]", Range(-1,1))=0
 
         Group#Nor("Normal[!_ShadingModel_0]", Int) = 1
             _NormalTex("NormalTex[Nor,!_ShadingModel_0]{type:Normal}", 2D) = "bump" {}
@@ -70,12 +70,10 @@ Shader "Pix/Standard"
                 #endif
             #endif
 
-
             #ifdef GPU_SKIN
             #include "lib/gpuskin.hlsl"
             #endif
 
-            #include "lib/light.hlsl"
             #include "lib/gbuffer.hlsl"
             
             struct Attributes
@@ -116,31 +114,32 @@ Shader "Pix/Standard"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-            float4 _Color;
-            half _ColorMultiply;
-            int _ShadingModel;
-            int _SSS_Profile;
-            half _NormalIntensity;
-            half _Anisotropy;
-            half _RoughnessOffset;
-            half _MetallicOffset;
+            CBUFFER_START(UnityPerMaterial)
+                float4 _Color;
+                half _ColorMultiply;
+                int _ShadingModel;
+                int _SSS_Profile;
+                half _NormalIntensity;
+                half _Anisotropy;
+                half _RoughnessOffset;
+                half _MetallicOffset;
+                half _FlipNormal;
 
-            half _FlipNormal;
+                #ifdef _ALPHATEST_ON
+                half _Cutoff;
+                #endif
+            CBUFFER_END
 
-            #ifdef _ALPHATEST_ON
-            half _Cutoff;
-            #endif
+            UNITY_INSTANCING_BUFFER_START(Props_main)
+                #ifdef MOTION_VECTOR_ON
+                UNITY_DEFINE_INSTANCED_PROP(float4x4, _PreviousLocalToWorld)
+                UNITY_DEFINE_INSTANCED_PROP(float4x4, _MatrixVP_Prev)
+                #endif
 
-            #ifdef MOTION_VECTOR_ON
-            UNITY_INSTANCING_BUFFER_START(Props)
-            
-            UNITY_DEFINE_INSTANCED_PROP(float4x4, _PreviousLocalToWorld);
-            UNITY_DEFINE_INSTANCED_PROP(float4x4, _MatrixVP_Prev);
-            
-            UNITY_INSTANCING_BUFFER_END(Props)
-            #endif
+                UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
+            UNITY_INSTANCING_BUFFER_END(Props_main)
 
-            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _MainTex_ST;
+            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
             TEXTURE2D(_NormalTex);SAMPLER(sampler_NormalTex);
             TEXTURE2D(_ParamTex);SAMPLER(sampler_ParamTex);
 
@@ -195,35 +194,33 @@ Shader "Pix/Standard"
             #endif
 
                 Varying output;
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
+
                 output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
                 output.normalVS = normalVS;
                 output.tangentVS = tangentVS;
                 output.bitangentVS = bitangentVS;
-                // output.normalVS = normalWS;
-                // output.tangentVS = tangentWS;
-                // output.bitangentVS = bitangentWS;
-
-                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                
+                float4 mainTex_st = UNITY_ACCESS_INSTANCED_PROP(Props_main, _MainTex_ST);
+                output.uv = input.uv*mainTex_st.xy + mainTex_st.zw;
                 output.tangentWS = tangentWS;
             #ifdef ENABLE_BENTNORMAL
                 output.bentNormalVS = half4(bentNormalVS, ao);
             #endif
-
 
             #ifdef MOTION_VECTOR_ON
                 #ifdef GPU_SKIN
                 transformPreviousSkinnedPos(input.boneWeights, input.boneIndices, prevPosOS);
                 #endif
 
-                float4x4 localToWorld_Prev = UNITY_ACCESS_INSTANCED_PROP(Props, _PreviousLocalToWorld);
-                float4x4 matrixVP_Prev = UNITY_ACCESS_INSTANCED_PROP(Props, _MatrixVP_Prev);
-                
+                float4x4 localToWorld_Prev = UNITY_ACCESS_INSTANCED_PROP(Props_main, _PreviousLocalToWorld);
+                float4x4 matrixVP_Prev = UNITY_ACCESS_INSTANCED_PROP(Props_main, _MatrixVP_Prev);
+
                 float4 prevPosWS = mul(localToWorld_Prev, prevPosOS);
                 output.prevPosCS = mul(matrixVP_Prev, prevPosWS);
                 output.screenUV = output.positionCS;
             #endif
-
-                UNITY_TRANSFER_INSTANCE_ID(input, output);
+                
                 return output;
             }
 
@@ -241,6 +238,7 @@ Shader "Pix/Standard"
             FragmentOutput frag(Varying input)
             {
                 UNITY_SETUP_INSTANCE_ID(input);
+
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
                 color.rgb *= _ColorMultiply;
 
@@ -354,8 +352,11 @@ Shader "Pix/Standard"
 
             #ifdef _ALPHATEST_ON
                 TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
+                
+                CBUFFER_START(UnityPerMaterial)
                 half4 _MainTex_ST;
                 half _Cutoff;
+                CBUFFER_END
             #endif
 
 
@@ -450,8 +451,11 @@ Shader "Pix/Standard"
 
             #if _ALPHATEST_ON
                 TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
+
+                CBUFFER_START(UnityPerMaterial)
                 half4 _MainTex_ST;
                 half _Cutoff;
+                CBUFFER_END
             #endif
 
             int _LightIndex;
@@ -541,8 +545,15 @@ Shader "Pix/Standard"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
+            
+            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
+            
+            CBUFFER_START(UnityPerMaterial)
+            float4 _MainTex_ST;
+            int _ShadingModel;
             float4 _Color;
-            TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _MainTex_ST;
+            half _ColorMultiply;
+            CBUFFER_END
 
             VaryingsDepth vert(AttributesDepth input)
             {
@@ -574,18 +585,19 @@ Shader "Pix/Standard"
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 half3 result = half3(0,0,0);
 
-                half3 diffuse = color.rgb * _Color.rgb;
-                half3 normalWS = input.normalWS;
+                half3 diffuse = color.rgb * _Color.rgb * _ColorMultiply;
 
-                PixLight light = GetPixLight(0);
-                
-                evaluateLightSimple(light, diffuse, normalWS, result);
-                evaluateIBLSimple(diffuse, normalWS, result);
+                if(_ShadingModel!=0){
+                    half3 normalWS = input.normalWS;
+                    PixLight light = GetPixLight(0);
+                    evaluateLightSimple(light, diffuse, normalWS, result);
+                    evaluateIBLSimple(diffuse, normalWS, result);
+                }else{
+                    result = diffuse;
+                }
 
                 result = HDR2LDR(result);
                 color.a = smoothstep(0,0.5,color.a);
-
-                // return half4(1,0,0,color.a);
 
                 return half4(result, color.a);
             }
