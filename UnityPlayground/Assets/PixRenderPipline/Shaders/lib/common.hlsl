@@ -27,6 +27,16 @@ half remap01(half from, half to, half x)
     return saturate((x - from) / (to - from));
 }
 
+half vmax(half2 x){
+    return max(x.x, x.y);
+}
+half vmax(half3 x){
+    return max(max(x.x, x.y), x.z);
+}
+half vmax(half4 x){
+    return max(max(x.x, x.y), max(x.z, x.w));
+}
+
 half2 remap01(half from, half to, half2 x)
 {
     return saturate((x - from) / (to - from));

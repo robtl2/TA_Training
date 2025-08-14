@@ -78,6 +78,7 @@ Shader "Hidden/Pix/Sky"
             }
 
             half3 _SunDirection;
+            half4 _SunProps; // r,g,b为颜色，a为大小
 
             void proceduralSky(float3 dir, inout half3 sky)
             {
@@ -99,7 +100,7 @@ Shader "Hidden/Pix/Sky"
                 float scatter_inter = pow5(remap01(0.95, 1.0, NoL));
                 scatter_inter *= scatter_inter;
 
-                phi = sq(phi);
+                phi = sq(phi)*phi;
                 scatter_outer += phi;
                 scatter_inter += remap01(0.5, 1, sq(phi));
 
@@ -112,6 +113,14 @@ Shader "Hidden/Pix/Sky"
                 half3 scatter = lerp(scatter_outer.xxx, scatter_inter.xxx, _SkyDisplayColor.rgb);
                 sky += scatter;
                 sky *= lerp(under,half3(0.5,0.55,0.4),0.5);
+
+                if(_SunProps.a>0){
+                    half sun = remap01(1-_SunProps.a,1, NoL);
+                    sun = sq(sun);
+
+                    sky += _SunProps.rgb*sun;
+                }
+                
             }
 
             half4 frag(VaryingsDepth input) : SV_Target

@@ -15,10 +15,11 @@ int         _PixLightCount;
 half4       _PixLightsShadowMapSize[MAX_PIX_LIGHT_COUNT];
 half4       _PixLightsPosition[MAX_PIX_LIGHT_COUNT];
 half4       _PixLightsDirection[MAX_PIX_LIGHT_COUNT];
-half3       _PixLightsColor[MAX_PIX_LIGHT_COUNT];
+half4       _PixLightsColor[MAX_PIX_LIGHT_COUNT];
 half4       _PixLightsContactShadow[MAX_PIX_LIGHT_COUNT];
 half4       _PixLightsShadowMap[MAX_PIX_LIGHT_COUNT];
 float4x4    _PixLights_VP[MAX_PIX_LIGHT_COUNT];
+float4x4    _PixLightsEffectArea[MAX_PIX_LIGHT_COUNT];
 
 // 最多4盏灯可以用shadowMap
 TEXTURE2D(_PixShadowMap_0);SAMPLER(sampler_PixShadowMap_0);
@@ -54,9 +55,10 @@ PixLight GetPixLight(int index)
     light.VP = _PixLights_VP[index];
     light.position = _PixLightsPosition[index].xyz;
     light.direction = _PixLightsDirection[index].xyz;
-    light.color = _PixLightsColor[index];
+    light.color = _PixLightsColor[index].rgb;
 
-    light.enabled = any(light.color>0);
+    light.enabled = _PixLightsColor[index].a != 0;
+    light.isPositive = _PixLightsColor[index].a > 0;
 
     light.contactShadow = _PixLightsContactShadow[index].x;
     light.contactSampleCount = (int)_PixLightsContactShadow[index].y;
@@ -84,7 +86,16 @@ PixLight GetPixLight(int index)
 
     light.enableDiffuse = enableDiffuse;
     light.enableSpecular = enableSpecular;
-    
+
+    float4x4 effectArea = _PixLightsEffectArea[index];
+    light.enableAreaEffect = any(effectArea != 0);
+    light.areaFadeRange = effectArea[3].x;
+
+    if(light.enableAreaEffect)
+        effectArea[3] = float4(0,0,0,1); 
+
+    light.effectArea = effectArea;
+
     return light;
 }
 

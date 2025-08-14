@@ -39,6 +39,7 @@ struct PixSSSProfile{
 
 struct PixLight{
     bool enabled;
+    bool isPositive;
 
     int lightType;
     int shadowMapIndex;
@@ -60,8 +61,13 @@ struct PixLight{
     bool enableDiffuse;
     bool enableSpecular;
     half f0;
+    // half f90;
 
     half visibilityShadow;
+
+    bool enableAreaEffect;
+    float4x4 effectArea; 
+    float areaFadeRange;
 
     float4x4 VP;
 };

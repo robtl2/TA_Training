@@ -111,7 +111,17 @@ Shader "Hidden/Pix/Deferred"
                 {
                     PixLight light = GetPixLight(i);
 
-                    if(light.enabled)
+                    if(light.enabled && light.isPositive)
+                        evaluateLight(light, gbufferData, uv, result);
+                }
+
+                // 祛光灯
+                [loop]
+                for(int i = 0;i<PIX_LIGHT_COUNT;i++)
+                {
+                    PixLight light = GetPixLight(i);
+
+                    if(light.enabled && !light.isPositive)
                         evaluateLight(light, gbufferData, uv, result);
                 }
 

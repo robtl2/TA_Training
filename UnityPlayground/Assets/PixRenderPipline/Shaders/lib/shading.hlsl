@@ -54,6 +54,26 @@ half3 diffuseLobe(GBufferData gbufferData,  float NoV, float NoL, float LoH) {
 // 后面ShadingModel计算的入口
 void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inout half3 result) 
 {
+    // if(light.isPositive < 0){
+    //     result = half3(1,0,0);
+    //     return;
+    // }
+
+    half effect = 1.0h;
+    if(light.enableAreaEffect){
+        float4 posInArea = mul(light.effectArea, float4(gbufferData.positionWS, 1.0f));
+        
+        if(any(posInArea>1 || posInArea<-1)){
+            //在影响范围外
+            return;
+        }else if(light.areaFadeRange>0){
+            // 在影响范围内,计算羽化过度
+            half pos_max = vmax(abs(posInArea.xyz));
+            half dis_to_border = 1- pos_max;
+            effect = remap01(0, light.areaFadeRange, dis_to_border);
+        }
+    }
+
     half3 N = gbufferData.normalWS;
     half3 L = light.direction;
     half NoL_full = dot(N, L);
@@ -80,7 +100,7 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
         diffuse = diffuseLobe(gbufferData, NoV, NoL, LoH);
 
     half3 specular = 0;
-    if(light.enableSpecular){
+    if(light.enableSpecular && light.isPositive){
         half f0 = gbufferData.f0;
 
         gbufferData.f0 *= light.f0;
@@ -101,9 +121,13 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
         NoL = lerp(NoL, NoL_b, sssProfile.scatteringColor * sssProfile.scatteringIntensity);
     }
 
-    // specular = 0;
+    if(light.isPositive)
+        result += light.color * (specular + diffuse) * shadow * NoL * effect;
+    else
+        result *= lerp(1, light.color, effect);
 
-    result += light.color * (specular + diffuse) * shadow * NoL;
+
+    result = max(result, 0.0h);
 }
 
 void evaluateLightSimple(PixLight light, half3 diffuse, half3 N, inout half3 result)

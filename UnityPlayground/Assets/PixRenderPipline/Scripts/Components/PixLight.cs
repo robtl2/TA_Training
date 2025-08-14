@@ -24,8 +24,8 @@ namespace PixRenderPipline
         static Vector4[] contactShadowPropList = new Vector4[MAX_LIGHT_COUNT];
         static Vector4[] shadowMapPropList = new Vector4[MAX_LIGHT_COUNT];
         static Matrix4x4[] shadowMapMatrixVP = new Matrix4x4[MAX_LIGHT_COUNT];
+        static Matrix4x4[] effectAreaProps = new Matrix4x4[MAX_LIGHT_COUNT];
         static readonly int _PixLightCount = Shader.PropertyToID("_PixLightCount");
-
         static readonly int _PixLightsShadowMapSize = Shader.PropertyToID("_PixLightsShadowMapSize");
         static readonly int _PixLightsPosition = Shader.PropertyToID("_PixLightsPosition");
         static readonly int _PixLightsDirection = Shader.PropertyToID("_PixLightsDirection");
@@ -33,6 +33,7 @@ namespace PixRenderPipline
         static readonly int _PixLightsContactShadow = Shader.PropertyToID("_PixLightsContactShadow");
         static readonly int _PixLightsShadowMap = Shader.PropertyToID("_PixLightsShadowMap");
         static readonly int _PixLights_VP = Shader.PropertyToID("_PixLights_VP");
+        static readonly int _PixLightsEffectArea = Shader.PropertyToID("_PixLightsEffectArea");
 
         public enum LightType
         {
@@ -55,6 +56,7 @@ namespace PixRenderPipline
         }
         #endregion
 
+        #region properties 
         [Header("Main")]
         public LightType lightType = LightType.Directional;
 
@@ -72,6 +74,9 @@ namespace PixRenderPipline
 
         [Range(1,5)]
         public float f90 = 1.0f;
+
+        public BoxCollider effectArea;
+        public float areaFadeRange = 0.0f;
 
         [Header("ShadowMap")]
         public bool enableShadowMap = false;
@@ -106,6 +111,9 @@ namespace PixRenderPipline
 
         [Header("Volume Light")]
         public bool volumeLight = false;
+
+        #endregion
+
 
         [HideInInspector]
         [SerializeField]
@@ -277,12 +285,12 @@ namespace PixRenderPipline
             int index = 0;
             for (int i = 0; i < lightCount; i++)
             {
-                if(i>= MAX_LIGHT_COUNT) break;
+                if (i >= MAX_LIGHT_COUNT) break;
 
                 var light = lights[i];
                 float bias = light.shadowMapBias;
                 if (!light.enableShadowMap) bias = 0;
-                 
+
                 bool requestShadowMap = bias > 0;
 
                 if (requestShadowMap)
@@ -305,6 +313,7 @@ namespace PixRenderPipline
             Shader.SetGlobalVectorArray(_PixLightsContactShadow, contactShadowPropList);
             Shader.SetGlobalVectorArray(_PixLightsShadowMap, shadowMapPropList);
             Shader.SetGlobalMatrixArray(_PixLights_VP, shadowMapMatrixVP);
+            Shader.SetGlobalMatrixArray(_PixLightsEffectArea, effectAreaProps);
         }
 
         // 将自己的参数填充到全屏数组中
@@ -323,9 +332,8 @@ namespace PixRenderPipline
             Vector3 dir = -transform.forward;
             Vector4 dirProp = new Vector4(dir.x, dir.y, dir.z, shadowMapIndex);
             dirctionPropList[i] = dirProp;
-
-            Color col = color * intensity;
-            colorPropList[i] = new Vector3(col.r, col.g, col.b);
+            Color _color = color * Mathf.Abs(intensity);
+            colorPropList[i] = new Vector4(_color.r, _color.g, _color.b, intensity);
 
             Vector4 contactShadowParam = Vector4.zero;
             float contactShadow = enableContactShadow ? contactRayLength : 0;
@@ -349,6 +357,28 @@ namespace PixRenderPipline
             shadowMapPropList[i] = shadowMapParam;
 
             shadowMapMatrixVP[i] = matrixVP_gpu;
+
+            Matrix4x4 effectAreaProp = Matrix4x4.zero;
+            if (effectArea != null)
+            {
+                effectAreaProp = effectArea.transform.worldToLocalMatrix;
+                Vector4 axis_x = effectAreaProp.GetRow(0) / (effectArea.size.x * 0.5f);
+                Vector4 axis_y = effectAreaProp.GetRow(1) / (effectArea.size.y * 0.5f);
+                Vector4 axis_z = effectAreaProp.GetRow(2) / (effectArea.size.z * 0.5f);
+                effectAreaProp.SetRow(0, axis_x);
+                effectAreaProp.SetRow(1, axis_y);
+                effectAreaProp.SetRow(2, axis_z);
+
+                Vector3 center = effectArea.center;
+                Vector4 localPos = effectAreaProp.GetColumn(3);
+                localPos.x -= center.x;
+                localPos.y -= center.y;
+                localPos.z -= center.z;
+                effectAreaProp.SetColumn(3, localPos);
+
+                effectAreaProp.SetRow(3, new Vector4(areaFadeRange, 0.0f, 0.0f, 1.0f)); // 设置fade范围
+            }
+            effectAreaProps[i] = effectAreaProp;
 
             return bias > 0;
         }

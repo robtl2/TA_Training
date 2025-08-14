@@ -108,7 +108,7 @@ Material:
     - _ClearCoatSmoothness: 0
     - _ColorMultiply: 1
     - _Cull: 2
-    - _CullMode: 2
+    - _CullMode: 0
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
@@ -127,7 +127,7 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RoughnessOffset: -0.787
+    - _RoughnessOffset: -0.7
     - _Rule1: 2
     - _SSS_Profile: 0
     - _ShadingModel: 1

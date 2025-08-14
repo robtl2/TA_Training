@@ -30,7 +30,10 @@ namespace PixRenderPipline
         public Color color;
         public Cubemap texture;
 
-        public Transform sunTransform;
+        public PixLight sun;
+        [Range(0, 1)]
+        public float sunSize = 0.1f;
+        public float sunIntensity = 1.0f;
 
         [Range(0, 1)]
         public float IrradianceColor = 0;
@@ -48,6 +51,7 @@ namespace PixRenderPipline
         readonly int _SkyColor = Shader.PropertyToID("_SkyColor");
         readonly int _SkyDisplayColor = Shader.PropertyToID("_SkyDisplayColor");
         readonly int _SunDirection = Shader.PropertyToID("_SunDirection");
+        readonly int _SunProps = Shader.PropertyToID("_SunProps");
         readonly int _Dethering = Shader.PropertyToID("_Dethering");
         readonly int _FovScale = Shader.PropertyToID("_FovScale");
         readonly int _RotateSky = Shader.PropertyToID("_RotateSky");
@@ -95,9 +99,12 @@ namespace PixRenderPipline
             if (skyType == SkyType.Texture && texture != null)
                 Shader.SetGlobalTexture(_SkyTex, texture);
 
-            if (sunTransform == null) return;
+            if (sun == null) return;
 
-            Shader.SetGlobalVector(_SunDirection, Vector3.Normalize(-sunTransform.forward));
+            Shader.SetGlobalVector(_SunDirection, Vector3.Normalize(-sun.transform.forward));
+            float _intensity = sun.intensity * sunIntensity;
+            Vector4 sunProps = new Vector4(sun.color.r * _intensity, sun.color.g * _intensity, sun.color.b * _intensity, sunSize*0.01f);
+            Shader.SetGlobalVector(_SunProps, sunProps);
         }
 
         // 将 transform 的 y 轴旋转转换为 -π 到 π 之间的弧度值
