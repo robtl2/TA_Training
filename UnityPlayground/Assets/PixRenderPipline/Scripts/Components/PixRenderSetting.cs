@@ -20,12 +20,16 @@ namespace PixRenderPipline
         public bool GPU_OCC_Culling = true;
 
         public FilterMode defaultFilterMode = FilterMode.Bilinear;
+        #endregion
 
+        #region Fog
         [Header("Fog")]
         public bool Enable_Fog = true;
         public Vector4 FogParams = new Vector4(0.1f, 0.1f, 200f, 10f); // Density, Start, End, Height
         public Color FogColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        #endregion
 
+        #region AO
         [Header("AO")]
         [Range(0, 1)]
         public float ao_factor = 1;
@@ -47,6 +51,7 @@ namespace PixRenderPipline
         public float ssao_radius_2nd = 0.02f;
         public int ssao_stepCount_2nd = 2;
         public float ssao_jitterRadius_2nd = 0.01f;
+       
         #endregion
 
         #region PostProcessing
@@ -60,6 +65,10 @@ namespace PixRenderPipline
 
         [Range(0, 3)]
         public float Exposure = 1.0f;
+
+        [Space(10)]
+        [Range(0, 1)]
+        public float Vagnet = 1.0f;
 
         [Space(10)]
         public bool EnableBloom = true;
@@ -80,7 +89,6 @@ namespace PixRenderPipline
 
         [Range(0, 0.995f)]
         public float TAA_histroy = 0.8f;
-
         #endregion
 
 
@@ -114,14 +122,9 @@ namespace PixRenderPipline
         public float depthScale = 1.0f;
         #endregion
 
-        #region 
+        #region Lighting Debug
         [Header("Lighting Debug")]
         public bool enableDebugLight = false;
-        public bool asWhiteMaterial = false;
-        public bool enableIBLIrradiance = true;
-        public bool enableIBLRadiance = true;
-        public bool enableLightDiffuse = true;
-        public bool enableLightSpecular = true;
         #endregion
         void OnEnable()
         {

@@ -25,7 +25,7 @@ Shader "Hidden/Pix/Post"
             #include "lib/fullscreen.hlsl"
 
             #pragma multi_compile _ TAA
-
+            #pragma multi_compile _ PP_SUN_VOLUME
             #pragma multi_compile _ PP_SHARPEN
             #pragma multi_compile _ PP_BLOOM
             #pragma multi_compile _ PP_TONEMAPPING
@@ -33,13 +33,17 @@ Shader "Hidden/Pix/Post"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/common.hlsl"
             #include "lib/gbuffer.hlsl"
+            #include "lib/light.hlsl"
+            #include "lib/random.hlsl"
 
 
-            TEXTURE2D(_PixColorTex);SAMPLER(sampler_PixColorTex);
-            half2 _PixColorTex_TexelSize;
+            TEXTURE2D(_PixColorTex);SAMPLER(sampler_PixColorTex);half2 _PixColorTex_TexelSize;
+            // TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);
+            
 
             half4 _SharpenProps;
             half _Exposure;
+            half _Vagnet;
 
             #ifdef PP_BLOOM
                 TEXTURE2D(_BloomTex);SAMPLER(sampler_BloomTex);float2 _BloomTex_TexelSize;
@@ -84,13 +88,19 @@ Shader "Hidden/Pix/Post"
                 color = diff*mask*m + color;
             }
 
+            void Vignet(inout half3 color, half2 uv, half intensity){
+                uv = uv-0.5;
+                half range = length(uv)*2;
+                range = 1 - smoothstep(0.5, 2,range);
+                range *= range;
+                range = lerp(1, range, intensity);
+                range = detherColor(range, uv, 256);
+                color *= range;
+            }
+
             #ifdef PP_BLOOM
             void Bloom(inout half3 color, half2 uv)
             {
-                // #ifdef TAA
-                // uv += _TAA_Jitter*_BloomTex_TexelSize;
-                // #endif
-
                 half3 bloom = 0;
                 int mipCount = 4;
                 half weightTotle = 0;
@@ -103,7 +113,6 @@ Shader "Hidden/Pix/Post"
                     bloom += SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, uv + half2(diagonal.x, -diagonal.y)).xyz*weight;
                     bloom += SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, uv + half2(-diagonal.x, -diagonal.y)).xyz*weight;
 
-                    // bloom += SAMPLE_TEXTURE2D_LOD(_BloomTex, sampler_BloomTex, uv, i).rgb*weight;
                     weightTotle += weight*4;
                     weight *=0.8;
                 }
@@ -111,6 +120,78 @@ Shader "Hidden/Pix/Post"
 
                 color += bloom * _BloomIntensity;
             }
+            #endif
+
+            #ifdef PP_SUN_VOLUME
+            
+            half4 _SunVolume;
+            half4 _SunVolumeColor;
+
+            void SunVolume(inout half3 color, half2 screenUV, half mask){
+                PixLight sun = GetPixLight((int)_SunVolume.x);
+
+                half depth_dest = sampleDepthDownSample(screenUV);
+                half3 pos_dest = ReconstructWorldPos(screenUV, depth_dest);
+                float3 cameraPos = _WorldSpaceCameraPos;
+                half3 V = pos_dest - cameraPos;
+                half len = length(V);
+                V = normalize(V); 
+                
+                half fade = len;
+                fade = remap01(5,50,len);
+                fade *= fade;
+
+                half LoV = saturate(dot(sun.direction, V)*0.8+0.2);
+                fade = lerp(fade,1,LoV);
+                
+                uint maxStep = (uint)_SunVolume.z;
+                float3 stepLen = V*_SunVolume.w;
+                float3 origin = cameraPos;
+                half volume = 0;
+
+                int step = 0;
+                [loop]
+                while(step < maxStep){
+                    step ++;
+
+                    half3 rayEnd = V*stepLen*step;
+                    origin += stepLen;
+                    
+                    origin += hash33(origin)*0.05;
+                    if(length(origin - cameraPos) > len){
+                        break;
+                    }
+
+                    float4 clipPos = mul(sun.VP, float4(origin,1));
+                    float3 ndcPos = clipPos.xyz / clipPos.w;
+                    float2 uv = ndcPos.xy * 0.5 + 0.5;
+                    uv.y = 1-uv.y;
+
+                    if(any(uv<0 || uv>1)){
+                        volume += 1;
+                        continue;
+                    }
+
+                    if(sun.shadowMapJitter)
+                        uv += hash22(screenUV).xy*sun.shadowMapSize.y;
+
+                    float depthSrc = saturate(ndcPos.z + sun.shadowMapBias);
+
+                    half depthDest = SampleShadowMap(sun.shadowMapIndex, uv);
+
+                    volume += depthSrc>depthDest?1:0;
+                }
+
+                volume/=maxStep;
+
+                volume *= _SunVolume.y;
+                volume = saturate(volume);
+
+                half m = lerp(mask,1,_SunVolumeColor.a);
+
+                color = lerp(color, sun.color*_SunVolumeColor.rgb*0.1, volume * fade * m);
+            }
+
             #endif
 
             half4 frag(VarFullScreenQuad input) : SV_Target
@@ -129,18 +210,19 @@ Shader "Hidden/Pix/Post"
                 #endif
 
                 rgb = LDR2HDR(rgb);
+
+                #ifdef PP_SUN_VOLUME
+                    SunVolume(rgb, uv, color.a);
+                #endif
+
                 rgb *= _Exposure;
+
+                Vignet(rgb, uv, _Vagnet);
 
                 #ifdef PP_TONEMAPPING
                     Tonemap(rgb);
                 #endif
 
-                // rgb = detherColor(rgb, uv,64);
-
-                // #if 0
-                //     if(any(color>1))color.rgb = half3(1,0,0);
-                // #endif
-                
                 return half4(rgb, 1);
             }
             ENDHLSL

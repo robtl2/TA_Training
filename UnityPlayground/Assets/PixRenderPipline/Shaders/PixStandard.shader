@@ -597,7 +597,7 @@ Shader "Pix/Standard"
                 }
 
                 result = HDR2LDR(result);
-                color.a = smoothstep(0,0.5,color.a);
+                // color.a = smoothstep(0,0.5,color.a);
 
                 return half4(result, color.a);
             }

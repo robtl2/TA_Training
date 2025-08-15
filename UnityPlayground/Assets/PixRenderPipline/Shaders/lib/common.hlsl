@@ -88,7 +88,7 @@ half3 HDR2LDR(half3 rgb, half maxVal = 2){
 
 half3 LDR2HDR(half3 ldr, half maxVal = 2){
     half3 rgb = ldr*maxVal;
-    rgb = rgb*rgb;
+    rgb = sq(rgb);
     return rgb;
 }
 

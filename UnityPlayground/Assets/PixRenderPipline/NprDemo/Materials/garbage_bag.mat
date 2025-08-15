@@ -127,7 +127,7 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RoughnessOffset: -0.21
+    - _RoughnessOffset: -0.59
     - _Rule1: 2
     - _SSS_Profile: 0
     - _ShadingModel: 1

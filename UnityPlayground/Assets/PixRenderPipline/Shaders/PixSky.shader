@@ -54,6 +54,7 @@ Shader "Hidden/Pix/Sky"
             half _RotateSky;
             half _FovScale;
             half _BlurLevel;
+            half4 _Scattering;
             TEXTURECUBE(_SkyTex);SAMPLER(sampler_SkyTex);
 
             VaryingsDepth vert(AttributesDepth input)
@@ -92,26 +93,35 @@ Shader "Hidden/Pix/Sky"
                 phi = saturate(pow5(phi));
 
                 sky = lerp(sky*0.21,sky*5, phi);
-
+                
+                half scatteringOuter = _Scattering.x;
+                half scatteringInter = _Scattering.z;
+                half scatteringOuterIntensity = _Scattering.y;
+                half scatteringInterIntensity = _Scattering.w;
                 float NoL_full = dot(dir, _SunDirection);
-                float NoL = saturate(NoL_full);
-                float scatter_outer = sq(remap01(0.5, 1, NoL));
+                float NoL = NoL_full;//saturate(NoL_full);
+                float scatter_outer = sq(remap01(scatteringOuter, 1, NoL))*scatteringOuterIntensity;
                 scatter_outer *= scatter_outer;
-                float scatter_inter = pow5(remap01(0.95, 1.0, NoL));
+                float scatter_inter = pow5(remap01(scatteringInter, 1.0, NoL))*scatteringInterIntensity;
                 scatter_inter *= scatter_inter;
 
-                phi = sq(phi)*phi;
-                scatter_outer += phi;
-                scatter_inter += remap01(0.5, 1, sq(phi));
+                phi = pow5(phi);
+                scatter_outer += phi*scatteringOuterIntensity*0.25;
+                scatter_inter += remap01(0.5, 1, sq(phi))*scatteringInterIntensity;
 
                 under = pow5(under);
                 scatter_outer *= under*0.8+0.2;
                 scatter_inter *= sq(under);
 
-                scatter_outer*=1.2;
+                // scatter_outer*=1.2;
 
-                half3 scatter = lerp(scatter_outer.xxx, scatter_inter.xxx, _SkyDisplayColor.rgb);
+                half3 scatter = lerp(scatter_outer.xxx, 0, _SkyDisplayColor.rgb);
                 sky += scatter;
+
+                scatter = lerp(scatter_inter.xxx, 0, _SkyDisplayColor.rgb);
+                sky += scatter;
+
+
                 sky *= lerp(under,half3(0.5,0.55,0.4),0.5);
 
                 if(_SunProps.a>0){

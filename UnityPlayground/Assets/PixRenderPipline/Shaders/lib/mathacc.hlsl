@@ -13,6 +13,10 @@ half sq(half x) {
     return x * x;
 }
 
+half3 sq(half3 x){
+    return x * x;
+}
+
 half fast_cos(half x){
     half s = sign(x);
     half a = fmod(x , TWO_PI);

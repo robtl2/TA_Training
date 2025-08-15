@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering.VirtualTexturing;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -18,33 +20,62 @@ namespace PixRenderPipline
             Texture,
             Procedural,
         }
-
+        #region parameters
         public SkyType skyType = SkyType.None;
-        public Color displayColor;
+        [Space(10)]
+        [Header("Texture")]
+        public Cubemap texture;
         [Range(0, 9)]
         public float blurLevel = 0;
+
+        [Space(10)]
+        [Header("Main Parameter")]
+        public Color color;
+        [Range(0, 3)]
+        public float intensity = 1;
+        public Color displayColor;
         [Range(0, 3)]
         public float fovScale = 1;
-        public int detherStep = 0;
 
-        public Color color;
-        public Cubemap texture;
+        [Space(10)]
 
+        [Range(0, 1)]
+        public float IrradianceColor = 0;
+
+        [Range(0, 3.5f)]
+        public float IrradianceIntensity = 1.0f;
+
+        [Space(10)]
+        [Header("Procedural")]
+        [Range(-2, 1)]
+        public float scatteringOuter = 0.5f;
+        [Range(0,1)]
+        public float OuterIntensity = 1.0f;
+        [Range(-1,1)]
+        public float scatteringInter = 0.95f;
+        [Range(0,1)]
+        public float InterIntensity = 1.0f;
+
+        [Space(10)]
         public PixLight sun;
         [Range(0, 1)]
         public float sunSize = 0.1f;
         public float sunIntensity = 1.0f;
 
+        [Space(10)]
+        [Header("Volume SunLight")]
         [Range(0, 1)]
-        public float IrradianceColor = 0;
+        public float sunVolume = 0;
+        public Color sunVolumeColor = Color.white;
+        public float rayStepLength = 0.5f;
+        public uint maxRayStep = 24;
 
-        [Range(0, 3)]
-        public float intensity = 1;
-
-        [Range(0, 3.5f)]
-        public float IrradianceIntensity = 1.0f;
+        [Space(10)]
+        [Header("Other")]
+        public int detherStep = 0;
 
         public PixSHData shData = new();
+        #endregion
 
         #region Shader Property IDs
         readonly int _SkyType = Shader.PropertyToID("_SkyType");
@@ -52,6 +83,8 @@ namespace PixRenderPipline
         readonly int _SkyDisplayColor = Shader.PropertyToID("_SkyDisplayColor");
         readonly int _SunDirection = Shader.PropertyToID("_SunDirection");
         readonly int _SunProps = Shader.PropertyToID("_SunProps");
+        readonly int _SunVolume = Shader.PropertyToID("_SunVolume");
+        readonly int _SunVolumeColor = Shader.PropertyToID("_SunVolumeColor");
         readonly int _Dethering = Shader.PropertyToID("_Dethering");
         readonly int _FovScale = Shader.PropertyToID("_FovScale");
         readonly int _RotateSky = Shader.PropertyToID("_RotateSky");
@@ -61,6 +94,7 @@ namespace PixRenderPipline
         readonly int _SkySH = Shader.PropertyToID("_SkySH");
         readonly int _IrradianceColor = Shader.PropertyToID("_IrradianceColor");
         readonly int _IrradianceIntensity = Shader.PropertyToID("_IrradianceIntensity");
+        readonly int _Scattering = Shader.PropertyToID("_Scattering");
         #endregion
 
         void OnEnable()
@@ -99,16 +133,31 @@ namespace PixRenderPipline
             Shader.SetGlobalVectorArray(_SkySH, shData.shCoefficients);
             Shader.SetGlobalFloat(_IrradianceColor, IrradianceColor);
             Shader.SetGlobalFloat(_IrradianceIntensity, IrradianceIntensity);
+            Shader.SetGlobalVector(_Scattering, new Vector4(scatteringOuter, OuterIntensity, scatteringInter, InterIntensity));
 
-            // if (skyType == SkyType.Texture && texture != null)
             Shader.SetGlobalTexture(_SkyTex, texture);
 
             if (sun == null) return;
 
             Shader.SetGlobalVector(_SunDirection, Vector3.Normalize(-sun.transform.forward));
             float _intensity = sun.intensity * sunIntensity;
-            Vector4 sunProps = new Vector4(sun.color.r * _intensity, sun.color.g * _intensity, sun.color.b * _intensity, sunSize*0.01f);
+            Vector4 sunProps = new Vector4(sun.color.r * _intensity, sun.color.g * _intensity, sun.color.b * _intensity, sunSize * 0.01f);
             Shader.SetGlobalVector(_SunProps, sunProps);
+
+            if (sunVolume > 0)
+            {
+                Shader.EnableKeyword("PP_SUN_VOLUME");
+
+                Vector4 sunVolumeProps = new();
+                sunVolumeProps.x = sun.index;
+                sunVolumeProps.y = sunVolume;
+                sunVolumeProps.z = maxRayStep;
+                sunVolumeProps.w = rayStepLength;
+                Shader.SetGlobalVector(_SunVolume, sunVolumeProps);
+                Shader.SetGlobalColor(_SunVolumeColor, sunVolumeColor);
+            }
+            else
+                Shader.DisableKeyword("PP_SUN_VOLUME");
         }
 
         // 将 transform 的 y 轴旋转转换为 -π 到 π 之间的弧度值

@@ -11,7 +11,6 @@ namespace PixRenderPipline
         Material materialTAA;
 
         static int _Bloom_Threshold = Shader.PropertyToID("_Bloom_Threshold");
-
         static int _BloomTex = Shader.PropertyToID("_BloomTex");
         static int _BloomTexVertical = Shader.PropertyToID("_BloomTexVertical");
         static int _BloomTexHorizontal = Shader.PropertyToID("_BloomTexHorizontal");
@@ -22,6 +21,7 @@ namespace PixRenderPipline
         static int _HistroyWeight = Shader.PropertyToID("_HistroyWeight");
         static int _SharpenProps = Shader.PropertyToID("_SharpenProps");
         static int _Exposure = Shader.PropertyToID("_Exposure");
+        static int _Vagnet = Shader.PropertyToID("_Vagnet");
 
         public static readonly int ColorBuff_Front = Shader.PropertyToID("_PixColorTex_Front");
 
@@ -91,6 +91,7 @@ namespace PixRenderPipline
             postMaterial.SetVector(_SharpenProps, sharpenProps);
 
             postMaterial.SetFloat(_Exposure, setting.Exposure);
+            postMaterial.SetFloat(_Vagnet, setting.Vagnet);
 
             TriggerEvent(PixRenderEventName.BeforePostProcess);
 

@@ -121,8 +121,8 @@ namespace PixRenderPipline
         Matrix4x4 matrixVP;
         Matrix4x4 matrixVP_gpu;
 
-        int index;
-        int shadowMapIndex = 0;
+        public int index { get; private set; }
+        public int shadowMapIndex { get; private set; }
         bool passAdded = false;
 
         void OnEnable()
@@ -143,7 +143,7 @@ namespace PixRenderPipline
         {
             lights.Remove(this);
 
-            Debug.Log(lights.Count);
+            // Debug.Log(lights.Count);
 
             if (this == mainLight)
             {
