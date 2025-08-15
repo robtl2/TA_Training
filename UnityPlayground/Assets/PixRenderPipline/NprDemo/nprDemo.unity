@@ -1748,15 +1748,15 @@ MonoBehaviour:
   fovScale: 0.82
   IrradianceColor: 0.731
   IrradianceIntensity: 0.41
-  scatteringOuter: 0.42
+  scatteringOuter: 0.37
   OuterIntensity: 0.875
-  scatteringInter: 0.79
+  scatteringInter: 0.82
   InterIntensity: 0.902
   sun: {fileID: 1683865467}
   sunSize: 0.02
   sunIntensity: 0.22
   sunVolume: 0.445
-  sunVolumeColor: {r: 0.16874333, g: 0.33288243, b: 0.4528302, a: 0.18431373}
+  sunVolumeColor: {r: 0.39048594, g: 0.48754093, b: 0.7075472, a: 0.18431373}
   rayStepLength: 0.5
   maxRayStep: 24
   detherStep: 64
@@ -6738,8 +6738,8 @@ MonoBehaviour:
   GPU_OCC_Culling: 1
   defaultFilterMode: 1
   Enable_Fog: 1
-  FogParams: {x: 2.62, y: 4.3, z: 39.1, w: 45.9}
-  FogColor: {r: 0.18422928, g: 0.34292817, b: 0.8679245, a: 0.6117647}
+  FogParams: {x: 2.62, y: 4.3, z: 39.1, w: 58.3}
+  FogColor: {r: 0, g: 0.18266296, b: 1, a: 0.6117647}
   ao_factor: 1
   Enable_SSAO: 1
   ssao_factor: 0.81

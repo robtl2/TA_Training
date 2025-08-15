@@ -149,15 +149,17 @@ Shader "Hidden/Pix/Post"
                 float3 origin = cameraPos;
                 half volume = 0;
 
-                int step = 0;
+                uint step = 0;
                 [loop]
                 while(step < maxStep){
                     step ++;
-
+                    // half jitter_d = hash21(screenUV)*stepLen;
                     half3 rayEnd = V*stepLen*step;
                     origin += stepLen;
+
+                    half3 jitter_p = hash33(origin)*stepLen*0.1;
+                    origin += jitter_p;
                     
-                    origin += hash33(origin)*0.05;
                     if(length(origin - cameraPos) > len){
                         break;
                     }
