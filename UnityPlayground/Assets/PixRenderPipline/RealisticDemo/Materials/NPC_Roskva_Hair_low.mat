@@ -103,7 +103,7 @@ Material:
     - _OutlineZOffset: 0
     - _Parallax: 0.02
     - _Rim: 0
-    - _RoughnessOffset: 0.04
+    - _RoughnessOffset: 0.1
     - _Rule1: 2
     - _SSS_Profile: 0
     - _ShadingModel: 2

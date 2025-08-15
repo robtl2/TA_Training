@@ -130,7 +130,7 @@ Material:
     - _NormalIntensity: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RoughnessOffset: 0
+    - _RoughnessOffset: 0.07
     - _Rule1: 2
     - _SSS_Profile: 0
     - _ShadingModel: 1

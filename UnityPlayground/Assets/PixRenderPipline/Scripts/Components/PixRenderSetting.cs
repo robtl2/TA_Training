@@ -41,6 +41,7 @@ namespace PixRenderPipline
         public float ssao_radius = 0.4f;
         public int ssao_stepCount = 4;
         public float ssao_jitterRadius = 0.05f;
+        public bool ssao_clipByDistance = false;
         public PixRenderer.SamplerQuality ssao_quality = PixRenderer.SamplerQuality.Low;
 
         [Space(10)]

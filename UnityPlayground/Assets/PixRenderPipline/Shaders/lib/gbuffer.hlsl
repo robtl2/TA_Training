@@ -175,7 +175,7 @@ GBufferData UnpackGBuffer(float2 uv)
     half3 f0 = computeF0(albedo, metallic, reflectance);
 
     if (shadingModel == SHADING_MODEL_HAIR)
-        f0*=1.3;
+        f0*=1.2;
 
     half3 diffuse = computeDiffuseColor(albedo, metallic);
 
