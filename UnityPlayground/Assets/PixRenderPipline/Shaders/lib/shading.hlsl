@@ -54,11 +54,6 @@ half3 diffuseLobe(GBufferData gbufferData,  float NoV, float NoL, float LoH) {
 // 后面ShadingModel计算的入口
 void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inout half3 result) 
 {
-    // if(light.isPositive < 0){
-    //     result = half3(1,0,0);
-    //     return;
-    // }
-
     half effect = 1.0h;
     if(light.enableAreaEffect){
         float4 posInArea = mul(light.effectArea, float4(gbufferData.positionWS, 1.0f));
@@ -74,14 +69,18 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
         }
     }
 
+    if(!light.isPositive){
+        result *= lerp(1, light.color, effect);
+        return;
+    }
+
     half3 N = gbufferData.normalWS;
     half3 L = light.direction;
     half NoL_full = dot(N, L);
     
     // 逆光时可以有大片连续的象素被跳过
-    if(NoL_full<-0.1 && light.isPositive){
+    if(NoL_full<-0.1)
         return;
-    }
 
     half3 V = gbufferData.viewDir;
     half3 H = normalize(L + V);
@@ -121,13 +120,8 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
         NoL = lerp(NoL, NoL_b, sssProfile.scatteringColor * sssProfile.scatteringIntensity);
     }
 
-    if(light.isPositive)
-        result += light.color * (specular + diffuse) * shadow * NoL * effect;
-    else
-        result *= lerp(1, light.color, effect);
+    result += light.color * (specular + diffuse) * shadow * NoL * effect;
 
-
-    result = max(result, 0.0h);
 }
 
 void evaluateLightSimple(PixLight light, half3 diffuse, half3 N, inout half3 result)

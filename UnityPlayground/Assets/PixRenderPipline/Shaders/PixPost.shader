@@ -150,7 +150,6 @@ Shader "Hidden/Pix/Post"
                 [loop]
                 while(step < maxStep){
                     step ++;
-                    // half jitter_d = hash21(screenUV)*stepLen;
                     stepLen *= 1.1;
                     half3 rayEnd = V*stepLen*step;
                     origin += stepLen;
