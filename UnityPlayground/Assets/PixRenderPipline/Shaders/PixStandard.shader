@@ -124,18 +124,19 @@ Shader "Pix/Standard"
                 half _RoughnessOffset;
                 half _MetallicOffset;
                 half _FlipNormal;
+                
 
                 #ifdef _ALPHATEST_ON
                 half _Cutoff;
                 #endif
             CBUFFER_END
 
-            UNITY_INSTANCING_BUFFER_START(Props_main)
-                #ifdef MOTION_VECTOR_ON
-                UNITY_DEFINE_INSTANCED_PROP(float4x4, _PreviousLocalToWorld)
-                UNITY_DEFINE_INSTANCED_PROP(float4x4, _MatrixVP_Prev)
-                #endif
+            float4x4 _MatrixVP;
+            // float4x4 _PreviousLocalToWorld;
+            float4x4 _MatrixVP_Prev;
 
+            UNITY_INSTANCING_BUFFER_START(Props_main)
+                UNITY_DEFINE_INSTANCED_PROP(float4x4, _PreviousLocalToWorld)
                 UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
             UNITY_INSTANCING_BUFFER_END(Props_main)
 
@@ -162,7 +163,7 @@ Shader "Pix/Standard"
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
                 float3 tangentWS = TransformObjectToWorldNormal(input.tangentOS.xyz)* input.tangentOS.w;
                 float3 bitangentWS = cross(normalWS, tangentWS) ;
-                float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
+                float3 positionWS = mul(UNITY_MATRIX_M, input.positionOS).xyz;
 
                 // 计算视线空间下的法线
                 float3 cameraPos = _WorldSpaceCameraPos;
@@ -196,7 +197,7 @@ Shader "Pix/Standard"
                 Varying output;
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
-                output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
+                output.positionCS = mul(_MatrixVP, float4(positionWS,1));
                 output.normalVS = normalVS;
                 output.tangentVS = tangentVS;
                 output.bitangentVS = bitangentVS;
@@ -212,12 +213,9 @@ Shader "Pix/Standard"
                 #ifdef GPU_SKIN
                 transformPreviousSkinnedPos(input.boneWeights, input.boneIndices, prevPosOS);
                 #endif
-
-                float4x4 localToWorld_Prev = UNITY_ACCESS_INSTANCED_PROP(Props_main, _PreviousLocalToWorld);
-                float4x4 matrixVP_Prev = UNITY_ACCESS_INSTANCED_PROP(Props_main, _MatrixVP_Prev);
-
-                float4 prevPosWS = mul(localToWorld_Prev, prevPosOS);
-                output.prevPosCS = mul(matrixVP_Prev, prevPosWS);
+                float4x4 previousLocalToWorld = UNITY_ACCESS_INSTANCED_PROP(Props_main, _PreviousLocalToWorld);
+                float4 prevPosWS = mul(previousLocalToWorld, prevPosOS);
+                output.prevPosCS = mul(_MatrixVP_Prev, prevPosWS);
                 output.screenUV = output.positionCS;
             #endif
                 
@@ -352,31 +350,34 @@ Shader "Pix/Standard"
 
             #ifdef _ALPHATEST_ON
                 TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
-                
-                CBUFFER_START(UnityPerMaterial)
-                half4 _MainTex_ST;
-                half _Cutoff;
-                CBUFFER_END
+
+                UNITY_INSTANCING_BUFFER_START(Props)
+                    UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
+                    UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
+                UNITY_INSTANCING_BUFFER_END(Props)
             #endif
+
+            float4x4 _MatrixVP;
 
 
             VaryingsDepth vert(AttributesDepth input)
             {
-                UNITY_SETUP_INSTANCE_ID(input);
-
                 VaryingsDepth output;
+
+                UNITY_SETUP_INSTANCE_ID(input);
 
                 #ifdef GPU_SKIN
                 transformSkinnedPos(input.boneWeights, input.boneIndices, input.positionOS);
                 #endif
 
-                float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
+                float3 positionWS = mul(UNITY_MATRIX_M, input.positionOS).xyz;
 
-                output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
+                output.positionCS = mul(_MatrixVP, float4(positionWS,1));
                 output.screenUV = output.positionCS;
                 
                 #ifdef _ALPHATEST_ON
-                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                float4 main_st = UNITY_ACCESS_INSTANCED_PROP(Props, _MainTex_ST);
+                output.uv = input.uv*main_st.xy + main_st.zw;
                 #endif
 
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
@@ -388,7 +389,8 @@ Shader "Pix/Standard"
                 UNITY_SETUP_INSTANCE_ID(input);
                 #ifdef _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
-                TestAlpha(alpha, _Cutoff, input.screenUV);
+                half cutoff = UNITY_ACCESS_INSTANCED_PROP(Props, _Cutoff);
+                TestAlpha(alpha, cutoff, input.screenUV);
                 #endif
 
                 return 0;
@@ -452,10 +454,10 @@ Shader "Pix/Standard"
             #if _ALPHATEST_ON
                 TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);
 
-                CBUFFER_START(UnityPerMaterial)
-                half4 _MainTex_ST;
-                half _Cutoff;
-                CBUFFER_END
+                UNITY_INSTANCING_BUFFER_START(Props_sc)
+                    UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST)
+                    UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
+                UNITY_INSTANCING_BUFFER_END(Props_sc)
             #endif
 
             int _LightIndex;
@@ -469,12 +471,13 @@ Shader "Pix/Standard"
 
                 PixLight light = GetPixLight(_LightIndex);
                 float4x4 VP = light.VP;
-                float4 posWorld = mul(unity_ObjectToWorld, input.positionOS);
+                float4 posWorld = mul(UNITY_MATRIX_M, input.positionOS);
 
                 VaryingsDepth output;
                 output.positionCS = mul(VP,posWorld);
             #if _ALPHATEST_ON
-                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                float4 main_st = UNITY_ACCESS_INSTANCED_PROP(Props_sc, _MainTex_ST);
+                output.uv = input.uv*main_st.xy + main_st.zw;
             #endif
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
                 return output;
@@ -485,7 +488,8 @@ Shader "Pix/Standard"
                 UNITY_SETUP_INSTANCE_ID(input);
             #if _ALPHATEST_ON
                 half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
-                clip(alpha - _Cutoff);
+                half cutoff = UNITY_ACCESS_INSTANCED_PROP(Props_sc, _Cutoff);
+                clip(alpha - cutoff);
             #endif
 
                 return 0;

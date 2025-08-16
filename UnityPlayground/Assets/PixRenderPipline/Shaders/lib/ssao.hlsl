@@ -34,7 +34,7 @@ half calculateSSAO(half2 uv, GBufferData gbufferData)
             direction = mul(direction, tbn);
             ao += ContactShadow(gbufferData, direction, radius, stepCount, jitter, SSAO_SAMPLE_BIAS, _SSAO_Clip>0);
         }
-        ao /= SSAO_SAMPLER_COUNT;
+        ao /= SSAO_SAMPLER_COUNT; 
     #endif
 
     if(intensity<0.99)

@@ -29,7 +29,7 @@ namespace PixRenderPipline
         }
 
         static Mesh _fullScreenQuad;
-        public Mesh FullScreenQuad
+        public static Mesh FullScreenQuad
         {
             get
             {
@@ -60,7 +60,7 @@ namespace PixRenderPipline
         }
 
         static Mesh _tiledFullScreenQuad;
-        public Mesh TiledFullScreenQuad
+        public  Mesh TiledFullScreenQuad
         {
             get
             {

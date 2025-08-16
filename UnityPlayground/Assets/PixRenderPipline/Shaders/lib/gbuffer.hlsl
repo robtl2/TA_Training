@@ -20,6 +20,10 @@ TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
 TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);
 
+#ifdef DEBUG_LIGHT
+    half _DebugBrightness;
+#endif
+
 UNITY_INSTANCING_BUFFER_START(Props)
 float2 _PixGBuffer_0_TexelSize;
 half2 _PixDepthDownSample_TexelSize;
@@ -200,9 +204,8 @@ GBufferData UnpackGBuffer(float2 uv)
 
 #ifdef DEBUG_LIGHT
     gbufferData.shadingModel = shadingModel;
-    gbufferData.albedo = 0.5;
-    gbufferData.diffuse = 0.5;
-    gbufferData.metallic = 0;
+    gbufferData.albedo = _DebugBrightness;
+    gbufferData.diffuse = _DebugBrightness;
 #endif
 
     gbufferData.ao = ao;

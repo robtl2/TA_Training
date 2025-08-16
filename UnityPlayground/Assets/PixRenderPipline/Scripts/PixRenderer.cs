@@ -143,11 +143,12 @@ namespace PixRenderPipline
         /// 因为是自己做TAA，所以VP得自己来抖
         /// 这个名字当然是有讲究的，就是unity内置VP矩阵的名字
         /// </summary>
-        readonly int MATRIX_VP = Shader.PropertyToID("unity_MatrixVP");
+        readonly int MATRIX_VP = Shader.PropertyToID("_MatrixVP");
         
         readonly int _MatrixVP_Prev = Shader.PropertyToID("_MatrixVP_Prev");
         readonly int _TAA_Jitter = Shader.PropertyToID("_TAA_Jitter");
         readonly int _ScreenTexelSize = Shader.PropertyToID("_ScreenTexelSize");
+        readonly int _DebugBrightness = Shader.PropertyToID("_DebugBrightness");
         
         // 相机上一帧的VP
         static Dictionary<Camera, Matrix4x4> VP_pre_map = new();
@@ -199,12 +200,13 @@ namespace PixRenderPipline
             else
                 Shader.DisableKeyword("TAA");
 
-            if(setting.enableDebugLight)
+            if(setting.useDebugMaterial)
                 Shader.EnableKeyword("DEBUG_LIGHT");
             else
                 Shader.DisableKeyword("DEBUG_LIGHT");
 
 
+            Shader.SetGlobalFloat(_DebugBrightness, setting.materialBrightness);
             Shader.SetGlobalVector(_ScreenTexelSize, new Vector4(1.0f / size.x, 1.0f / size.y, size.x, size.y));
 
             if (!jitterUploaded)

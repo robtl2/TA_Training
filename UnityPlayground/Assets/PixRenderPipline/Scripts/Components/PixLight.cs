@@ -218,6 +218,8 @@ namespace PixRenderPipline
             if (PixGPUSkin.gpuSkins.Count > 0)
                 foreach (var gpuskin in PixGPUSkin.gpuSkins) gpuskin.ExecuteGPUskinPass(renderer);
 
+            PixInstance.DrawPass(renderer, 2);
+
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
         }

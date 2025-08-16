@@ -9,7 +9,8 @@
 
 
 #define MAX_PIX_LIGHT_COUNT 64
-#define PIX_LIGHT_COUNT     _PixLightCount
+
+#define PIX_LIGHT_COUNT _PixLightCount
 
 int         _PixLightCount;
 half4       _PixLightsShadowMapSize[MAX_PIX_LIGHT_COUNT];
@@ -46,8 +47,8 @@ half SampleShadowMap(int index, float2 uv)
 
 PixLight GetPixLight(int index)
 {
-    index = min(index, PIX_LIGHT_COUNT-1);
-
+    index = min(index, _PixLightCount-1);
+    
     PixLight light;
     light.lightType = (int)_PixLightsPosition[index].w;
     light.shadowMapIndex = (int)_PixLightsDirection[index].w;
@@ -82,7 +83,6 @@ PixLight GetPixLight(int index)
         enableSpecular = false;
     else if(shadingFilter==2)
         enableDiffuse = false;
-    
 
     light.enableDiffuse = enableDiffuse;
     light.enableSpecular = enableSpecular;

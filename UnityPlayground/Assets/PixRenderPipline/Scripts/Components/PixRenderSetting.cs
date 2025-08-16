@@ -121,11 +121,15 @@ namespace PixRenderPipline
 
         [Range(0, 1)]
         public float depthScale = 1.0f;
-        #endregion
 
-        #region Lighting Debug
-        [Header("Lighting Debug")]
-        public bool enableDebugLight = false;
+        [Space(10)]
+        public bool useDebugMaterial = false;
+        [Range(0,1)]
+        public float materialBrightness = 0.5f;
+
+        [Space(10)]
+        public bool showInstancingBounds = true;
+        
         #endregion
         void OnEnable()
         {

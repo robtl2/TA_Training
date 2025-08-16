@@ -87,6 +87,7 @@ Shader "Pix/DemoGround"
             half _ColorMultiply;
             half _NormalIntensity;
             half3 _Roughness;
+            float4x4 _MatrixVP;
 
             #ifdef MOTION_VECTOR_ON
             float4x4 _PreviousLocalToWorld;
@@ -109,7 +110,7 @@ Shader "Pix/DemoGround"
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
                 float3 tangentWS = TransformObjectToWorldNormal(input.tangentOS.xyz)* input.tangentOS.w;
                 float3 bitangentWS = cross(normalWS, tangentWS) ;
-                float3 positionWS = mul(unity_ObjectToWorld, input.positionOS).xyz;
+                float3 positionWS = mul(UNITY_MATRIX_M, input.positionOS).xyz;
 
                 // 计算视线空间下的法线
                 float3 cameraPos = _WorldSpaceCameraPos;
@@ -126,7 +127,7 @@ Shader "Pix/DemoGround"
                 half4 color = input.color;
 
                 Varying output;
-                output.positionCS = mul(unity_MatrixVP, float4(positionWS,1));
+                output.positionCS = mul(_MatrixVP, float4(positionWS,1));
                 output.normalVS = normalVS;
                 output.tangentVS = tangentVS;
                 output.bitangentVS = bitangentVS;

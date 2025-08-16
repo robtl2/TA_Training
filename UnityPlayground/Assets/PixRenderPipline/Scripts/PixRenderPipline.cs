@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -24,20 +25,22 @@ namespace PixRenderPipline
         /// </summary>
         /// <param name="context">厨房管事儿的给过来的空菜单</param>
         /// <param name="cameras">点菜的客人</param>
-        [System.Obsolete("说，这个方法快过时了")]
-        protected override void Render(ScriptableRenderContext context, Camera[] cameras)
+        protected override void Render(ScriptableRenderContext context, List<Camera> cameras)
         {
             if (!PixRenderSetting.instance) return;
             
             frameIndex++;
             // 按照深度排序相机
-            System.Array.Sort(cameras, (c1, c2) => c1.depth.CompareTo(c2.depth));
+            // System.Array.Sort(cameras, (c1, c2) => c1.depth.CompareTo(c2.depth));
+            cameras.Sort((c1, c2) => c1.depth.CompareTo(c2.depth));
 
             foreach (var camera in cameras)
             {
                 renderer.Setup(context, camera, asset, frameIndex);
                 renderer.Render();
             }
+
+            PixInstance.UpdatePrevioursMatrix();
 
             renderer.jitterUploaded = false;
         }
