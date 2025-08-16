@@ -203,8 +203,7 @@ Transform:
   m_LocalPosition: {x: 4.72007, y: 1.1040801, z: -6.3218412}
   m_LocalScale: {x: 1, y: 1, z: 1.0124}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1019728174}
+  m_Children: []
   m_Father: {fileID: 339920733}
   m_LocalEulerAnglesHint: {x: -42.66, y: -280.677, z: 23.073}
 --- !u!114 &45957349
@@ -316,7 +315,7 @@ MonoBehaviour:
   f0: 1
   f90: 1
   effectArea: {fileID: 1019728175}
-  areaFadeRange: 1.06
+  areaFadeRange: 1
   enableShadowMap: 0
   shadowMapSize: 517
   shadowMapJitter: 1
@@ -1203,24 +1202,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skyType: 3
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
-  blurLevel: 0
-  color: {r: 0.4026344, g: 0.5575258, b: 0.9811321, a: 0.07058824}
-  intensity: 1.21
+  blurLevel: 3.6
+  color: {r: 0.3537736, g: 0.52522135, b: 1, a: 0.07058824}
+  intensity: 1.6
   displayColor: {r: 0.33333337, g: 0.72386473, b: 0.94509804, a: 1}
   fovScale: 0.82
   IrradianceColor: 1
-  IrradianceIntensity: 0.83
-  scatteringOuter: -2
-  OuterIntensity: 0.875
-  scatteringInter: 0.82
-  InterIntensity: 0.902
+  IrradianceIntensity: 0.8
+  scatteringOuter: -0.25
+  OuterIntensity: 0.85
+  scatteringInter: 0.75
+  InterIntensity: 1
   sun: {fileID: 1683865467}
-  sunSize: 0.02
-  sunIntensity: 0.1
-  sunVolume: 0.4
-  sunVolumeColor: {r: 0.39048594, g: 0.48754093, b: 0.7075472, a: 0.12156863}
-  rayStepLength: 0.5
-  maxRayStep: 16
+  sunSize: 0.05
+  sunIntensity: 0.37
+  sunVolume: 0.38
+  sunVolumeColor: {r: 0.39048594, g: 0.48754093, b: 0.7075472, a: 0}
+  rayStepLength: 0.7
+  maxRayStep: 12
   detherStep: 64
   shData:
     shCoefficients:
@@ -1364,6 +1363,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1019728174}
   - {fileID: 45957348}
   - {fileID: 2117554648}
   - {fileID: 1169921576}
@@ -2985,8 +2985,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 755518752}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.04424597, y: -0.95561296, z: -0.21419507, w: -0.19739977}
-  m_LocalPosition: {x: -6.45197, y: -3.2737994, z: 12.765942}
+  m_LocalRotation: {x: 0.040047962, y: -0.95985687, z: -0.20308127, w: -0.1892856}
+  m_LocalPosition: {x: -6.4217234, y: -3.1990063, z: 13.900223}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3893,12 +3893,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1019728173}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.1674406, y: 0.64520395, z: 0.35912824, w: -0.6532247}
-  m_LocalPosition: {x: -2.5562003, y: 2.6575966, z: 1.1203252}
-  m_LocalScale: {x: 1.8613085, y: 7.932288, z: 8.506663}
+  m_LocalRotation: {x: 0.01830607, y: -0.00000029802322, z: -0.00000017136335, w: 0.9998325}
+  m_LocalPosition: {x: 3.9499998, y: 2.9339986, z: -3.0139992}
+  m_LocalScale: {x: 1.8733621, y: 7.9780574, z: 8.507975}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 45957348}
+  m_Father: {fileID: 339920733}
   m_LocalEulerAnglesHint: {x: 2.098, y: 0, z: 0}
 --- !u!65 &1019728175
 BoxCollider:
@@ -4305,8 +4305,8 @@ MonoBehaviour:
   SharpenStrength: 0
   SharpenMid: 0.2
   Exposure: 1
-  Vagnet: 0.523
-  EnableBloom: 1
+  Vagnet: 0
+  EnableBloom: 0
   Bloom_Threshold: 0.75
   Bloom_Radius: 2
   Bloom_Intensity: 1
@@ -4319,7 +4319,7 @@ MonoBehaviour:
   depthScale: 1
   useDebugMaterial: 0
   materialBrightness: 0.2
-  showInstancingBounds: 0
+  showInstancingBounds: 1
 --- !u!4 &1117694732
 Transform:
   m_ObjectHideFlags: 0
@@ -6218,14 +6218,14 @@ MonoBehaviour:
   enableShadowMap: 1
   shadowMapSize: 517
   shadowMapJitter: 1
-  shadowMapBias: 0.0026
+  shadowMapBias: 0.0037
   shadowMapArea: 1
   boxArea: {fileID: 1914101454}
   enableContactShadow: 1
   contactShadowJitter: 1
   contactShadowJitterRadius: 0.87
-  contactRayLength: 0.715
-  contactSampleCount: 5
+  contactRayLength: 0.8
+  contactSampleCount: 4
   contactBias: 0.0000047
   enableVisbilityShadow: 0
   visibilityShadowSoftness: 0.2
@@ -8712,7 +8712,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8689215384711777463, guid: e2f011b67c21143838e13a8e1e8aa9a5, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8888556055100239618, guid: e2f011b67c21143838e13a8e1e8aa9a5, type: 3}
       propertyPath: m_IsActive

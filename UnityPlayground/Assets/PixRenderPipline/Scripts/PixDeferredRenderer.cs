@@ -79,9 +79,9 @@ namespace PixRenderPipline
         void PrepairTAA()
         { 
             // TAA用到的这张历史记录的颜色贴图之所以不用临时RT，是因为它会在下一帧时还得用到
-            if (!frontRT.ContainsKey(camera) || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
+            if (!frontRT.ContainsKey(camera) || !frontRT[camera] || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
             {
-                if (frontRT.ContainsKey(camera))
+                if (frontRT.ContainsKey(camera) && frontRT[camera])
                     frontRT[camera].Release();
 
                 frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)

@@ -98,10 +98,10 @@ Shader "Hidden/Pix/Sky"
                 half scatteringInter = _Scattering.z;
                 half scatteringOuterIntensity = _Scattering.y;
                 half scatteringInterIntensity = _Scattering.w;
-                float NoL_full = dot(dir, _SunDirection);
-                float NoL = NoL_full;//saturate(NoL_full);
+                float NoL = dot(dir, _SunDirection);
                 float scatter_outer = sq(remap01(scatteringOuter, 1, NoL))*scatteringOuterIntensity;
                 scatter_outer *= scatter_outer;
+                
                 float scatter_inter = pow5(remap01(scatteringInter, 1.0, NoL))*scatteringInterIntensity;
                 scatter_inter *= scatter_inter;
 
@@ -120,7 +120,6 @@ Shader "Hidden/Pix/Sky"
 
                 scatter = lerp(scatter_inter.xxx, 0, _SkyDisplayColor.rgb);
                 sky += scatter;
-
 
                 sky *= lerp(under,half3(0.5,0.55,0.4),0.5);
 

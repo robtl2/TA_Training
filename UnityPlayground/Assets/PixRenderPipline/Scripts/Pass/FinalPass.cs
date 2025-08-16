@@ -24,6 +24,10 @@ namespace PixRenderPipline
 
             base.Execute();
 
+            if(!filterMaterial)filterMaterial = new Material(Shader.Find("Hidden/Pix/Filter"));
+            if(!debugMaterial)debugMaterial = new Material(Shader.Find("Hidden/Pix/Debugger"));
+
+
             var setting = PixRenderSetting.instance;
 
             filterMaterial.SetFloat(_IsSceneView, renderer.isSceneView ? 1 : 0);

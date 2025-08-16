@@ -25,6 +25,8 @@ namespace PixRenderPipline
         {
             base.Execute();
 
+            if(!material)material = new Material(Shader.Find("Hidden/Pix/Deferred"));
+
             var setting = PixRenderSetting.instance;
 
             GetTemporaryColorRT(ColorBuff);

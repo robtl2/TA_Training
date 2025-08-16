@@ -74,15 +74,15 @@ namespace PixRenderPipline
             }
         }
 
-        void OnDestroy()
-        {
-            Clear();   
-        }
-
         void Clear()
-        { 
+        {
             instDict.Clear();
             dirtyDict.Clear();
+            boundsDict.Clear();
+            localMatricesDict.Clear();
+            meshesDict.Clear();
+            materialsDict.Clear();
+            targetPreviousMatrixDic.Clear();
         }
 
         void Update()
@@ -97,8 +97,6 @@ namespace PixRenderPipline
 
             var localBounds = boundsDict[target];
             bounds = PixUtils.CalculateWorldBounds(transform, localBounds);
-            // bounds.center = bounds.center + transform.position;
-            // bounds = new Bounds(localBounds.center + transform.position - target.transform.position, localBounds.size);
         }
 
         void OnValidate()

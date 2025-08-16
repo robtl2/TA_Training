@@ -36,10 +36,7 @@ Shader "Hidden/Pix/Post"
             #include "lib/light.hlsl"
             #include "lib/random.hlsl"
 
-
             TEXTURE2D(_PixColorTex);SAMPLER(sampler_PixColorTex);half2 _PixColorTex_TexelSize;
-            // TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);
-            
 
             half4 _SharpenProps;
             half _Exposure;
@@ -154,6 +151,7 @@ Shader "Hidden/Pix/Post"
                 while(step < maxStep){
                     step ++;
                     // half jitter_d = hash21(screenUV)*stepLen;
+                    stepLen *= 1.1;
                     half3 rayEnd = V*stepLen*step;
                     origin += stepLen;
 
@@ -178,7 +176,6 @@ Shader "Hidden/Pix/Post"
                         uv += hash22(screenUV).xy*sun.shadowMapSize.y;
 
                     float depthSrc = saturate(ndcPos.z + sun.shadowMapBias);
-
                     half depthDest = SampleShadowMap(sun.shadowMapIndex, uv);
 
                     volume += depthSrc>depthDest?1:0;

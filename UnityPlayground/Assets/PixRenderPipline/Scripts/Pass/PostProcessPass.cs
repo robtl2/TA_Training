@@ -44,6 +44,9 @@ namespace PixRenderPipline
         public override void Execute()
         {
             base.Execute();
+            
+            if (!postMaterial) postMaterial = new Material(Shader.Find("Hidden/Pix/Post"));
+            if(!materialTAA) materialTAA = new Material(Shader.Find("Hidden/Pix/TAA"));
 
             var setting = PixRenderSetting.instance;
             PixDeferredRenderer dr = renderer as PixDeferredRenderer;
