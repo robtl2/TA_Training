@@ -5,7 +5,7 @@
 **/.vscode/
 **/UserSettings/
 **/.DS_Store
-**/.ProjectVersion.txt
+**/ProjectVersion.txt
 *.csproj
 *.sln
 *.log
