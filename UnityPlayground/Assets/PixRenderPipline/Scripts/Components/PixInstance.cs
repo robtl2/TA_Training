@@ -31,7 +31,7 @@ namespace PixRenderPipline
         static Matrix4x4[] preWorldMatrices = new Matrix4x4[1023];
         static MaterialPropertyBlock mpb;
 
-        //这里记录的是每个PixInstance上一帧的localToWorld举证，又是给TAA用的
+        //这里记录的是每个PixInstance上一帧的localToWorld，又是给TAA用的
         static Dictionary<GameObject, Matrix4x4> targetPreviousMatrixDic = new();
         /// <summary>
         /// 交给渲染管线调用的渲染Pass
@@ -157,7 +157,7 @@ namespace PixRenderPipline
 
         void Update()
         {
-            // 在生帧检测自己的transform有没有变换，如果变换了则更新边界盒
+            // 在每帧检测自己的transform有没有变换，如果变换了则更新边界盒
             if (transform.localToWorldMatrix != _prevLocalToWorld)
                 UpdateBounds();
         }
