@@ -22,7 +22,7 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.BeforeEarlyZ);
 
-            PixInstance.DrawPass(renderer, 1);
+            PixInstance.DrawPass(renderer, 1, renderer.frustum);
 
             // 获取渲染列表并绘制
             RendererList list = GetRendererList(earlyZTag, SortingCriteria.CommonOpaque, RenderQueueRange.opaque);

@@ -33,11 +33,12 @@ namespace PixRenderPipline
 
         //这里记录的是每个PixInstance上一帧的localToWorld，又是给TAA用的
         static Dictionary<GameObject, Matrix4x4> targetPreviousMatrixDic = new();
+
         /// <summary>
         /// 交给渲染管线调用的渲染Pass
         /// 要是这里的passID能用管线里的ShaderTagID作为参数的话会更体面
         /// </summary>
-        public static void DrawPass(PixRenderer renderer, int passID)
+        public static void DrawPass(PixRenderer renderer, int passID, Plane[] frustum)
         {
             if (list.Count < 1) return; //有一个没分组的list就有这好处，判断要不要画时逻辑很简单
 
@@ -50,9 +51,6 @@ namespace PixRenderPipline
 
                 List<PixInstance> insts = kv.Value;
 
-                worldMatrices[0] = tar.transform.localToWorldMatrix;
-                preWorldMatrices[0] = targetPreviousMatrixDic[tar];
-
                 for (int i = 0; i < meshes.Length; i++) // per mesh loop
                 {
                     mpb.Clear();
@@ -63,13 +61,13 @@ namespace PixRenderPipline
 
                     for (int j = 0; j < mats.Length; j++) // oneMore material oneMore DRAWCALL
                     {
-                        int count = 1;
+                        int count = 0;
                         foreach (var inst in insts) // combine instance 
                         {
-                            if (renderer.FrustumCull(inst.bounds))// frustum culling
+                            if (GeometryUtility.TestPlanesAABB(frustum, inst.bounds))// frustum culling
                             {
                                 worldMatrices[count] = inst.transform.localToWorldMatrix * localMatrix;
-                                preWorldMatrices[count] = inst._prevLocalToWorld;
+                                preWorldMatrices[count] = inst._prevLocalToWorld * localMatrix;
                                 count++;
                             }
                         }
@@ -153,6 +151,17 @@ namespace PixRenderPipline
             meshesDict.Clear();
             materialsDict.Clear();
             targetPreviousMatrixDic.Clear();
+        }
+
+        void Clear(GameObject target)
+        {
+            instDict.Remove(target);
+            dirtyDict.Remove(target);
+            boundsDict.Remove(target);
+            localMatricesDict.Remove(target);
+            meshesDict.Remove(target);
+            materialsDict.Remove(target);
+            targetPreviousMatrixDic.Remove(target);
         }
 
         void Update()
@@ -250,6 +259,26 @@ namespace PixRenderPipline
                     instDict[obj].Add(inst);
                     inst.UpdateBounds();
                 }
+            }
+
+            PixInstance component = obj.GetComponent<PixInstance>();
+            var rens = obj.GetComponentsInChildren<Renderer>();
+            if (instDict[obj].Count == 0)
+            {
+                Clear(obj);
+                if (component)
+                {
+                    DestroyImmediate(component);
+                    foreach (var ren in rens)
+                        ren.enabled = true;
+                }
+                var pixinst = obj.GetComponent<PixInstance>();
+                if (pixinst) DestroyImmediate(pixinst);
+            }
+            else if (!component)
+            {
+                component = obj.AddComponent<PixInstance>();
+                component.SetTarget(obj);
             }
 
             dirtyDict[obj] = false;

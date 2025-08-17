@@ -120,6 +120,7 @@ namespace PixRenderPipline
 
         Matrix4x4 matrixVP;
         Matrix4x4 matrixVP_gpu;
+        Plane[] frustum;
 
         public int index { get; private set; }
         public int shadowMapIndex { get; private set; }
@@ -161,7 +162,7 @@ namespace PixRenderPipline
                 passAdded = false;
             }
         }
-        
+
         void OnValidate()
         {
             // 当满足这三个条件时才开启ShadowMapPass
@@ -218,7 +219,7 @@ namespace PixRenderPipline
             if (PixGPUSkin.gpuSkins.Count > 0)
                 foreach (var gpuskin in PixGPUSkin.gpuSkins) gpuskin.ExecuteGPUskinPass(renderer);
 
-            PixInstance.DrawPass(renderer, 2);
+            PixInstance.DrawPass(renderer, 2, frustum);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
@@ -250,8 +251,7 @@ namespace PixRenderPipline
                 cullingParams.isOrthographic = isOrthographic;
                 cullingParams.cullingMatrix = matrixVP;
                 cullingParams.cullingOptions = CullingOptions.ShadowCasters;
-
-                var frustum = GeometryUtility.CalculateFrustumPlanes(matrixVP);
+                
                 cullingParams.cullingPlaneCount = frustum.Length;
                 for (int i = 0; i < frustum.Length; i++)
                 {
@@ -276,11 +276,12 @@ namespace PixRenderPipline
 
             return renderer.context.CreateRendererList(rendererListDesc);
         }
-    #endregion
-    
+        #endregion
+
         void Update()
         {
             UpdateBoxArea();
+            frustum = GeometryUtility.CalculateFrustumPlanes(matrixVP);
         }
 
         void UpLoadParameters()
