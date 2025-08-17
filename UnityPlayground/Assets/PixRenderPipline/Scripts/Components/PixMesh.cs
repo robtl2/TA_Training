@@ -15,10 +15,9 @@ namespace PixRenderPipline
         static PixMesh pixMeshMan;
         static bool listIsDirty = true;
         static List<PixMesh> pixMeshes = new();
-
-        static int _PreviousLocalToWorld = Shader.PropertyToID("_PreviousLocalToWorld");
         static MaterialPropertyBlock _PreviousLocalToWorldBlock;
         static Dictionary<MeshRenderer, Matrix4x4> previousLocalToWorldMatrices = new();
+        static int _PreviousLocalToWorld = Shader.PropertyToID("_PreviousLocalToWorld");
 
         MeshRenderer[] renderers;
 
@@ -83,7 +82,7 @@ namespace PixRenderPipline
 
                 foreach (var renderer in pixMesh.renderers)
                 {
-                    if (renderer != null && !allMeshRenderers.Contains(renderer))
+                    if (renderer && !allMeshRenderers.Contains(renderer))
                         allMeshRenderers.Add(renderer);
                 }
             }

@@ -7,26 +7,87 @@ namespace PixRenderPipline
     [ExecuteInEditMode]
     public class PixInstance : MonoBehaviour
     {
-        public static PixInstance instMan;
-        public static List<PixInstance> list = new();
-        public static Dictionary<GameObject, List<PixInstance>> instDict = new();
+        #region static
+        //内部管理员
+        static PixInstance manager;
+        //场景中所有挂载了PixInstance的List
+        static List<PixInstance> list = new();
 
-        static Dictionary<GameObject, Bounds> boundsDict = new();
-        static Dictionary<GameObject, Matrix4x4[]> localMatricesDict = new();
-        static Dictionary<GameObject, Mesh[]> meshesDict = new();
-        static Dictionary<GameObject, Material[][]> materialsDict = new();
+        //记录哪些引用目标下的列表发生了变动
         static Dictionary<GameObject, bool> dirtyDict = new();
+        //按instanceTarget为分组的List
+        static Dictionary<GameObject, List<PixInstance>> instDict = new();
+        //每个instanceTarget的边界盒
+        static Dictionary<GameObject, Bounds> boundsDict = new();
+        //每个instanceTarget下可能会有多个渲染对象，这里记录每个对象的LocalMatrix
+        static Dictionary<GameObject, Matrix4x4[]> localMatricesDict = new();
+        //记录每个instanceTarget下有哪些Mesh
+        static Dictionary<GameObject, Mesh[]> meshesDict = new();
+        //记录每个instanceTarget下有哪些材质，因为一个Mesh可能有多个材质，所以这里是二维数组
+        static Dictionary<GameObject, Material[][]> materialsDict = new();
+        
+        //下面三个是给Shader提交数据用的，焊死只是为了gc友好
+        static Matrix4x4[] worldMatrices = new Matrix4x4[1023];
+        static Matrix4x4[] preWorldMatrices = new Matrix4x4[1023];
+        static MaterialPropertyBlock mpb;
+
+        //这里记录的是每个PixInstance上一帧的localToWorld举证，又是给TAA用的
         static Dictionary<GameObject, Matrix4x4> targetPreviousMatrixDic = new();
+        /// <summary>
+        /// 交给渲染管线调用的渲染Pass
+        /// 要是这里的passID能用管线里的ShaderTagID作为参数的话会更体面
+        /// </summary>
+        public static void DrawPass(PixRenderer renderer, int passID)
+        {
+            if (list.Count < 1) return; //有一个没分组的list就有这好处，判断要不要画时逻辑很简单
 
+            foreach (var kv in instDict) // per target loop
+            {
+                GameObject tar = kv.Key;
 
-        public GameObject target;
+                if (!meshesDict.TryGetValue(tar, out Mesh[] meshes)) continue;
+                if (meshes.Length == 0) continue;
 
-        public Bounds bounds { get; private set; }
+                List<PixInstance> insts = kv.Value;
 
-        GameObject _prevTarget;
+                worldMatrices[0] = tar.transform.localToWorldMatrix;
+                preWorldMatrices[0] = targetPreviousMatrixDic[tar];
 
-        Matrix4x4 _prevLocalToWorld = Matrix4x4.identity;
+                for (int i = 0; i < meshes.Length; i++) // per mesh loop
+                {
+                    mpb.Clear();
 
+                    var mesh = meshes[i];
+                    var localMatrix = localMatricesDict[tar][i];
+                    var mats = materialsDict[tar][i];
+
+                    for (int j = 0; j < mats.Length; j++) // oneMore material oneMore DRAWCALL
+                    {
+                        int count = 1;
+                        foreach (var inst in insts) // combine instance 
+                        {
+                            if (renderer.FrustumCull(inst.bounds))// frustum culling
+                            {
+                                worldMatrices[count] = inst.transform.localToWorldMatrix * localMatrix;
+                                preWorldMatrices[count] = inst._prevLocalToWorld;
+                                count++;
+                            }
+                        }
+
+                        // 老是上一帧上一帧什么TAA什么的，这里就是终点，可算把结果提交给Shader了
+                        // 多句嘴，你只要把东西交给commandbuffer提交了，你就别管这东西是值还是引用，后面的修改与这里提交的东西都无关了
+                        // 所以我用static的数据在的这里反复蹂躏
+                        mpb.SetMatrixArray("_PreviousLocalToWorld", preWorldMatrices);
+                        // upload command for drawing
+                        renderer.cmb.DrawMeshInstanced(mesh, j, mats[j], passID, worldMatrices, count, mpb);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 交给渲染管线那边在渲染结束后执行,是的，为了TAA
+        /// </summary>
         public static void UpdatePrevioursMatrix()
         {
             foreach (var inst in list)
@@ -36,6 +97,17 @@ namespace PixRenderPipline
             foreach (var t in targets)
                 targetPreviousMatrixDic[t] = t.transform.localToWorldMatrix;
         }
+        #endregion
+
+        // 要instanc谁
+        public GameObject target;
+        // 给FrustumCulling用的
+        Bounds bounds;
+        // 记录之前的target,这样才方便知道target是否发生变动了
+        GameObject _prevTarget;
+        // 上一帧的localToWorld矩阵，对，TAA，但是也能用它知道坐标是不是发生改变了，要不要刷新bounds
+        Matrix4x4 _prevLocalToWorld = Matrix4x4.identity;
+
 
         /// <summary>
         /// 给运行时用的
@@ -49,8 +121,8 @@ namespace PixRenderPipline
 
         void OnEnable()
         {
-            if (instMan == null)
-                instMan = this;
+            if (manager == null)
+                manager = this;
 
             list.Add(this);
             MakeDirty();
@@ -61,16 +133,14 @@ namespace PixRenderPipline
             list.Remove(this);
             MakeDirty();
 
-            if (this == instMan)
+            if (this == manager)
             {
-                instMan = null;
+                manager = null;
 
                 if (list.Count > 0)
-                    instMan = list[0];
+                    manager = list[0];
                 else
-                {
                     Clear();
-                }
             }
         }
 
@@ -87,9 +157,12 @@ namespace PixRenderPipline
 
         void Update()
         {
-            UpdateBounds();
+            // 在生帧检测自己的transform有没有变换，如果变换了则更新边界盒
+            if (transform.localToWorldMatrix != _prevLocalToWorld)
+                UpdateBounds();
         }
 
+        // 更新边界盒用来做FrustumCulling
         void UpdateBounds()
         {
             if (!target) return;
@@ -99,6 +172,7 @@ namespace PixRenderPipline
             bounds = PixUtils.CalculateWorldBounds(transform, localBounds);
         }
 
+        // 在编辑器中如果改变了instancing的target需要刷新
         void OnValidate()
         {
             if (target != _prevTarget)
@@ -116,7 +190,6 @@ namespace PixRenderPipline
             Vector3[] corners = PixUtils.GetBoundsCorners(bounds);
 
             Gizmos.color = Color.green;
-            // 使用 Gizmos.DrawLine 绘制线框
             // 后面四个点
             Gizmos.DrawLine(corners[0], corners[1]); // 左下后 -> 右下后
             Gizmos.DrawLine(corners[1], corners[3]); // 右下后 -> 右上后
@@ -140,9 +213,10 @@ namespace PixRenderPipline
             if (target) dirtyDict[target] = true;
         }
 
+        // manager的私人领地，负责按target分组的数据刷新
         void LateUpdate()
         {
-            if (this != instMan) return;
+            if (this != manager) return;
 
             mpb ??= new();
 
@@ -152,54 +226,6 @@ namespace PixRenderPipline
             {
                 if (dirtyDict[obj])
                     RefreshList(obj);
-            }
-        }
-
-        static Matrix4x4[] worldMatrices = new Matrix4x4[1023];
-        static Matrix4x4[] preWorldMatrices = new Matrix4x4[1023];
-        static MaterialPropertyBlock mpb;
-        public static void DrawPass(PixRenderer renderer, int passID)
-        {
-            if (list.Count < 1) return;
-
-            foreach (var kv in instDict) // per target loop
-            {
-                GameObject tar = kv.Key;
-                List<PixInstance> insts = kv.Value;
-
-                if (!meshesDict.TryGetValue(tar, out Mesh[] meshes)) continue;
-                if (meshes.Length == 0) continue;
-
-                worldMatrices[0] = tar.transform.localToWorldMatrix;
-                preWorldMatrices[0] = targetPreviousMatrixDic[tar];
-
-                for (int i = 0; i < meshes.Length; i++) // one mesh one drawcall
-                {
-                    mpb.Clear();
-
-                    var mesh = meshes[i];
-                    var localMatrix = localMatricesDict[tar][i];
-                    var mats = materialsDict[tar][i];
-
-                    for (int j = 0; j < mats.Length; j++)
-                    { 
-                        int count = 1;
-                        foreach (var inst in insts) // per instance loop
-                        {
-                            if (renderer.FrustumCull(inst.bounds))
-                            {
-                                worldMatrices[count] = inst.transform.localToWorldMatrix * localMatrix;
-                                preWorldMatrices[count] = inst._prevLocalToWorld;
-                                count++;
-                            }
-                        }
-
-                        mpb.SetMatrixArray("_PreviousLocalToWorld", preWorldMatrices);
-
-                        renderer.cmb.DrawMeshInstanced(mesh, j, mats[j], passID, worldMatrices, count, mpb);
-                    }
-                    
-                }
             }
         }
 
@@ -220,12 +246,17 @@ namespace PixRenderPipline
                 if (instDict[obj].Count >= 1023) break;
 
                 if (inst.target == obj)
+                {
                     instDict[obj].Add(inst);
+                    inst.UpdateBounds();
+                }
             }
 
             dirtyDict[obj] = false;
         }
 
+        // 在这里收集instancTarget对象下的相关数据
+        // 比如有几个Mesh几个材质，合并后的边界盒之类的
         void RefreshRefrence(GameObject obj)
         {
             if (obj == null) return;
@@ -246,22 +277,18 @@ namespace PixRenderPipline
                 Vector3[] corners = PixUtils.GetBoundsCorners(ren.bounds);
 
                 for (int j = 0; j < 8; j++)
-                {
                     corners[j] = obj.transform.worldToLocalMatrix.MultiplyPoint3x4(corners[j]);
-                }
 
                 boundses[i] = new Bounds(corners[0],Vector3.zero);
                 for (int j = 1; j < 8; j++)
-                {
                     boundses[i].Encapsulate(corners[j]);
-                }
 
                 if (ren is MeshRenderer)
                 {
                     if (ren.TryGetComponent(out MeshFilter mf))
                         meshes[i] = mf.sharedMesh;
                 }
-                else if (ren is SkinnedMeshRenderer)
+                else if (ren is SkinnedMeshRenderer) //TODO: fullfil skinnedMesh instancing
                 {
                     var skinRen = ren as SkinnedMeshRenderer;
                     meshes[i] = skinRen.sharedMesh;
@@ -284,6 +311,7 @@ namespace PixRenderPipline
             materialsDict[obj] = materials;
         }
 
+        // 把多个AABB的Bounds合并成一个大的，总不能让我在画一个PixInstance做FrustumCulling时去Culling多次吧
         Bounds MergeBounds(Bounds[] boundsArray)
         {
             if (boundsArray == null || boundsArray.Length == 0)
@@ -291,9 +319,7 @@ namespace PixRenderPipline
 
             Bounds mergedBounds = boundsArray[0];
             for (int i = 1; i < boundsArray.Length; i++)
-            {
                 mergedBounds.Encapsulate(boundsArray[i]);
-            }
 
             return mergedBounds;
         }

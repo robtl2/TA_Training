@@ -8645,6 +8645,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1184936413}
     m_Modifications:
+    - target: {fileID: 374891589231978000, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1242550358720705043, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4253543352794692117, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4833665959249571888, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
       propertyPath: m_Name
       value: Plant
@@ -8689,7 +8701,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2572530874578581528, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+    - {fileID: 6650429118632580241, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
