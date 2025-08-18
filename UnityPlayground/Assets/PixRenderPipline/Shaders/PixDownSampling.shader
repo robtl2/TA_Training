@@ -26,16 +26,23 @@ Shader "Hidden/Pix/DownSampling"
             #include "lib/gbuffer.hlsl"
             #include "lib/light.hlsl"
 
+            #ifndef SSAO_QUALITY_OFF
+            #include "lib/ssao.hlsl"
+
+            void SSAO(inout half4 result, half3 positionWS, half2 screenUV){
+                half ao = calculateSSAO(screenUV, positionWS);
+                result.y = ao;
+            }
+            #endif
+
             #ifdef PP_SUN_VOLUME
             half4 _SunVolume;
 
-            half SunVolume(half2 screenUV){
+            void SunVolume(inout half4 result, half3 positionWS, half2 screenUV){
                 PixLight sun = GetPixLight((int)_SunVolume.x);
 
-                half depth_dest = sampleDepthDownSample(screenUV);
-                half3 pos_dest = ReconstructWorldPos(screenUV, depth_dest);
                 float3 cameraPos = _WorldSpaceCameraPos;
-                half3 V = pos_dest - cameraPos;
+                half3 V = positionWS - cameraPos;
                 half len = length(V);
                 V = normalize(V); 
                 
@@ -89,23 +96,28 @@ Shader "Hidden/Pix/DownSampling"
 
                 volume *= _SunVolume.y;
                 volume = saturate(volume);
-
-                return volume*fade;
+                
+                result.x = volume*fade;
             }
             #endif
 
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
                 float2 uv = input.uv;
+                half depth_dest = sampleDepthDownSample(uv);
+                half3 positionWS = ReconstructWorldPos(uv, depth_dest);
+
+                half4 result = 0;
 
                 #ifdef PP_SUN_VOLUME
-                half sunVolume = SunVolume(uv);
-                return half4(sunVolume.xxx,1);
+                SunVolume(result, positionWS, uv);
                 #endif
 
+                #ifndef SSAO_QUALITY_OFF
+                SSAO(result, positionWS, uv);
+                #endif
                 
-                return 1;
-                
+                return result;
             }
             ENDHLSL
         }

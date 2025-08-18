@@ -129,11 +129,11 @@ half ShadowMap(PixLight light, GBufferData gbufferData, half2 screenUV){
     return depthSrc>depthDest;
 }
 
-half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias, bool clip = true){
+half ContactShadow(half3 positionWS, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias, half clip){
     int sampleCount = stepCount + 1; 
     half rayLength = rayLengthDivStepCount*stepCount;
     half step = rayLengthDivStepCount; //采样步长
-    half3 pos_ori = gbufferData.positionWS; //ray的起点
+    half3 pos_ori = positionWS; //ray的起点
     half3 pos_src = pos_ori;
     
     //遍历次数不定加[loop]，避免编译器unroll优化时报错
@@ -151,7 +151,7 @@ half ContactShadow(GBufferData gbufferData, half3 direction, half rayLengthDivSt
         
         half dist = length(pos_ori - pos_dest);
         
-        if(clip && dist>rayLength)
+        if(clip>0 && dist>clip)
             return 1.0h;
 
         half4 ndcPos = TransformWorldToHClip(pos_src);
@@ -173,7 +173,7 @@ half ContactShadow(PixLight light, GBufferData gbufferData){
     half jitterRadius = light.contactShadowJitter*light.shadowMapSize.y;
     half bias = light.contactBias;
 
-    return ContactShadow(gbufferData, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias);
+    return ContactShadow(gbufferData.positionWS, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias, rayLengthDivStepCount*stepCount);
 }
 
 #endif

@@ -17,8 +17,8 @@ namespace PixRenderPipline
             base.Execute();
             if(!material)material = new Material(Shader.Find("Hidden/Pix/DownSampling"));
 
-            // 现在这个下采样Pass暂时只画VolumeSunLight，所以只需要用到一个Channal,以后还有别的记得上这里来改格式
-            renderer.cmb.GetTemporaryRT(rtID, renderer.size.z, renderer.size.w, 0, FilterMode.Bilinear, RenderTextureFormat.R8);
+            // 现在这个下采样Pass暂时只画SSAO和VolumeSunLight，所以只需要用到两个Channal,以后还有别的记得上这里来改格式
+            renderer.cmb.GetTemporaryRT(rtID, renderer.size.z, renderer.size.w, 0, FilterMode.Bilinear, RenderTextureFormat.RG16, RenderTextureReadWrite.Linear);
             renderer.cmb.SetRenderTarget(rtID);
 
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);

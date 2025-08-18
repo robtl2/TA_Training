@@ -247,8 +247,8 @@ namespace PixRenderPipline
                 ssao_props.w = setting.ssao_jitterRadius;
                 Shader.SetGlobalVector(_SSAO_Props, ssao_props);
                 Vector2 ssao_clip = new();
-                ssao_clip.x = setting.ssao_clipByDistance ? 1 : 0;
-                ssao_clip.y = setting.ssao_clipByDistance_2nd ? 1 : 0;
+                ssao_clip.x = setting.ssao_clipByDistance;
+                ssao_clip.y = setting.ssao_clipByDistance_2nd;
                 Shader.SetGlobalVector(_SSAO_Clip, ssao_clip);
 
                 Vector4 ssao_props_2sec = new();

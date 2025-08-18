@@ -4,7 +4,8 @@
 #include "bentnormal.hlsl"
 
 #ifndef SSAO_QUALITY_OFF
-    #include "lib/ssao.hlsl"
+    TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
+    // #include "lib/ssao.hlsl"
 #endif
 
 half4 _SkyColor;
@@ -146,7 +147,15 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     }
 
     #ifndef SSAO_QUALITY_OFF
-        half ssao = calculateSSAO(uv, gbufferData);
+        half2 offset = _PixDownSampling_TexelSize;
+        half2 offset2 = offset;
+        offset2.x = -offset.x;
+        half ssao = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).y;// calculateSSAO(uv, gbufferData.positionWS);
+        ssao += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset).y;
+        ssao += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset2).y;
+        ssao += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset2).y;
+        ssao *= 0.25;
+        ssao*=ssao;
         ao *= ssao;
     #endif
 
