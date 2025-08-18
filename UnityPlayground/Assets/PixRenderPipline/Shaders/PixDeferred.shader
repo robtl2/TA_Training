@@ -89,15 +89,12 @@ Shader "Hidden/Pix/Deferred"
                 fogFactor *= heightFactor;
 
                 color = lerp(color, _FogColor.rgb, fogFactor);
-                // color = fogFactor;
             }
 
             half4 frag(VaryingsDepth input) : SV_Target
             {
                 float2 uv = input.uv;
                 GBufferData gbufferData = UnpackGBuffer(uv);
-
-                // return half4(gbufferData.albedo, 1);
 
                 if(gbufferData.shadingModel == SHADING_MODEL_UNLIT)
                     return half4(gbufferData.albedo, 1);
@@ -107,7 +104,8 @@ Shader "Hidden/Pix/Deferred"
                 half3 result = half3(0, 0, 0);
 
                 evaluateIBL(gbufferData, uv, result);
-
+                
+                // TODO:应该给灯光加个order这样的排序参数，这样就不用为了排序做两次Loop了
                 if(PIX_LIGHT_COUNT > 0){
                     [loop]
                     for(int i = 0;i<PIX_LIGHT_COUNT;i++)

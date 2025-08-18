@@ -66,7 +66,7 @@ namespace PixRenderPipline
             {
                 if (_tiledFullScreenQuad == null)
                 {
-                    int2 tile = renderer.size / 8;
+                    int2 tile = renderer.size.xy / 8;
                     _tiledFullScreenQuad = new Mesh();
 
                     int tilesX = tile.x;

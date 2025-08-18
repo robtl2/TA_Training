@@ -8,7 +8,7 @@ namespace PixRenderPipline
     {
         public static readonly int ColorBuff = Shader.PropertyToID("_PixOpaqueTex");
         public static readonly RenderTargetIdentifier ColorBuffID = new(ColorBuff);
-        public static readonly int DepthDownSample = Shader.PropertyToID("_PixDepthDownSample");
+        
         static int _AO_Factor = Shader.PropertyToID("_AO_Factor");
         static int _SSAO_Props = Shader.PropertyToID("_SSAO_Props");
         static int _SSAO_Clip = Shader.PropertyToID("_SSAO_Clip");
@@ -40,11 +40,7 @@ namespace PixRenderPipline
             
             material.SetFloat(_AO_Factor, setting.ao_factor);
 
-            // Depth经常拿来被采样，这里blit出来一个下采样的DepthTexture
-            int2 size = renderer.size / 2;
-            renderer.cmb.GetTemporaryRT(DepthDownSample, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.RFloat);
-            renderer.cmb.SetRenderTarget(DepthDownSample);
-            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 0);
+            
 
             if (renderer.camera.orthographic)
                 material.EnableKeyword("ORTHOGRAPHIC");
@@ -102,7 +98,6 @@ namespace PixRenderPipline
             }
 
             renderer.cmb.SetRenderTarget(ColorBuff);
-            renderer.cmb.SetGlobalTexture(DepthDownSample, DepthDownSample);
 
             TriggerEvent(PixRenderEventName.BeforeDeferred);
 

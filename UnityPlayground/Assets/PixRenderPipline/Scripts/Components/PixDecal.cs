@@ -92,7 +92,6 @@ namespace PixRenderPipline
         }
 
         // 包围盒缓存
-        Vector3[] worldCorners = new Vector3[8];
         Bounds cachedWorldBounds;
         bool boundsDirty = true;
         Vector3 lastPosition;
@@ -166,47 +165,8 @@ namespace PixRenderPipline
             Gizmos.DrawLine(-Vector3.forward, Vector3.forward);
         }
 
-        // /// <summary>
-        // /// 计算精确的世界空间包围盒
-        // /// 考虑了transform的scale和rotation，避免过早剔除
-        // /// </summary>
-        // Bounds CalculateWorldBounds()
-        // {
-        //     var localBounds = mesh.bounds;
-            
-        //     // 获取local bounds的8个顶点
-        //     Vector3[] localCorners = new Vector3[8];
-        //     localCorners[0] = new Vector3(localBounds.min.x, localBounds.min.y, localBounds.min.z);
-        //     localCorners[1] = new Vector3(localBounds.max.x, localBounds.min.y, localBounds.min.z);
-        //     localCorners[2] = new Vector3(localBounds.min.x, localBounds.max.y, localBounds.min.z);
-        //     localCorners[3] = new Vector3(localBounds.max.x, localBounds.max.y, localBounds.min.z);
-        //     localCorners[4] = new Vector3(localBounds.min.x, localBounds.min.y, localBounds.max.z);
-        //     localCorners[5] = new Vector3(localBounds.max.x, localBounds.min.y, localBounds.max.z);
-        //     localCorners[6] = new Vector3(localBounds.min.x, localBounds.max.y, localBounds.max.z);
-        //     localCorners[7] = new Vector3(localBounds.max.x, localBounds.max.y, localBounds.max.z);
-
-        //     // 转换到世界空间
-        //     for (int i = 0; i < 8; i++)
-        //         worldCorners[i] = transform.TransformPoint(localCorners[i]);
-
-        //     // 计算世界空间包围盒
-        //     Vector3 min = worldCorners[0];
-        //     Vector3 max = worldCorners[0];
-            
-        //     for (int i = 1; i < 8; i++)
-        //     {
-        //         min = Vector3.Min(min, worldCorners[i]);
-        //         max = Vector3.Max(max, worldCorners[i]);
-        //     }
-
-        //     Vector3 size = max - min;
-        //     Vector3 center = (min + max) * 0.5f;
-            
-        //     return new Bounds(center, size);
-        // }
-
         /// <summary>
-        /// 计算UV参数
+        /// 找到Atlas的局部UV参数
         /// </summary>
         float4 CalculateUV_ST()
         {

@@ -56,7 +56,7 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     float blendMode = UNITY_ACCESS_INSTANCED_PROP(Props, _BlendMode);
     float alpha = UNITY_ACCESS_INSTANCED_PROP(Props, _Alpha);
     
-    // 通过屏幕坐标UI拿取GBuffer数据
+    // 通过屏幕坐标UV拿取GBuffer数据
     half2 screenUV = input.uv.xy * input.uv.w;
     GBufferData gbufferData = UnpackGBuffer(screenUV);
 

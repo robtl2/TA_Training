@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace PixRenderPipline
 {
@@ -8,18 +9,27 @@ namespace PixRenderPipline
         public static PixRenderSetting instance;
 
 
-        #region main
+       
         public enum Style
         {
             PBR,
             NPR,
         }
 
+        public enum DownSampleSize
+        {
+            Div2,
+            Div4,
+            Div8,
+        }
+
+        #region main
         public Style style;
 
         public bool GPU_OCC_Culling = true;
 
         public FilterMode defaultFilterMode = FilterMode.Bilinear;
+        public DownSampleSize downSampleSize = DownSampleSize.Div2;
         #endregion
 
         #region Fog
@@ -52,6 +62,7 @@ namespace PixRenderPipline
         public float ssao_radius_2nd = 0.02f;
         public int ssao_stepCount_2nd = 2;
         public float ssao_jitterRadius_2nd = 0.01f;
+        public bool ssao_clipByDistance_2nd = false;
        
         #endregion
 

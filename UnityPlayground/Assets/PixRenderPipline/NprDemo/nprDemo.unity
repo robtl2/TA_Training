@@ -826,15 +826,15 @@ MonoBehaviour:
   fovScale: 0.82
   IrradianceColor: 1
   IrradianceIntensity: 0.8
-  scatteringOuter: -0.25
-  OuterIntensity: 0.9
-  scatteringInter: 0.75
+  scatteringOuter: -1.47
+  OuterIntensity: 0.737
+  scatteringInter: 0.64
   InterIntensity: 1
   sun: {fileID: 1683865467}
-  sunSize: 0.05
+  sunSize: 0.02
   sunIntensity: 0.1
   sunVolume: 0.4
-  sunVolumeColor: {r: 0.39048594, g: 0.48754093, b: 0.7075472, a: 0}
+  sunVolumeColor: {r: 0.9150943, g: 0.6617187, b: 0.10791205, a: 0.11372549}
   rayStepLength: 0.7
   maxRayStep: 12
   detherStep: 64
@@ -1945,8 +1945,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 755518752}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.040047962, y: -0.95985687, z: -0.20308127, w: -0.1892856}
-  m_LocalPosition: {x: -6.4217234, y: -3.1990063, z: 13.900223}
+  m_LocalRotation: {x: 0.0058784643, y: -0.977642, z: -0.20837669, w: -0.027580298}
+  m_LocalPosition: {x: -4.2204337, y: -3.132697, z: 13.628592}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2907,6 +2907,7 @@ MonoBehaviour:
   style: 0
   GPU_OCC_Culling: 1
   defaultFilterMode: 1
+  downSampleSize: 0
   Enable_Fog: 1
   FogParams: {x: 2.62, y: 4.18, z: 39.1, w: 51.5}
   FogColor: {r: 0.1802243, g: 0.19702922, b: 0.8490566, a: 0.6745098}
@@ -2919,21 +2920,22 @@ MonoBehaviour:
   ssao_clipByDistance: 0
   ssao_quality: 1
   Enable_SSAO_2nd: 1
-  ssao_factor_2nd: 0.72
-  ssao_radius_2nd: 0.1
+  ssao_factor_2nd: 0.745
+  ssao_radius_2nd: 0.15
   ssao_stepCount_2nd: 3
   ssao_jitterRadius_2nd: 0.01
+  ssao_clipByDistance_2nd: 0
   SharpenStrength: 2.16
   SharpenMid: 0.22
   Exposure: 1
-  Vagnet: 0.76
+  Vagnet: 0.622
   EnableBloom: 1
   Bloom_Threshold: 0.75
   Bloom_Radius: 2
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 1
+  TAA_jitter: 0.667
   TAA_histroy: 0.8
   debugMode: 0
   debugSize: 1

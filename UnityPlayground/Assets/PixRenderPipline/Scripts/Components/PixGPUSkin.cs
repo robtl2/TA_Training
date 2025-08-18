@@ -13,15 +13,15 @@ namespace PixRenderPipline
     public class PixGPUSkin : MonoBehaviour
     {
         public static List<PixGPUSkin> gpuSkins = new List<PixGPUSkin>();
-        public static PixGPUSkin gpuSkinMan;
+        public static PixGPUSkin manager;
         public static bool listIsDirty = true;
 
         Dictionary<SkinnedMeshRenderer, Mesh> meshInRenderer = new();
         bool passAdded = false;
         void OnEnable()
         {
-            if (gpuSkinMan == null)
-                gpuSkinMan = this;
+            if (manager == null)
+                manager = this;
 
             gpuSkins.Add(this);
             listIsDirty = true;
@@ -32,11 +32,11 @@ namespace PixRenderPipline
             gpuSkins.Remove(this);
             listIsDirty = true;
 
-            if (gpuSkinMan == this)
+            if (manager == this)
             {
-                gpuSkinMan = null;
+                manager = null;
                 if (gpuSkins.Count > 0)
-                    gpuSkinMan = gpuSkins[0];
+                    manager = gpuSkins[0];
             }
 
             if (passAdded)
@@ -70,8 +70,9 @@ namespace PixRenderPipline
                     foreach (var rm in meshInRenderer)
                     {
                         var ren = rm.Key;
-                        var mat = ren.sharedMaterial;
                         ren.enabled = true;
+
+                        var mat = ren.sharedMaterial;
                         mat.DisableKeyword("SKINNED_MESH");
                     }
 
@@ -101,7 +102,7 @@ namespace PixRenderPipline
                 var mat = ren.sharedMaterial;
                 var mesh = rm.Value;
 
-                if (renderer.FrustumCull(mesh.bounds))
+                if (renderer.FrustumCull(mesh.bounds)) 
                     renderer.cmb.DrawMesh(mesh, ren.transform.localToWorldMatrix, mat, 0, passID);
             }
         }
@@ -157,7 +158,7 @@ namespace PixRenderPipline
 
         void LateUpdate()
         {
-            if (gpuSkinMan != this) return;
+            if (manager != this) return;
 
             if (!listIsDirty) return;
 

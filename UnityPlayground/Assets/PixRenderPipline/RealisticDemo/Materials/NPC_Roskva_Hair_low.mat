@@ -15,8 +15,7 @@ Material:
   - ENABLE_BENTNORMAL
   - EXPORT_TANGENT
   - _ALPHATEST_ON
-  m_InvalidKeywords:
-  - GPU_SKIN
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0

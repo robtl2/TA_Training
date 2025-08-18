@@ -42,10 +42,6 @@ Shader "Hidden/Pix/Post"
             half _Exposure;
             half _Vagnet;
 
-            #ifdef PP_BLOOM
-                TEXTURE2D(_BloomTex);SAMPLER(sampler_BloomTex);float2 _BloomTex_TexelSize;
-                half _BloomIntensity;
-            #endif
 
             void Tonemap(inout half3 x)
             {
@@ -96,6 +92,10 @@ Shader "Hidden/Pix/Post"
             }
 
             #ifdef PP_BLOOM
+
+            TEXTURE2D(_BloomTex);SAMPLER(sampler_BloomTex);float2 _BloomTex_TexelSize;
+            half _BloomIntensity;
+
             void Bloom(inout half3 color, half2 uv)
             {
                 half3 bloom = 0;
@@ -120,74 +120,15 @@ Shader "Hidden/Pix/Post"
             #endif
 
             #ifdef PP_SUN_VOLUME
-            
+            TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
             half4 _SunVolume;
             half4 _SunVolumeColor;
 
             void SunVolume(inout half3 color, half2 screenUV, half mask){
-                PixLight sun = GetPixLight((int)_SunVolume.x);
-
-                half depth_dest = sampleDepthDownSample(screenUV);
-                half3 pos_dest = ReconstructWorldPos(screenUV, depth_dest);
-                float3 cameraPos = _WorldSpaceCameraPos;
-                half3 V = pos_dest - cameraPos;
-                half len = length(V);
-                V = normalize(V); 
-                
-                half fade = len;
-                fade = remap01(5,50,len);
-                fade *= fade;
-
-                half LoV = saturate(dot(sun.direction, V)*0.8+0.2);
-                fade = lerp(fade,1,LoV);
-                
-                uint maxStep = (uint)_SunVolume.z;
-                float3 stepLen = V*_SunVolume.w;
-                float3 origin = cameraPos;
-                half volume = 0;
-
-                uint step = 0;
-                [loop]
-                while(step < maxStep){
-                    step ++;
-                    stepLen *= 1.1;
-                    half3 rayEnd = V*stepLen*step;
-                    origin += stepLen;
-
-                    half3 jitter_p = hash33(origin)*stepLen*0.1;
-                    origin += jitter_p;
-                    
-                    if(length(origin - cameraPos) > len){
-                        break;
-                    }
-
-                    float4 clipPos = mul(sun.VP, float4(origin,1));
-                    float3 ndcPos = clipPos.xyz / clipPos.w;
-                    float2 uv = ndcPos.xy * 0.5 + 0.5;
-                    uv.y = 1-uv.y;
-
-                    if(any(uv<0 || uv>1)){
-                        volume += 1;
-                        continue;
-                    }
-
-                    if(sun.shadowMapJitter)
-                        uv += hash22(screenUV).xy*sun.shadowMapSize.y;
-
-                    float depthSrc = saturate(ndcPos.z + sun.shadowMapBias);
-                    half depthDest = SampleShadowMap(sun.shadowMapIndex, uv);
-
-                    volume += depthSrc>depthDest?1:0;
-                }
-
-                volume/=maxStep;
-
-                volume *= _SunVolume.y;
-                volume = saturate(volume);
-
+                // volume sun light的计算放下采样里去了
+                half3 volume = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV).x;
                 half m = lerp(mask,1,_SunVolumeColor.a);
-
-                color = lerp(color, sun.color*_SunVolumeColor.rgb*0.1, volume * fade * m);
+                color = lerp(color, _SunVolumeColor.rgb, volume*m);
             }
 
             #endif

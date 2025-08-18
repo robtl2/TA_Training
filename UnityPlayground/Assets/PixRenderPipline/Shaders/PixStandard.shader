@@ -64,10 +64,10 @@ Shader "Pix/Standard"
 
             #if defined TAA || defined MOTION_BLUR
                 #define MOTION_VECTOR_ON
+            #endif
 
-                #ifdef SKINNED_MESH
-                    #define GPU_SKIN
-                #endif
+            #ifdef SKINNED_MESH
+                #define GPU_SKIN
             #endif
 
             #ifdef GPU_SKIN
@@ -315,7 +315,7 @@ Shader "Pix/Standard"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/common.hlsl"
             
-            #if defined TAA && defined SKINNED_MESH
+            #ifdef SKINNED_MESH
             #define GPU_SKIN
             #endif
 
@@ -417,7 +417,7 @@ Shader "Pix/Standard"
             #pragma multi_compile _ TAA
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            #if defined TAA && defined SKINNED_MESH
+            #ifdef SKINNED_MESH
                 #define GPU_SKIN
             #endif
 
@@ -515,7 +515,7 @@ Shader "Pix/Standard"
             #pragma multi_compile _ SKINNED_MESH
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            #if defined TAA && defined SKINNED_MESH
+            #ifdef SKINNED_MESH
             #define GPU_SKIN
             #endif
 

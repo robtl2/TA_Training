@@ -57,7 +57,7 @@ namespace PixRenderPipline
         /// <summary>
         /// 绘制尺寸
         /// </summary>
-        public int2 size { get; private set; }
+        public int4 size { get; private set; }
 
         /// <summary>
         /// TiledPass绘制尺寸
@@ -75,6 +75,12 @@ namespace PixRenderPipline
         public bool cullingSuccess { get; private set; }
 
         public int frameIndex{get; private set; }
+
+        /// <summary>
+        /// 上一帧后处理之前的渲染结果
+        /// </summary>
+        public Dictionary<Camera, RenderTexture> frontRT = new();
+
         public PixRenderer()
         {
             cmb = new();
@@ -107,7 +113,7 @@ namespace PixRenderPipline
             
 
             size = asset.GetRenderSize(camera.aspect);
-            tiledSize = size / 8;
+            tiledSize = size.xy / 8;
 
             colorSpace = RenderTextureReadWrite.Linear;
 
@@ -123,13 +129,39 @@ namespace PixRenderPipline
                 cullingSuccess = true;
             }
 
+            var setting = PixRenderSetting.instance;
+            if (setting.enable_TAA)
+                PrepairTAA();
+
             context.SetupCameraProperties(camera);
             SetupGlobalUniform();
         }
 
         public virtual void CleanUp()
         { 
-            
+            foreach (var rt in frontRT)
+            {
+                if (rt.Value != null && rt.Value.IsCreated())
+                    rt.Value.Release();
+            }
+
+            frontRT.Clear();
+        }
+
+        void PrepairTAA()
+        { 
+            // TAA用到的这张历史记录的颜色贴图之所以不用临时RT，是因为它会在下一帧时还得用到
+            if (!frontRT.ContainsKey(camera) || !frontRT[camera] || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
+            {
+                if (frontRT.ContainsKey(camera) && frontRT[camera])
+                    frontRT[camera].Release();
+
+                frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
+                {
+                    name = "_ColorTex_Front"
+                };
+                frontRT[camera].Create();
+            }
         }
         
         #region GlobalUniforms
@@ -146,6 +178,10 @@ namespace PixRenderPipline
         readonly int MATRIX_VP = Shader.PropertyToID("_MatrixVP");
         
         readonly int _MatrixVP_Prev = Shader.PropertyToID("_MatrixVP_Prev");
+        readonly int _AO_Factor = Shader.PropertyToID("_AO_Factor");
+        readonly int _SSAO_Props = Shader.PropertyToID("_SSAO_Props");
+        readonly int _SSAO_Clip = Shader.PropertyToID("_SSAO_Clip");
+        readonly int _SSAO_Props_2nd = Shader.PropertyToID("_SSAO_Props_2nd");
         readonly int _TAA_Jitter = Shader.PropertyToID("_TAA_Jitter");
         readonly int _ScreenTexelSize = Shader.PropertyToID("_ScreenTexelSize");
         readonly int _DebugBrightness = Shader.PropertyToID("_DebugBrightness");
@@ -193,6 +229,66 @@ namespace PixRenderPipline
             else
             {
                 Shader.DisableKeyword("FOG");
+            }
+
+            if (camera.orthographic)
+                Shader.EnableKeyword("ORTHOGRAPHIC");
+            else
+                Shader.DisableKeyword("ORTHOGRAPHIC");
+
+             Shader.SetGlobalFloat(_AO_Factor, setting.ao_factor);
+
+            if (setting.Enable_SSAO)
+            {
+                Vector4 ssao_props = new();
+                ssao_props.x = setting.ssao_factor;
+                ssao_props.y = setting.ssao_radius / setting.ssao_stepCount;
+                ssao_props.z = setting.ssao_stepCount;
+                ssao_props.w = setting.ssao_jitterRadius;
+                Shader.SetGlobalVector(_SSAO_Props, ssao_props);
+                Vector2 ssao_clip = new();
+                ssao_clip.x = setting.ssao_clipByDistance ? 1 : 0;
+                ssao_clip.y = setting.ssao_clipByDistance_2nd ? 1 : 0;
+                Shader.SetGlobalVector(_SSAO_Clip, ssao_clip);
+
+                Vector4 ssao_props_2sec = new();
+                ssao_props_2sec.x = setting.ssao_factor_2nd;
+                if (!setting.Enable_SSAO_2nd)
+                    ssao_props_2sec.x = 0;
+                ssao_props_2sec.y = setting.ssao_radius_2nd / setting.ssao_stepCount_2nd;
+                ssao_props_2sec.z = setting.ssao_stepCount_2nd;
+                ssao_props_2sec.w = setting.ssao_jitterRadius_2nd;
+                Shader.SetGlobalVector(_SSAO_Props_2nd, ssao_props_2sec);
+
+                Shader.DisableKeyword("SSAO_QUALITY_OFF");
+                Shader.DisableKeyword("SSAO_QUALITY_POOR");
+                Shader.DisableKeyword("SSAO_QUALITY_LOW");
+                Shader.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                Shader.DisableKeyword("SSAO_QUALITY_HIGH");
+
+                switch (setting.ssao_quality)
+                {
+                    case SamplerQuality.Poor:
+                        Shader.EnableKeyword("SSAO_QUALITY_POOR");
+                        break;
+                    case SamplerQuality.Low:
+                        Shader.EnableKeyword("SSAO_QUALITY_LOW");
+                        break;
+                    case SamplerQuality.Medium:
+                        Shader.EnableKeyword("SSAO_QUALITY_MEDIUM");
+                        break;
+                    case SamplerQuality.High:
+                        Shader.EnableKeyword("SSAO_QUALITY_HIGH");
+                        break;
+                }
+            }
+            else
+            {
+                Shader.EnableKeyword("SSAO_QUALITY_OFF");
+                Shader.DisableKeyword("SSAO_QUALITY_POOR");
+                Shader.DisableKeyword("SSAO_QUALITY_LOW");
+                Shader.DisableKeyword("SSAO_QUALITY_MEDIUM");
+                Shader.DisableKeyword("SSAO_QUALITY_HIGH");
             }
 
             if (setting.enable_TAA)

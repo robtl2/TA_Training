@@ -30,8 +30,10 @@ namespace PixRenderPipline
             return new PixRenderPipline(this);
         }
 
-        public int2 GetRenderSize(float aspect)
+        public int4 GetRenderSize(float aspect)
         {
+            var setting = PixRenderSetting.instance;
+
             int h = 0;
             switch (renderSize)
             {
@@ -64,8 +66,24 @@ namespace PixRenderPipline
             // 确保尺寸不为零
             if (size.x < 8) size.x = 8;
             if (size.y < 8) size.y = 8;
+
+            int2 downSampleSize = size;
+            switch (setting.downSampleSize)
+            {
+                case PixRenderSetting.DownSampleSize.Div2:
+                    downSampleSize /= 2;
+                    break;
+                case PixRenderSetting.DownSampleSize.Div4:
+                    downSampleSize /= 4;
+                    break;
+                case PixRenderSetting.DownSampleSize.Div8:
+                    downSampleSize /= 8;
+                    break;
+                default:
+                    break;
+            }
             
-            return size;
+            return new int4(size, downSampleSize);
         }
     }
 }

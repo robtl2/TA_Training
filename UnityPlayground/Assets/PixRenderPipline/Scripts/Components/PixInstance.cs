@@ -113,8 +113,12 @@ namespace PixRenderPipline
         /// <param name="target"></param>
         public void SetTarget(GameObject target)
         {
-            this.target = target;
-            MakeDirty();
+            if (target != _prevTarget)
+            { 
+                this.target = target;
+                MakeDirty();
+                _prevTarget = target;
+            }
         }
 
         void OnEnable()
@@ -266,17 +270,23 @@ namespace PixRenderPipline
             if (instDict[obj].Count == 0)
             {
                 Clear(obj);
+                //如果场景中没有PixInstance引用这个obj了，那就先把如果关了的renderer恢复
                 if (component)
                 {
                     DestroyImmediate(component);
                     foreach (var ren in rens)
                         ren.enabled = true;
                 }
+
+                //再把自己身上的PixInstance给移除了
                 var pixinst = obj.GetComponent<PixInstance>();
                 if (pixinst) DestroyImmediate(pixinst);
             }
             else if (!component)
             {
+                //另一边，如果自己被别人引用当instance来画了
+                //那，target自己也用instanc来画，免得白瞎多一个DrawCall
+                //只是目前需要手动把target自己下面的renderer关一下
                 component = obj.AddComponent<PixInstance>();
                 component.SetTarget(obj);
             }
@@ -329,18 +339,21 @@ namespace PixRenderPipline
                         
                 materials[i] = mats;
 
+                // 把target下面所有renderer的坐标变换记录为基于target根节点local空间的坐标才方便别的instance来使用，
+                // 总不能去记录整个target下面所有的层级关系吧
                 Matrix4x4 matrixWorld = ren.transform.localToWorldMatrix;
-                Matrix4x4 matrixLocal = worldToLocal * matrixWorld;
+                Matrix4x4 matrixLocal = worldToLocal * matrixWorld; 
                 matrices[i] = matrixLocal;
             }
 
+            // 最后把该存的数据存下来
             boundsDict[obj] = MergeBounds(boundses);
             meshesDict[obj] = meshes;
             localMatricesDict[obj] = matrices;
             materialsDict[obj] = materials;
         }
 
-        // 把多个AABB的Bounds合并成一个大的，总不能让我在画一个PixInstance做FrustumCulling时去Culling多次吧
+        // 把多个AABB的Bounds合并成一个大的，总不能让我在给一个PixInstance做FrustumCulling时去Culling多次吧
         Bounds MergeBounds(Bounds[] boundsArray)
         {
             if (boundsArray == null || boundsArray.Length == 0)

@@ -8,7 +8,7 @@
 
 //x:intensity y:radius z:stepCount w:jitter
 half4 _SSAO_Props;
-int _SSAO_Clip;
+int2 _SSAO_Clip;
 half4 _SSAO_Props_2nd;
 
 half calculateSSAO(half2 uv, GBufferData gbufferData)
@@ -32,7 +32,7 @@ half calculateSSAO(half2 uv, GBufferData gbufferData)
         for(int i = 0; i < SSAO_SAMPLER_COUNT; i++){
             half3 direction = dirSamplers[i];
             direction = mul(direction, tbn);
-            ao += ContactShadow(gbufferData, direction, radius, stepCount, jitter, SSAO_SAMPLE_BIAS, _SSAO_Clip>0);
+            ao += ContactShadow(gbufferData, direction, radius, stepCount, jitter, SSAO_SAMPLE_BIAS, _SSAO_Clip.x>0);
         }
         ao /= SSAO_SAMPLER_COUNT; 
     #endif
@@ -47,7 +47,7 @@ half calculateSSAO(half2 uv, GBufferData gbufferData)
         int stepCount_2nd = (int)_SSAO_Props_2nd.z;
         half jitter_2nd = _SSAO_Props_2nd.w;
 
-        half ao_2nd = ContactShadow(gbufferData, gbufferData.bentNormal, radius_2nd, stepCount_2nd, jitter_2nd, SSAO_SAMPLE_BIAS, false);
+        half ao_2nd = ContactShadow(gbufferData, gbufferData.bentNormal, radius_2nd, stepCount_2nd, jitter_2nd, SSAO_SAMPLE_BIAS, _SSAO_Clip.y>0);
         if(intensity_2nd<1)
             ao_2nd = lerp(1.0h, ao_2nd, intensity_2nd);
         

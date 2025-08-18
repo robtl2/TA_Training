@@ -13,6 +13,7 @@ namespace PixRenderPipline
     {
         public EarlyZPass earlyZPass { get; private set; }
         public OcclusionCullingPass occlusionCullingPass { get; private set; }
+        public DownSamplingPass downSamplingPass{ get; private set; }
         public GBufferPass gBufferPass { get; private set; }
         public TiledPass tiledPass { get; private set; }
         public DeferredPass deferredPass { get; private set; }
@@ -22,16 +23,14 @@ namespace PixRenderPipline
         public PostProcessPass postProcessPass { get; private set; }
         public FinalPass finalPass { get; private set; }
 
-        /// <summary>
-        /// 上一帧后处理之前的渲染结果
-        /// </summary>
-        public Dictionary<Camera, RenderTexture> frontRT = new();
+        
         // public Dictionary<Camera, RenderTexture> bloomRT = new();
 
         public PixDeferredRenderer()
         {
             earlyZPass = new(this);
             occlusionCullingPass = new(this);
+            downSamplingPass = new(this);
             gBufferPass = new(this);
             tiledPass = new(this);
             deferredPass = new(this);
@@ -46,12 +45,9 @@ namespace PixRenderPipline
         {
             base.Render();
             
-            var setting = PixRenderSetting.instance;
-            if (setting.enable_TAA)
-                PrepairTAA();
-
             ExecutePass(earlyZPass);
             ExecutePass(occlusionCullingPass);
+            ExecutePass(downSamplingPass);
             ExecutePass(gBufferPass);
             ExecutePass(tiledPass);
             ExecutePass(deferredPass);
@@ -76,34 +72,13 @@ namespace PixRenderPipline
             pass.Execute();
         }
 
-        void PrepairTAA()
-        { 
-            // TAA用到的这张历史记录的颜色贴图之所以不用临时RT，是因为它会在下一帧时还得用到
-            if (!frontRT.ContainsKey(camera) || !frontRT[camera] || frontRT[camera].width != size.x || frontRT[camera].height != size.y)
-            {
-                if (frontRT.ContainsKey(camera) && frontRT[camera])
-                    frontRT[camera].Release();
-
-                frontRT[camera] = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
-                {
-                    name = "_ColorTex_Front"
-                };
-                frontRT[camera].Create();
-            }
-        }
+        
 
         public override void CleanUp()
         {
             base.CleanUp();
 
-            foreach (var rt in frontRT)
-            {
-                if (rt.Value != null && rt.Value.IsCreated())
-                    rt.Value.Release();
-            }
-                
-
-            frontRT.Clear();
+            
         }
     }
 }

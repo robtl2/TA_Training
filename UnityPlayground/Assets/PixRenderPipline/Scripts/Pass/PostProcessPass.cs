@@ -53,7 +53,7 @@ namespace PixRenderPipline
 
             if (setting.EnableBloom)
             {
-                int2 size = renderer.size / 2;
+                int2 size = renderer.size.zw;
 
                 renderer.cmb.SetGlobalTexture(_BloomTex, TransparentPass.ColorBuff);
                 renderer.cmb.SetGlobalFloat(_Bloom_Threshold, setting.Bloom_Threshold * 0.5f);
@@ -71,12 +71,11 @@ namespace PixRenderPipline
                 renderer.cmb.SetRenderTarget(_BloomTexHorizontal);
                 renderer.cmb.SetGlobalTexture(_BloomTex, _BloomTexVertical);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 3);
-
             }
 
             renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, TransparentPass.ColorBuff);
-            renderer.cmb.SetGlobalTexture(DeferredPass.DepthDownSample, DeferredPass.DepthDownSample);
+
             if (setting.EnableBloom)
             {
                 renderer.cmb.GenerateMips(_BloomTexHorizontal);
@@ -96,8 +95,6 @@ namespace PixRenderPipline
             postMaterial.SetFloat(_Exposure, setting.Exposure);
             postMaterial.SetFloat(_Vagnet, setting.Vagnet);
 
-            TriggerEvent(PixRenderEventName.BeforePostProcess);
-
             if (setting.SharpenStrength > 0.1 && setting.enable_TAA)
                 postMaterial.EnableKeyword("PP_SHARPEN");
             else
@@ -108,18 +105,21 @@ namespace PixRenderPipline
             else
                 postMaterial.DisableKeyword("PP_TONEMAPPING");
 
+            TriggerEvent(PixRenderEventName.BeforePostProcess);
+
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, postMaterial, 0, 0);
 
+            TriggerEvent(PixRenderEventName.AfterPostProcess);
+
             renderer.cmb.ReleaseTemporaryRT(TransparentPass.ColorBuff);
-            renderer.cmb.ReleaseTemporaryRT(DeferredPass.DepthDownSample);
+            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.DepthDownSample);
+            renderer.cmb.ReleaseTemporaryRT(DownSamplingPass.rtID);
 
             if (setting.EnableBloom)
             {
                 renderer.cmb.ReleaseTemporaryRT(_BloomTexVertical);
                 renderer.cmb.ReleaseTemporaryRT(_BloomTexHorizontal);
             }
-
-            TriggerEvent(PixRenderEventName.AfterPostProcess);
 
             if (setting.enable_TAA)
             {
