@@ -137,7 +137,11 @@ namespace PixRenderPipline
 
             Shader.SetGlobalTexture(_SkyTex, texture);
 
-            if (sun == null) return;
+            if (sun == null)
+            { 
+                Shader.DisableKeyword("PP_SUN_VOLUME");
+                return;  
+            } 
 
             Shader.SetGlobalVector(_SunDirection, Vector3.Normalize(-sun.transform.forward));
             float _intensity = sun.intensity * sunIntensity;
