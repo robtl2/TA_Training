@@ -130,8 +130,12 @@ Shader "Hidden/Pix/DownSampling"
             #pragma vertex vertFullScreen
             #pragma fragment frag
 
+            #pragma multi_compile _ BLUR_DOWNSAMPLE
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/fullscreen.hlsl"
+
+            half _BlurDownsample;
 
             TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
 
@@ -139,14 +143,16 @@ Shader "Hidden/Pix/DownSampling"
             {
                 half2 uv = input.uv;
 
-                half2 offset = half2(0, _PixDownSampling_TexelSize.y)*1;
-                
                 half2 result = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).xy;
+
+                #ifdef BLUR_DOWNSAMPLE
+                half2 offset = half2(0, _PixDownSampling_TexelSize.y)*_BlurDownsample;
                 result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset*2).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset*2).xy;
                 result *= 0.2;
+                #endif
 
                 return half4(result,0,0);
             }
@@ -161,23 +167,28 @@ Shader "Hidden/Pix/DownSampling"
             #pragma vertex vertFullScreen
             #pragma fragment frag
 
+            #pragma multi_compile _ BLUR_DOWNSAMPLE
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/fullscreen.hlsl"
+
+            half _BlurDownsample;
 
             TEXTURE2D(_PixDownSamplingBlur);SAMPLER(sampler_PixDownSamplingBlur);float2 _PixDownSamplingBlur_TexelSize;
 
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
                 half2 uv = input.uv;
-
-                half2 offset = half2(_PixDownSamplingBlur_TexelSize.x, 0)*1;
-                
                 half2 result = SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv).xy;
+
+                #ifdef BLUR_DOWNSAMPLE
+                half2 offset = half2(_PixDownSamplingBlur_TexelSize.x, 0)*_BlurDownsample;
                 result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset*2).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset*2).xy;
                 result *= 0.2;
+                #endif
 
                 return half4(result,0,0);
             }

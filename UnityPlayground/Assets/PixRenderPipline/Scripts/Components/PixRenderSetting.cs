@@ -30,6 +30,8 @@ namespace PixRenderPipline
 
         public FilterMode defaultFilterMode = FilterMode.Bilinear;
         public DownSampleSize downSampleSize = DownSampleSize.Div2;
+        [Range(0, 3)]
+        public float blurDownsample = 1.0f;
         #endregion
 
         #region Fog
