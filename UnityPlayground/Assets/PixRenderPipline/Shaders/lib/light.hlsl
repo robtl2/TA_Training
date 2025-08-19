@@ -22,6 +22,8 @@ half4       _PixLightsShadowMap[MAX_PIX_LIGHT_COUNT];
 float4x4    _PixLights_VP[MAX_PIX_LIGHT_COUNT];
 float4x4    _PixLightsEffectArea[MAX_PIX_LIGHT_COUNT];
 
+half4       _ScreenTexelSize;
+
 // 最多4盏灯可以用shadowMap
 TEXTURE2D(_PixShadowMap_0);SAMPLER(sampler_PixShadowMap_0);
 TEXTURE2D(_PixShadowMap_1);SAMPLER(sampler_PixShadowMap_1);

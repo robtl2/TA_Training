@@ -826,7 +826,7 @@ MonoBehaviour:
   displayColor: {r: 0.33333337, g: 0.72386473, b: 0.94509804, a: 1}
   fovScale: 0.82
   IrradianceColor: 1
-  IrradianceIntensity: 0.36
+  IrradianceIntensity: 0.35
   scatteringOuter: -1.47
   OuterIntensity: 0.737
   scatteringInter: 0.64
@@ -862,7 +862,8 @@ Transform:
   m_LocalPosition: {x: -0.66201, y: 1.11225, z: -0.99558}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1683865468}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -1.4, z: 0}
 --- !u!1 &305101555 stripped
@@ -2912,19 +2913,19 @@ MonoBehaviour:
   FogColor: {r: 0.1802243, g: 0.19702922, b: 0.8490566, a: 0.40392157}
   ao_factor: 1
   Enable_SSAO: 1
-  ssao_bias: 0
-  ssao_factor: 0.759
+  ssao_bias: 0.00179
+  ssao_factor: 1
   ssao_radius: 0.43
   ssao_stepCount: 2
-  ssao_jitterRadius: 0.04
-  ssao_clipByDistance: 8
+  ssao_jitterRadius: 0.13
+  ssao_clipByDistance: 22.56
   ssao_quality: 1
   Enable_SSAO_2nd: 1
-  ssao_factor_2nd: 0.705
-  ssao_radius_2nd: 0.15
-  ssao_stepCount_2nd: 3
+  ssao_factor_2nd: 0.509
+  ssao_radius_2nd: 0.29
+  ssao_stepCount_2nd: 8
   ssao_jitterRadius_2nd: 0.01
-  ssao_clipByDistance_2nd: 0.5
+  ssao_clipByDistance_2nd: 1
   SharpenStrength: 2.16
   SharpenMid: 0.22
   Exposure: 1
@@ -4700,9 +4701,9 @@ MonoBehaviour:
   enableContactShadow: 1
   contactShadowJitter: 1
   contactShadowJitterRadius: 0.55
-  contactRayLength: 0.896
-  contactSampleCount: 8
-  contactBias: 0.0000056
+  contactRayLength: 0.736
+  contactSampleCount: 16
+  contactBias: 0
   enableVisbilityShadow: 0
   visibilityShadowSoftness: 0.2
   volumeLight: 0
@@ -4715,13 +4716,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1683865466}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.63390553, y: 0.15874577, z: -0.5529992, w: -0.51687086}
-  m_LocalPosition: {x: -3.49, y: 0.73, z: 0}
+  m_LocalRotation: {x: 0.624052, y: 0.12149321, z: -0.5486962, w: -0.54289144}
+  m_LocalPosition: {x: -2.8028283, y: -0.38224936, z: 1.0643762}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -28.667, y: -80.426, z: -241.751}
+  m_Father: {fileID: 281959628}
+  m_LocalEulerAnglesHint: {x: -32.974, y: -76.798, z: -242.988}
 --- !u!1 &1721413414 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6763927252471423082, guid: a8f691e28a6344a669911288373e2e72, type: 3}
@@ -6571,7 +6572,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1117694732}
-  - {fileID: 1683865468}
   - {fileID: 281959628}
   - {fileID: 339920733}
   - {fileID: 551096054}

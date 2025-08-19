@@ -412,7 +412,7 @@ namespace PixRenderPipline
                 DestroyImmediate(bakedShadowMap);
         }
 
-    #region VPMatrix
+#region VPMatrix
         // TODO: 用collider和camera.frustum的交集来做边界盒
         void CalculateLightVPMatrix()
         {
@@ -529,7 +529,7 @@ namespace PixRenderPipline
             // projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, true);
             // matrixVP_gpu = projectionMatrix * viewMatrix; 
         }
-        #endregion
+#endregion
 
 #if UNITY_EDITOR
         void OnDrawGizmosSelected()
@@ -549,7 +549,7 @@ namespace PixRenderPipline
         {
 
         }
-    #endif
+#endif
 
     }
 }

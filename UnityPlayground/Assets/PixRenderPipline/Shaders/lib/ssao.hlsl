@@ -61,7 +61,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
         half ao_2nd = ContactShadow(positionWS, N, radius_2nd, stepCount_2nd, jitter_2nd, 0, _SSAO_Clip.y, 0);
         if(intensity_2nd<1)
             ao_2nd = lerp(1.0h, ao_2nd, intensity_2nd);
-        
+
         ao *= ao_2nd;
     }
 

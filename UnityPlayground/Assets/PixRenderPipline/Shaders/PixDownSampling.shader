@@ -31,7 +31,7 @@ Shader "Hidden/Pix/DownSampling"
 
             void SSAO(inout half4 result, half3 positionWS, half2 screenUV){
                 half ao = calculateSSAO(screenUV, positionWS);
-                result.y = ao;
+                result.y = ao*ao;
             }
             #endif
 
@@ -139,7 +139,7 @@ Shader "Hidden/Pix/DownSampling"
             {
                 half2 uv = input.uv;
 
-                half2 offset = half2(0, _PixDownSampling_TexelSize.y)*1.5;
+                half2 offset = half2(0, _PixDownSampling_TexelSize.y);
                 
                 half2 result = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).xy;
@@ -170,7 +170,7 @@ Shader "Hidden/Pix/DownSampling"
             {
                 half2 uv = input.uv;
 
-                half2 offset = half2(_PixDownSamplingBlur_TexelSize.x, 0)*1.5;
+                half2 offset = half2(_PixDownSamplingBlur_TexelSize.x, 0);
                 
                 half2 result = SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset).xy;

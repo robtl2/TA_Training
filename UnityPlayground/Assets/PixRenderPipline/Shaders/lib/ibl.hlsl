@@ -11,12 +11,12 @@
 half4 _SkyColor;
 TEXTURECUBE(_SkyTex);SAMPLER(sampler_SkyTex);
 
-half _SkyTexMipCount;
-half _RotateSky;
-half3 _SkySH[9];
-half _IrradianceColor;
-half _IrradianceIntensity;
-half _AO_Factor;
+half    _SkyTexMipCount;
+half    _RotateSky;
+half3   _SkySH[9];
+half    _IrradianceColor;
+half    _IrradianceIntensity;
+half    _AO_Factor;
 
 float perceptualRoughnessToLod(float perceptualRoughness) {
     return _SkyTexMipCount * perceptualRoughness  - perceptualRoughness - 1;
@@ -147,11 +147,8 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     }
 
     #ifndef SSAO_QUALITY_OFF
-        half2 offset = _PixDownSampling_TexelSize;
-        half2 offset2 = offset;
-        offset2.x = -offset.x;
+        half2 offset = hash22(uv) * _PixDownSampling_TexelSize*4;
         half ssao = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).y;// calculateSSAO(uv, gbufferData.positionWS);
-        ssao*=ssao;
         ao *= ssao;
     #endif
 
