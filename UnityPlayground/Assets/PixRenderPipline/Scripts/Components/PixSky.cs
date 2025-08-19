@@ -143,7 +143,7 @@ namespace PixRenderPipline
                 return;  
             } 
 
-            Shader.SetGlobalVector(_SunDirection, Vector3.Normalize(-sun.transform.forward));
+            Shader.SetGlobalVector(_SunDirection, Vector3.Normalize(sun.transform.forward));
             float _intensity = sun.intensity * sunIntensity;
             Vector4 sunProps = new Vector4(sun.color.r * _intensity, sun.color.g * _intensity, sun.color.b * _intensity, sunSize * 0.01f);
             Shader.SetGlobalVector(_SunProps, sunProps);

@@ -343,7 +343,7 @@ namespace PixRenderPipline
             Vector4 posProp = new Vector4(pos.x, pos.y, pos.z, (int)lightType);
             positionPropList[i] = posProp;
 
-            Vector3 dir = -transform.forward;
+            Vector3 dir = transform.forward;
             Vector4 dirProp = new Vector4(dir.x, dir.y, dir.z, shadowMapIndex);
             dirctionPropList[i] = dirProp;
             Color _color = color * Mathf.Abs(intensity);
@@ -454,10 +454,14 @@ namespace PixRenderPipline
                 bounds.Encapsulate(corners[i]);
 
             // 计算视图矩阵
-            Vector3 lightPosition = bounds.center;
-            Vector3 up = transform.up;
-            Vector3 forward = transform.forward;
-            Matrix4x4 viewMatrix = Matrix4x4.LookAt(lightPosition, lightPosition - forward, -up);
+            // Vector3 lightPosition = transform.position; //bounds.center;
+            // Vector3 up = -transform.right;
+            // Vector3 forward = transform.forward;
+            Matrix4x4 translation = Matrix4x4.Translate(-transform.position);
+            var iRotation = Quaternion.Inverse(transform.rotation);
+            Matrix4x4 rotation = Matrix4x4.Rotate(iRotation);
+            Matrix4x4 viewMatrix = rotation * translation;
+            
 
             // 将角点转换到光源空间
             Vector3[] lightSpaceCorners = new Vector3[corners.Length];

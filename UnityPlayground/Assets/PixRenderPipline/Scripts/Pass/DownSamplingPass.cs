@@ -16,6 +16,8 @@ namespace PixRenderPipline
         public Material material;
         public override void Execute()
         {
+            
+
             base.Execute();
             if(!material)material = new Material(Shader.Find("Hidden/Pix/DownSampling"));
 

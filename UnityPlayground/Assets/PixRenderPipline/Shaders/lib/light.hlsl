@@ -175,7 +175,7 @@ half ContactShadow(PixLight light, GBufferData gbufferData){
     half jitterRadius = light.contactShadowJitter*light.shadowMapSize.y;
     half bias = light.contactBias;
 
-    return ContactShadow(gbufferData.positionWS, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias, rayLengthDivStepCount*stepCount);
+    return ContactShadow(gbufferData.positionWS, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias, rayLengthDivStepCount*stepCount*0.5);
 }
 
 #endif
