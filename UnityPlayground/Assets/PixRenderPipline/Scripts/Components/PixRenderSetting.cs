@@ -46,6 +46,8 @@ namespace PixRenderPipline
 
         [Space(10)]
         public bool Enable_SSAO = true;
+        [Range(0,0.01f)]
+        public float ssao_bias = 0.00001f;
         [Range(0, 1)]
         public float ssao_factor = 1.0f;
         public float ssao_radius = 0.4f;

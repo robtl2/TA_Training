@@ -4,11 +4,9 @@
 #include "sampler.hlsl"
 #include "light.hlsl"
 
-#define SSAO_SAMPLE_BIAS 0.00005
-
 //x:intensity y:radius z:stepCount w:jitter
 half4 _SSAO_Props;
-half2 _SSAO_Clip;
+half3 _SSAO_Clip;
 half4 _SSAO_Props_2nd;
 
 half calculateSSAO(half2 uv, half3 positionWS)
@@ -18,13 +16,17 @@ half calculateSSAO(half2 uv, half3 positionWS)
 #endif
 
     half intensity = _SSAO_Props.x;
-    half radius = _SSAO_Props.y;
     int stepCount = (int)_SSAO_Props.z;
+    half radius = _SSAO_Props.y;
     half jitter = _SSAO_Props.w;
+    half bias = _SSAO_Clip.z;
 
     float3 cameraPos = _WorldSpaceCameraPos;
     half3 V = positionWS - cameraPos;
     half len = length(V);
+    // half factor = 1/len;
+    // bias *= factor;
+    // radius *= factor;
 
     V = normalize(V); 
 
@@ -37,7 +39,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
 
     #ifdef SSAO_QUALITY_POOR
         // TAA太畜牲了
-        half ao = ContactShadow(positionWS, N, radius, stepCount, jitter, SSAO_SAMPLE_BIAS, false);
+        half ao = ContactShadow(positionWS, N, radius, stepCount, jitter, bias, false);
     #else
         half3x3 tbn = half3x3(T, B, N);
 
@@ -45,7 +47,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
         for(int i = 0; i < SSAO_SAMPLER_COUNT; i++){
             half3 direction = dirSamplers[i];
             direction = mul(direction, tbn);
-            ao += ContactShadow(positionWS, direction, radius, stepCount, jitter, SSAO_SAMPLE_BIAS, _SSAO_Clip.x);
+            ao += ContactShadow(positionWS, direction, radius, stepCount, jitter, bias, _SSAO_Clip.x);
         }
         ao /= SSAO_SAMPLER_COUNT; 
     #endif
@@ -60,7 +62,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
         int stepCount_2nd = (int)_SSAO_Props_2nd.z;
         half jitter_2nd = _SSAO_Props_2nd.w;
 
-        half ao_2nd = ContactShadow(positionWS, N, radius_2nd, stepCount_2nd, jitter_2nd, SSAO_SAMPLE_BIAS, _SSAO_Clip.y);
+        half ao_2nd = ContactShadow(positionWS, N, radius_2nd, stepCount_2nd, jitter_2nd, bias, _SSAO_Clip.y);
         if(intensity_2nd<1)
             ao_2nd = lerp(1.0h, ao_2nd, intensity_2nd);
         

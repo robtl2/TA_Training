@@ -2910,21 +2910,22 @@ MonoBehaviour:
   downSampleSize: 0
   Enable_Fog: 1
   FogParams: {x: 2.62, y: 4.18, z: 39.1, w: 51.5}
-  FogColor: {r: 0.1802243, g: 0.19702922, b: 0.8490566, a: 0.6745098}
+  FogColor: {r: 0.1802243, g: 0.19702922, b: 0.8490566, a: 0.40392157}
   ao_factor: 1
   Enable_SSAO: 1
-  ssao_factor: 0.624
+  ssao_bias: 0
+  ssao_factor: 0.759
   ssao_radius: 0.2
   ssao_stepCount: 2
   ssao_jitterRadius: 0.05
   ssao_clipByDistance: 0
   ssao_quality: 1
   Enable_SSAO_2nd: 1
-  ssao_factor_2nd: 0.78
-  ssao_radius_2nd: 0.06
+  ssao_factor_2nd: 0.83
+  ssao_radius_2nd: -0.15
   ssao_stepCount_2nd: 3
-  ssao_jitterRadius_2nd: 0.008
-  ssao_clipByDistance_2nd: 0.85
+  ssao_jitterRadius_2nd: 0.01
+  ssao_clipByDistance_2nd: 0.42
   SharpenStrength: 2.16
   SharpenMid: 0.22
   Exposure: 1

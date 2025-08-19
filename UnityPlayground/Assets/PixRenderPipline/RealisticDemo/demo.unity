@@ -421,15 +421,15 @@ MonoBehaviour:
   detherStep: 64
   shData:
     shCoefficients:
-    - {x: 1.7555379, y: 2.1655197, z: 2.5888476, w: 3.5448966}
-    - {x: 0.78016114, y: 1.0336127, z: 1.3891044, w: 0.15232533}
-    - {x: 0.38048548, y: 0.55540055, z: 0.8148206, w: -0.057462648}
-    - {x: -0.096189864, y: -0.068837896, z: -0.046560448, w: -0.05356169}
-    - {x: 0.04618138, y: 0.059248015, z: 0.0773119, w: 0.017636914}
-    - {x: -0.04262741, y: -0.054983824, z: -0.07107705, w: -0.02827153}
-    - {x: -0.03311291, y: -0.03310678, z: -0.038971633, w: 0.11080575}
-    - {x: -0.086318225, y: -0.107339576, z: -0.13044548, w: -0.17397688}
-    - {x: -0.4413207, y: -0.639625, z: -0.9142936, w: 0.084583916}
+    - {x: 1.6800401, y: 2.0626853, z: 2.447943, w: 3.5448966}
+    - {x: 0.5690777, y: 0.7623154, z: 1.0481933, w: -0.16863665}
+    - {x: 0.39247763, y: 0.56866825, z: 0.8274542, w: -0.014168808}
+    - {x: -0.1546225, y: -0.13699727, z: -0.12324121, w: -0.17998394}
+    - {x: -0.0028347108, y: 0.0012792422, z: 0.009547129, w: -0.050447002}
+    - {x: -0.04056589, y: -0.054484446, z: -0.07513374, w: 0.0070216474}
+    - {x: -0.0020405448, y: 0.015822038, z: 0.03762172, w: 0.04399626}
+    - {x: -0.014389201, y: -0.015060784, z: -0.014424597, w: -0.05371338}
+    - {x: -0.3758154, y: -0.5523061, z: -0.7920738, w: 0.030494919}
 --- !u!4 &602252877
 Transform:
   m_ObjectHideFlags: 0
@@ -625,8 +625,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.006181257, y: 0.9914843, z: -0.051262967, w: 0.11955254}
-  m_LocalPosition: {x: -0.257, y: 1.623, z: 1.071}
+  m_LocalRotation: {x: -0.005553702, y: 0.992596, z: -0.049827687, w: -0.11063292}
+  m_LocalPosition: {x: 0.26992655, y: 1.6230012, z: 1.0235729}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -771,38 +771,39 @@ MonoBehaviour:
   Enable_Fog: 0
   FogParams: {x: 0.1, y: 0.1, z: 200, w: 10}
   FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  ao_factor: 0.74
+  ao_factor: 0.75
   Enable_SSAO: 1
-  ssao_factor: 1
-  ssao_radius: 0.1
-  ssao_stepCount: 4
-  ssao_jitterRadius: 0.015
-  ssao_clipByDistance: 1
+  ssao_bias: 0
+  ssao_factor: 0.491
+  ssao_radius: -0.05
+  ssao_stepCount: 3
+  ssao_jitterRadius: 0.01
+  ssao_clipByDistance: 0
   ssao_quality: 1
   Enable_SSAO_2nd: 0
   ssao_factor_2nd: 1
   ssao_radius_2nd: 0.02
   ssao_stepCount_2nd: 2
-  ssao_jitterRadius_2nd: 0.01
+  ssao_jitterRadius_2nd: 0
   ssao_clipByDistance_2nd: 0
-  SharpenStrength: 2
-  SharpenMid: 0.2
+  SharpenStrength: 2.12
+  SharpenMid: 0.125
   Exposure: 1.14
-  Vagnet: 0.144
+  Vagnet: 0
   EnableBloom: 1
   Bloom_Threshold: 0.8
   Bloom_Radius: 0.97
   Bloom_Intensity: 1.42
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 0.94
-  TAA_histroy: 0.85
+  TAA_jitter: 0.536
+  TAA_histroy: 0.808
   debugMode: 0
   debugSize: 1
   depthScale: 1
   useDebugMaterial: 0
   materialBrightness: 0.5
-  showInstancingBounds: 1
+  showInstancingBounds: 0
 --- !u!4 &1365793593
 Transform:
   m_ObjectHideFlags: 0
