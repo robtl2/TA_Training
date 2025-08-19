@@ -4,11 +4,8 @@
 #include "sampler.hlsl"
 #include "light.hlsl"
 
-//x:intensity y:radius z:stepCount w:jitter
 half4 _SSAO_Props;
-half3 _SSAO_Clip;
-// half4 _SSAO_Props_2nd;
-// half4 _ScreenTexelSize;
+half2 _SSAO_Clip;
 
 half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
 {
@@ -16,16 +13,11 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
     return 1.0h;
 #endif
 
-    
-
     half intensity = _SSAO_Props.x;
     half radius = _SSAO_Props.y;
     half maxDistance = _SSAO_Clip.x;
     half rMaxDistance = rcp(maxDistance);
 
-    half bias = _SSAO_Clip.z;
-
-    // return stepCount*0.1;
 
     float3 cameraPos = _WorldSpaceCameraPos;
     half len = length(cameraPos - pos_src);
@@ -38,7 +30,7 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
         half2 uv_dest = uv+offset;
         half depth_dest = sampleDepthDownSample(uv_dest);
 
-        if(depth_dest < depth_src + bias){
+        if(depth_dest < depth_src){
             ao += 1.0;
         }
         else if(maxDistance>0){
@@ -70,7 +62,7 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
             half2 uv_dest = uv+offset;
             half depth_dest = sampleDepthDownSample(uv_dest);
 
-            if(depth_dest < depth_src + bias){
+            if(depth_dest < depth_src){
                 ao_2nd += 1.0;
             }
             else if(maxDistance_2nd>0){
@@ -83,7 +75,7 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
 
         ao_2nd /= SSAO_SAMPLER_COUNT_2;
         if(intensity_2nd<0.99)
-        ao_2nd = lerp(1.0h, ao_2nd, intensity_2nd);
+            ao_2nd = lerp(1.0h, ao_2nd, intensity_2nd);
 
         ao *= ao_2nd;
     }
