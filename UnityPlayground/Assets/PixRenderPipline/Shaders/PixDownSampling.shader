@@ -29,9 +29,9 @@ Shader "Hidden/Pix/DownSampling"
             #ifndef SSAO_QUALITY_OFF
             #include "lib/ssao.hlsl"
 
-            void SSAO(inout half4 result, half3 positionWS, half2 screenUV){
-                half ao = calculateSSAO(screenUV, positionWS);
-                result.y = ao*ao;
+            void SSAO(inout half4 result, half depth, half3 positionWS, half2 screenUV){
+                half ao = calculateSSAO(screenUV, depth, positionWS);
+                result.y = ao;
             }
             #endif
 
@@ -104,8 +104,8 @@ Shader "Hidden/Pix/DownSampling"
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
                 float2 uv = input.uv;
-                half depth_dest = sampleDepthDownSample(uv);
-                half3 positionWS = ReconstructWorldPos(uv, depth_dest);
+                half depth = sampleDepthDownSample(uv);
+                half3 positionWS = ReconstructWorldPos(uv, depth);
 
                 half4 result = 0;
 
@@ -114,7 +114,7 @@ Shader "Hidden/Pix/DownSampling"
                 #endif
 
                 #ifndef SSAO_QUALITY_OFF
-                SSAO(result, positionWS, uv);
+                SSAO(result, depth, positionWS, uv);
                 #endif
                 
                 return result;
@@ -139,7 +139,7 @@ Shader "Hidden/Pix/DownSampling"
             {
                 half2 uv = input.uv;
 
-                half2 offset = half2(0, _PixDownSampling_TexelSize.y);
+                half2 offset = half2(0, _PixDownSampling_TexelSize.y)*1;
                 
                 half2 result = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).xy;
@@ -170,7 +170,7 @@ Shader "Hidden/Pix/DownSampling"
             {
                 half2 uv = input.uv;
 
-                half2 offset = half2(_PixDownSamplingBlur_TexelSize.x, 0);
+                half2 offset = half2(_PixDownSamplingBlur_TexelSize.x, 0)*1;
                 
                 half2 result = SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv).xy;
                 result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset).xy;

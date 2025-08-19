@@ -36,6 +36,9 @@ namespace PixRenderPipline
         /// </summary>
         public Camera camera { get; private set; }
 
+        /// <summary>
+        /// 相机的Frustum Planes
+        /// </summary>
         public Plane[] frustum { get; private set; }
 
         /// <summary>
@@ -110,8 +113,6 @@ namespace PixRenderPipline
         /// </summary>
         public virtual void Render()
         {
-            
-
             size = asset.GetRenderSize(camera.aspect);
             tiledSize = size.xy / 8;
 
@@ -242,24 +243,17 @@ namespace PixRenderPipline
             {
                 Vector4 ssao_props = new();
                 ssao_props.x = setting.ssao_factor;
-                ssao_props.y = setting.ssao_radius / setting.ssao_stepCount;
-                ssao_props.z = setting.ssao_stepCount;
-                ssao_props.w = setting.ssao_jitterRadius;
+                ssao_props.y = setting.ssao_radius;
+                ssao_props.z = setting.ssao_factor_2nd;
+                if (!setting.Enable_SSAO_2nd)
+                    ssao_props.z = 0;
+                ssao_props.w = setting.ssao_radius_2nd;
                 Shader.SetGlobalVector(_SSAO_Props, ssao_props);
+
                 Vector3 ssao_clip = new();
                 ssao_clip.x = setting.ssao_clipByDistance;
                 ssao_clip.y = setting.ssao_clipByDistance_2nd;
-                ssao_clip.z = setting.ssao_bias;
                 Shader.SetGlobalVector(_SSAO_Clip, ssao_clip);
-
-                Vector4 ssao_props_2sec = new();
-                ssao_props_2sec.x = setting.ssao_factor_2nd;
-                if (!setting.Enable_SSAO_2nd)
-                    ssao_props_2sec.x = 0;
-                ssao_props_2sec.y = setting.ssao_radius_2nd / setting.ssao_stepCount_2nd;
-                ssao_props_2sec.z = setting.ssao_stepCount_2nd;
-                ssao_props_2sec.w = setting.ssao_jitterRadius_2nd;
-                Shader.SetGlobalVector(_SSAO_Props_2nd, ssao_props_2sec);
 
                 Shader.DisableKeyword("SSAO_QUALITY_OFF");
                 Shader.DisableKeyword("SSAO_QUALITY_POOR");
@@ -304,7 +298,7 @@ namespace PixRenderPipline
 
 
             Shader.SetGlobalFloat(_DebugBrightness, setting.materialBrightness);
-            Shader.SetGlobalVector(_ScreenTexelSize, new Vector4(1.0f / size.x, 1.0f / size.y, size.x, size.y));
+            Shader.SetGlobalVector(_ScreenTexelSize, new Vector4(1.0f / size.x, 1.0f / size.y, 1.0f/size.z, 1.0f/size.w));
 
             if (!jitterUploaded)
             {

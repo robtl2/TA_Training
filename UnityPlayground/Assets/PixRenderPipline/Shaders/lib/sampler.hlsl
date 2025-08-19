@@ -5,8 +5,13 @@
 #define SAMPLER_QUALITY_MEDIUM 2
 #define SAMPLER_QUALITY_HIGH 3
 
-#if defined SSAO_QUALITY_LOW
+#if defined SSAO_QUALITY_POOR
+    #define SSAO_SAMPLER_COUNT 1
+    #define SSAO_SAMPLER_COUNT_2 1
+
+#elif defined SSAO_QUALITY_LOW
     #define SSAO_SAMPLER_COUNT 4
+    #define SSAO_SAMPLER_COUNT_2 2
 
     static half3 dirSamplers[4] = {
         half3(0.5, 0, 0.8660254),
@@ -16,6 +21,7 @@
     };
 #elif defined SSAO_QUALITY_MEDIUM
     #define SSAO_SAMPLER_COUNT 8
+    #define SSAO_SAMPLER_COUNT_2 4
 
     static half3 dirSamplers[8] = {
         half3(0.3826834, 0, 0.9238795),
@@ -29,6 +35,7 @@
     };
 #elif defined SSAO_QUALITY_HIGH
     #define SSAO_SAMPLER_COUNT 16
+    #define SSAO_SAMPLER_COUNT_2 8
 
     static half3 dirSamplers[16] = {
         half3(0.1950903, 0, 0.9807853),

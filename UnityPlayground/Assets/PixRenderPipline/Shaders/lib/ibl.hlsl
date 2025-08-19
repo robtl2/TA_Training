@@ -147,7 +147,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     }
 
     #ifndef SSAO_QUALITY_OFF
-        half2 offset = hash22(uv) * _PixDownSampling_TexelSize*4;
+        half2 offset = 0;//hash22(uv) * _PixDownSampling_TexelSize;
         half ssao = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).y;// calculateSSAO(uv, gbufferData.positionWS);
         ao *= ssao;
     #endif
