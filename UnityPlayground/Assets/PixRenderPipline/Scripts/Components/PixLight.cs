@@ -454,9 +454,6 @@ namespace PixRenderPipline
                 bounds.Encapsulate(corners[i]);
 
             // 计算视图矩阵
-            // Vector3 lightPosition = transform.position; //bounds.center;
-            // Vector3 up = -transform.right;
-            // Vector3 forward = transform.forward;
             Matrix4x4 translation = Matrix4x4.Translate(-transform.position);
             var iRotation = Quaternion.Inverse(transform.rotation);
             Matrix4x4 rotation = Matrix4x4.Rotate(iRotation);
@@ -535,14 +532,16 @@ namespace PixRenderPipline
         #endregion
 
 #if UNITY_EDITOR
-        void OnDrawGizmosSelected() {
+        void OnDrawGizmosSelected()
+        {
             Gizmos.color = Color.yellow;
             Gizmos.matrix = transform.localToWorldMatrix;
-            Gizmos.DrawLine(new Vector3(0.05f, 0, -0.1f), new Vector3(0.05f, 0, 0.08f));
-            Gizmos.DrawLine(new Vector3(-0.05f, 0, -0.1f), new Vector3(-0.05f, 0, 0.08f));
-            Gizmos.DrawLine(new Vector3(0, 0, -0.1f), new Vector3(0, 0, 0.15f));
-            Gizmos.DrawLine(new Vector3(0, 0.05f, -0.1f), new Vector3(0, 0.05f, 0.08f));
-            Gizmos.DrawLine(new Vector3(0, -0.05f, -0.1f), new Vector3(0, -0.05f, 0.08f));
+            Gizmos.DrawLine(new Vector3(0.1f, 0, 0f), new Vector3(0.1f, 0, -0.1f));
+            Gizmos.DrawLine(new Vector3(-0.1f, 0, 0f), new Vector3(-0.1f, 0, -0.1f));
+            Gizmos.DrawLine(new Vector3(0, 0, -0.1f), new Vector3(0, 0, -0.2f));
+            Gizmos.DrawLine(new Vector3(0, 0.1f, 0f), new Vector3(0, 0.1f, -0.1f));
+            Gizmos.DrawLine(new Vector3(0, -0.1f, 0f), new Vector3(0, -0.1f, -0.1f));
+            Gizmos.DrawWireSphere(Vector3.zero, 0.1f);
         }
 
         // TODO: fullfil
