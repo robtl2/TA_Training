@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
+using System.Data;
 
 namespace PixRenderPipline
 {
@@ -11,6 +12,7 @@ namespace PixRenderPipline
             material = new Material(Shader.Find("Hidden/Pix/DownSampling"));
         }
         public static readonly int rtID = Shader.PropertyToID("_PixDownSampling");
+        static int blurRT = Shader.PropertyToID("_PixDownSamplingBlur");
         public Material material;
         public override void Execute()
         {
@@ -23,8 +25,17 @@ namespace PixRenderPipline
 
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
 
+            renderer.cmb.GetTemporaryRT(blurRT, renderer.size.z, renderer.size.w, 0, FilterMode.Point, RenderTextureFormat.RG16, RenderTextureReadWrite.Linear);
             renderer.cmb.SetGlobalTexture(rtID, rtID);
+            renderer.cmb.SetRenderTarget(blurRT);
+            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 1);
 
+            renderer.cmb.SetRenderTarget(rtID);
+            renderer.cmb.SetGlobalTexture(blurRT, blurRT);
+            renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 2);
+
+            renderer.cmb.ReleaseTemporaryRT(blurRT);
+            renderer.cmb.SetGlobalTexture(rtID, rtID);
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
         }

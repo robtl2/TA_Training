@@ -825,7 +825,7 @@ MonoBehaviour:
   displayColor: {r: 0.33333337, g: 0.72386473, b: 0.94509804, a: 1}
   fovScale: 0.82
   IrradianceColor: 1
-  IrradianceIntensity: 0.8
+  IrradianceIntensity: 0.7
   scatteringOuter: -1.47
   OuterIntensity: 0.737
   scatteringInter: 0.64
@@ -834,9 +834,9 @@ MonoBehaviour:
   sunSize: 0.02
   sunIntensity: 0.1
   sunVolume: 0.4
-  sunVolumeColor: {r: 0.9150943, g: 0.6617187, b: 0.10791205, a: 0.11372549}
-  rayStepLength: 0.7
-  maxRayStep: 12
+  sunVolumeColor: {r: 0.9150943, g: 0.70891386, b: 0.25467247, a: 0.11372549}
+  rayStepLength: 0.17
+  maxRayStep: 24
   detherStep: 64
   shData:
     shCoefficients:
@@ -2687,7 +2687,7 @@ Transform:
   m_GameObject: {fileID: 1019728173}
   serializedVersion: 2
   m_LocalRotation: {x: 0.01830607, y: -0.00000029802322, z: -0.00000017136335, w: 0.9998325}
-  m_LocalPosition: {x: 4.09, y: 2.93, z: -3.01}
+  m_LocalPosition: {x: 3.81, y: 3.86, z: -2.98}
   m_LocalScale: {x: 1.8733621, y: 7.9780574, z: 8.507975}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2915,17 +2915,17 @@ MonoBehaviour:
   Enable_SSAO: 1
   ssao_bias: 0
   ssao_factor: 0.759
-  ssao_radius: -0.2
+  ssao_radius: -0.55
   ssao_stepCount: 2
-  ssao_jitterRadius: 0.05
+  ssao_jitterRadius: 0.45
   ssao_clipByDistance: 0
   ssao_quality: 1
   Enable_SSAO_2nd: 1
-  ssao_factor_2nd: 0.83
+  ssao_factor_2nd: 0.705
   ssao_radius_2nd: 0.15
   ssao_stepCount_2nd: 3
   ssao_jitterRadius_2nd: 0.01
-  ssao_clipByDistance_2nd: 0.42
+  ssao_clipByDistance_2nd: 0.56
   SharpenStrength: 2.16
   SharpenMid: 0.22
   Exposure: 1
