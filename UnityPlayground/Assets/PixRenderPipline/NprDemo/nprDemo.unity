@@ -2915,14 +2915,14 @@ MonoBehaviour:
   Enable_SSAO: 1
   ssao_bias: 0
   ssao_factor: 0.759
-  ssao_radius: 0.2
+  ssao_radius: -0.2
   ssao_stepCount: 2
   ssao_jitterRadius: 0.05
   ssao_clipByDistance: 0
   ssao_quality: 1
   Enable_SSAO_2nd: 1
   ssao_factor_2nd: 0.83
-  ssao_radius_2nd: -0.15
+  ssao_radius_2nd: 0.15
   ssao_stepCount_2nd: 3
   ssao_jitterRadius_2nd: 0.01
   ssao_clipByDistance_2nd: 0.42

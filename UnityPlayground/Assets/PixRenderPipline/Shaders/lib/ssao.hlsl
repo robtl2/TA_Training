@@ -22,7 +22,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
     half bias = _SSAO_Clip.z;
 
     float3 cameraPos = _WorldSpaceCameraPos;
-    half3 V = positionWS - cameraPos;
+    half3 V = cameraPos - positionWS;
     half len = length(V);
     // half factor = 1/len;
     // bias *= factor;

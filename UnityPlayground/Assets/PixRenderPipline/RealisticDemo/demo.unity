@@ -775,7 +775,7 @@ MonoBehaviour:
   Enable_SSAO: 1
   ssao_bias: 0
   ssao_factor: 0.491
-  ssao_radius: -0.05
+  ssao_radius: 0.05
   ssao_stepCount: 3
   ssao_jitterRadius: 0.01
   ssao_clipByDistance: 0
