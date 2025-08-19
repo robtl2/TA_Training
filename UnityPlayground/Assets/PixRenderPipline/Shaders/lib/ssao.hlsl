@@ -24,10 +24,6 @@ half calculateSSAO(half2 uv, half3 positionWS)
     float3 cameraPos = _WorldSpaceCameraPos;
     half3 V = cameraPos - positionWS;
     half len = length(V);
-    // half factor = 1/len;
-    // bias *= factor;
-    // radius *= factor;
-
     V = normalize(V); 
 
     half3 N = V;
@@ -39,7 +35,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
 
     #ifdef SSAO_QUALITY_POOR
         // TAA太畜牲了
-        half ao = ContactShadow(positionWS, N, radius, stepCount, jitter, bias, false);
+        half ao = ContactShadow(positionWS, N, radius, stepCount, jitter, bias, _SSAO_Clip.x, 0);
     #else
         half3x3 tbn = half3x3(T, B, N);
 
@@ -47,7 +43,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
         for(int i = 0; i < SSAO_SAMPLER_COUNT; i++){
             half3 direction = dirSamplers[i];
             direction = mul(direction, tbn);
-            ao += ContactShadow(positionWS, direction, radius, stepCount, jitter, bias, _SSAO_Clip.x);
+            ao += ContactShadow(positionWS, direction, radius, stepCount, jitter, bias, _SSAO_Clip.x, 0);
         }
         ao /= SSAO_SAMPLER_COUNT; 
     #endif
@@ -62,7 +58,7 @@ half calculateSSAO(half2 uv, half3 positionWS)
         int stepCount_2nd = (int)_SSAO_Props_2nd.z;
         half jitter_2nd = _SSAO_Props_2nd.w;
 
-        half ao_2nd = ContactShadow(positionWS, N, radius_2nd, stepCount_2nd, jitter_2nd, 0, _SSAO_Clip.y);
+        half ao_2nd = ContactShadow(positionWS, N, radius_2nd, stepCount_2nd, jitter_2nd, 0, _SSAO_Clip.y, 0);
         if(intensity_2nd<1)
             ao_2nd = lerp(1.0h, ao_2nd, intensity_2nd);
         

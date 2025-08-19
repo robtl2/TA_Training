@@ -825,7 +825,7 @@ MonoBehaviour:
   displayColor: {r: 0.33333337, g: 0.72386473, b: 0.94509804, a: 1}
   fovScale: 0.82
   IrradianceColor: 1
-  IrradianceIntensity: 0.7
+  IrradianceIntensity: 0.36
   scatteringOuter: -1.47
   OuterIntensity: 0.737
   scatteringInter: 0.64
@@ -2915,17 +2915,17 @@ MonoBehaviour:
   Enable_SSAO: 1
   ssao_bias: 0
   ssao_factor: 0.759
-  ssao_radius: -0.55
+  ssao_radius: 0.43
   ssao_stepCount: 2
-  ssao_jitterRadius: 0.45
-  ssao_clipByDistance: 0
+  ssao_jitterRadius: 0.04
+  ssao_clipByDistance: 8
   ssao_quality: 1
   Enable_SSAO_2nd: 1
   ssao_factor_2nd: 0.705
   ssao_radius_2nd: 0.15
   ssao_stepCount_2nd: 3
   ssao_jitterRadius_2nd: 0.01
-  ssao_clipByDistance_2nd: 0.56
+  ssao_clipByDistance_2nd: 0.5
   SharpenStrength: 2.16
   SharpenMid: 0.22
   Exposure: 1
@@ -4782,10 +4782,10 @@ MonoBehaviour:
   boxArea: {fileID: 1914101454}
   enableContactShadow: 1
   contactShadowJitter: 1
-  contactShadowJitterRadius: 0.87
-  contactRayLength: 0.76
-  contactSampleCount: 6
-  contactBias: 0.000022
+  contactShadowJitterRadius: 0.55
+  contactRayLength: 0.896
+  contactSampleCount: 8
+  contactBias: 0.0000056
   enableVisbilityShadow: 0
   visibilityShadowSoftness: 0.2
   volumeLight: 0

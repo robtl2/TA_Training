@@ -129,7 +129,7 @@ half ShadowMap(PixLight light, GBufferData gbufferData, half2 screenUV){
     return depthSrc>depthDest;
 }
 
-half ContactShadow(half3 positionWS, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias, half clip){
+half ContactShadow(half3 positionWS, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias, half clip, half outOfUV = 1.0){
     int sampleCount = stepCount + 1; 
     half rayLength = rayLengthDivStepCount*stepCount;
     half step = rayLengthDivStepCount; //采样步长
@@ -145,6 +145,8 @@ half ContactShadow(half3 positionWS, half3 direction, half rayLengthDivStepCount
 
         if(jitterRadius>0)
             uv += hash22(uv).xy*jitterRadius;
+        
+        if(any(uv<0 || uv>1))return outOfUV;
 
         half depth_dest = sampleDepthDownSample(uv);
         half3 pos_dest = ReconstructWorldPos(uv, depth_dest);
