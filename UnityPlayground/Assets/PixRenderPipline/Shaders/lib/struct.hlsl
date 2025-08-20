@@ -45,6 +45,9 @@ struct PixLight{
     int shadowMapIndex;
     half2 shadowMapSize;
 
+    half halfAngle;
+    half range;
+
     half3 position;
     half3 direction;
     half3 color;

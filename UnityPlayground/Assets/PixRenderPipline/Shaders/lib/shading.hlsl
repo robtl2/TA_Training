@@ -76,11 +76,37 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
 
     half3 N = gbufferData.normalWS;
     half3 L = light.direction;
+    if(light.lightType>0){
+        L = light.position - gbufferData.positionWS;
+        half dist = length(L);
+        L /= dist;
+
+        if(dist>light.range)
+            return;
+
+        //对与Point&Spot Light现在都只用了反距离的平方来做亮度衰减
+        half distFade = min(light.range, dist);
+        distFade /= light.range;
+        distFade = 1-distFade*distFade;
+        effect *= distFade;
+
+        if(light.lightType==1){
+            half cosTheta = saturate(dot(L, light.direction));
+            if(cosTheta<light.halfAngle)
+                return;
+
+            half radFade = remap01(light.halfAngle, 1, cosTheta);
+            radFade = radFade*radFade;
+            effect *= radFade;
+        }
+    }
+
     half NoL_full = dot(N, L);
     
     // 逆光时可以有大片连续的象素被跳过
     if(NoL_full<-0.1)
         return;
+
 
     half3 V = gbufferData.viewDir;
     half3 H = normalize(L + V);

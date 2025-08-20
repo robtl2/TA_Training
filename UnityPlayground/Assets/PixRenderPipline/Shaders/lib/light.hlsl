@@ -60,6 +60,8 @@ PixLight GetPixLight(int index)
     light.direction = _PixLightsDirection[index].xyz;
     light.color = _PixLightsColor[index].rgb;
 
+    light.halfAngle = _PixLightsShadowMap[index].y;
+
     light.enabled = _PixLightsColor[index].a != 0;
     light.isPositive = _PixLightsColor[index].a > 0;
 
@@ -69,7 +71,6 @@ PixLight GetPixLight(int index)
     light.contactShadowJitter = _PixLightsContactShadow[index].w;
 
     light.shadowMapBias = _PixLightsShadowMap[index].x;
-    // light.shadowMapType = (int)_PixLightsShadowMap[index].y;
     light.shadowMapJitter = _PixLightsShadowMap[index].w > 0;
     light.shadowMapSize = _PixLightsShadowMapSize[index].xy;
     light.visibilityShadow = _PixLightsShadowMapSize[index].z;
@@ -92,6 +93,8 @@ PixLight GetPixLight(int index)
     float4x4 effectArea = _PixLightsEffectArea[index];
     light.enableAreaEffect = any(effectArea != 0);
     light.areaFadeRange = effectArea[3].x;
+
+    light.range = effectArea[3].y;
 
     if(light.enableAreaEffect)
         effectArea[3] = float4(0,0,0,1); 
@@ -172,6 +175,9 @@ half ContactShadow(PixLight light, GBufferData gbufferData){
     if(light.contactShadow == 0) return 1.0h;
 
     half3 direction = light.direction;
+    if(light.lightType>0)
+        direction = normalize(light.position - gbufferData.positionWS);
+        
     half rayLengthDivStepCount = light.contactShadow;
     int stepCount = light.contactSampleCount;
     half jitterRadius = light.contactShadowJitter*light.shadowMapSize.y;

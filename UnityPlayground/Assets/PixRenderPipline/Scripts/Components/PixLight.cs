@@ -2,6 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RendererUtils;
+using System;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace PixRenderPipline
 {
@@ -41,10 +46,11 @@ namespace PixRenderPipline
             Point
         }
 
-        public enum ShadowMapArea
+        public enum DirectionalShadowMapArea
         {
             Camera,
             Box_Area,
+            Camera_I_BoxArea,//TODO
         }
 
         public enum SampleQuality
@@ -63,6 +69,7 @@ namespace PixRenderPipline
         public Color color = Color.white;
         public float intensity = 10;
         public float spotAngle;
+        public float lightRange;
 
         [Header("ShadingFilter")]
         public bool enableDiffuse = true;
@@ -85,7 +92,7 @@ namespace PixRenderPipline
 
         [Range(0.00001f, 0.03f)]
         public float shadowMapBias = 0.0001f;
-        public ShadowMapArea shadowMapArea = ShadowMapArea.Box_Area;
+        public DirectionalShadowMapArea shadowMapArea = DirectionalShadowMapArea.Box_Area;
         public BoxCollider boxArea;
 
         [Header("Contact Shadow")]
@@ -125,6 +132,7 @@ namespace PixRenderPipline
 
         public int index { get; private set; }
         public int shadowMapIndex { get; private set; }
+        float halfAngle;
         bool passAdded = false;
 
         void OnEnable()
@@ -166,13 +174,12 @@ namespace PixRenderPipline
 
         void OnValidate()
         {
-            // 当满足这三个条件时才开启ShadowMapPass
-            if (isActiveAndEnabled && !passAdded && enableShadowMap && shadowMapBias > 0)
+            if (isActiveAndEnabled && !passAdded && enableShadowMap && shadowMapBias > 0 && lightType != LightType.Point)
             {
                 PixRenderEvent.AddEvent(PixRenderEventName.BeforeAll, ShadowMapPass);
                 passAdded = true;
             }
-            else if (!isActiveAndEnabled || !enableShadowMap || shadowMapBias == 0)
+            else if (!isActiveAndEnabled || !enableShadowMap || shadowMapBias == 0 || lightType == LightType.Point)
             {
                 PixRenderEvent.RemoveEvent(PixRenderEventName.BeforeAll, ShadowMapPass);
                 passAdded = false;
@@ -298,7 +305,7 @@ namespace PixRenderPipline
 
                 var light = lights[i];
                 float bias = light.shadowMapBias;
-                if (!light.enableShadowMap) bias = 0;
+                if (!light.enableShadowMap || light.lightType==LightType.Point) bias = 0;
 
                 bool requestShadowMap = bias > 0;
 
@@ -364,6 +371,9 @@ namespace PixRenderPipline
             Vector4 shadowMapParam = Vector4.zero;
             shadowMapParam.x = bias;
 
+            halfAngle = spotAngle * 0.5f * Mathf.Deg2Rad;
+            shadowMapParam.y = Mathf.Cos(halfAngle);
+
             int shadingFilter = 0;
             if (enableDiffuse && !enableSpecular) shadingFilter = 1;
             if (!enableDiffuse && enableSpecular) shadingFilter = 2;
@@ -395,6 +405,7 @@ namespace PixRenderPipline
 
                 effectAreaProp.SetRow(3, new Vector4(areaFadeRange, 0.0f, 0.0f, 1.0f)); // 设置fade范围
             }
+            effectAreaProp.m31 = lightRange;
             effectAreaProps[i] = effectAreaProp;
 
             return bias > 0;
@@ -402,7 +413,7 @@ namespace PixRenderPipline
 
         void UpdateBoxArea()
         {
-            if (shadowMapArea != ShadowMapArea.Box_Area) return;
+            if (shadowMapArea != DirectionalShadowMapArea.Box_Area) return;
             if (boxArea == null) return;
 
             // TODO: 只在发生改变时更新
@@ -429,7 +440,7 @@ namespace PixRenderPipline
             if (lightType == LightType.Directional)
                 CalculateDirectionalLightVPMatrix(corners);
             else if (lightType == LightType.Spot)
-                CalculateSpotLightVPMatrix(corners);
+                CalculateSpotLightVPMatrix();
         }
 
         static Vector3[] corners = new Vector3[8];
@@ -449,19 +460,19 @@ namespace PixRenderPipline
             corners[7] = center + new Vector3(extents.x, extents.y, extents.z);
         }
 
-        void CalculateDirectionalLightVPMatrix(Vector3[] corners)
+        // 计算视图矩阵
+        Matrix4x4 CalculateVMatrix()
         {
-            // 找到包围盒的中心点和范围
-            Bounds bounds = new(corners[0], Vector3.zero);
-            for (int i = 1; i < corners.Length; i++)
-                bounds.Encapsulate(corners[i]);
-
-            // 计算视图矩阵
             Matrix4x4 translation = Matrix4x4.Translate(-transform.position);
             var iRotation = Quaternion.Inverse(transform.rotation);
             Matrix4x4 rotation = Matrix4x4.Rotate(iRotation);
             Matrix4x4 viewMatrix = rotation * translation;
-            
+            return viewMatrix;
+        }
+
+        void CalculateDirectionalLightVPMatrix(Vector3[] corners)
+        {
+            Matrix4x4 viewMatrix = CalculateVMatrix();
 
             // 将角点转换到光源空间
             Vector3[] lightSpaceCorners = new Vector3[corners.Length];
@@ -491,46 +502,16 @@ namespace PixRenderPipline
         }
 
         // TODO: SpotLight Shadow
-        void CalculateSpotLightVPMatrix(Vector3[] corners)
+        void CalculateSpotLightVPMatrix()
         {
-            // 计算视图矩阵（从光源位置看向包围盒中心）
-            Bounds bounds = new Bounds(corners[0], Vector3.zero);
-            for (int i = 1; i < corners.Length; i++)
-                bounds.Encapsulate(corners[i]);
+            Matrix4x4 viewMatrix = CalculateVMatrix();
 
-            Vector3 lightPosition = transform.position;
-            Vector3 lookTarget = bounds.center;
-            Matrix4x4 viewMatrix = Matrix4x4.LookAt(lightPosition, lookTarget, Vector3.up);
-
-            // 将角点转换到光源空间
-            Vector3[] lightSpaceCorners = new Vector3[corners.Length];
-            for (int i = 0; i < corners.Length; i++)
-                lightSpaceCorners[i] = viewMatrix.MultiplyPoint3x4(corners[i]);
-
-            // 计算近平面和远平面距离
-            float minZ = Mathf.Infinity;
-            float maxZ = Mathf.NegativeInfinity;
-            
-            foreach (Vector3 corner in lightSpaceCorners)
-            {
-                minZ = Mathf.Min(minZ, corner.z);
-                maxZ = Mathf.Max(maxZ, corner.z);
-            }
-
-            // 确保近平面为正值且不超过远平面
-            minZ = Mathf.Max(0.1f, minZ);
-            maxZ = Mathf.Max(minZ + 0.1f, maxZ);
-
-            // 根据聚光灯角度和距离计算投影范围
-            float fov = spotAngle;
-            float aspect = 1.0f; // 通常使用1:1的宽高比
-            
             // 创建透视投影矩阵
-            Matrix4x4 projectionMatrix = Matrix4x4.Perspective(fov, aspect, minZ, maxZ);
+            Matrix4x4 projectionMatrix = Matrix4x4.Perspective(spotAngle, 1, 0.1f, lightRange);
             
             matrixVP = projectionMatrix * viewMatrix; 
-            // projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, true);
-            // matrixVP_gpu = projectionMatrix * viewMatrix; 
+            projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, true);
+            matrixVP_gpu = projectionMatrix * viewMatrix; 
         }
 #endregion
 
@@ -538,13 +519,70 @@ namespace PixRenderPipline
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.yellow;
+            Handles.color = Gizmos.color;
+
+            switch (lightType)
+            {
+                case LightType.Directional:
+                    DrawDirectionalGizmos();
+                    break;
+                case LightType.Point:
+                    DrawPointGizmos();
+                    break;
+                case LightType.Spot:
+                    DrawSpotGizmos();
+                    break;
+            }
+        }
+
+        void DrawDirectionalGizmos()
+        { 
             Gizmos.matrix = transform.localToWorldMatrix;
             Gizmos.DrawLine(new Vector3(0.1f, 0, 0f), new Vector3(0.1f, 0, -0.1f));
             Gizmos.DrawLine(new Vector3(-0.1f, 0, 0f), new Vector3(-0.1f, 0, -0.1f));
             Gizmos.DrawLine(new Vector3(0, 0, -0.1f), new Vector3(0, 0, -0.2f));
             Gizmos.DrawLine(new Vector3(0, 0.1f, 0f), new Vector3(0, 0.1f, -0.1f));
             Gizmos.DrawLine(new Vector3(0, -0.1f, 0f), new Vector3(0, -0.1f, -0.1f));
-            Gizmos.DrawWireSphere(Vector3.zero, 0.1f);
+            
+            Handles.DrawWireDisc(transform.position, -transform.forward, 0.1f);
+        }
+
+        void DrawPointGizmos()
+        {
+            var sceneCam = SceneView.lastActiveSceneView?.camera;
+            if (sceneCam == null)
+                return;
+
+            Vector3 normal = (sceneCam.transform.position - transform.position).normalized;
+            Handles.DrawWireDisc(transform.position, normal, 0.1f);
+            Handles.DrawWireDisc(transform.position, normal, lightRange);
+
+            Vector3 right = sceneCam.transform.right;
+            Vector3 up = sceneCam.transform.up;
+            Vector3 upRight = (right + up).normalized;
+            Vector3 downRight = (right - up).normalized;
+            Gizmos.DrawLine(transform.position + right * 0.11f, transform.position + right * 0.15f);
+            Gizmos.DrawLine(transform.position - right * 0.11f, transform.position - right * 0.15f);
+            Gizmos.DrawLine(transform.position + up * 0.11f, transform.position + up * 0.15f);
+            Gizmos.DrawLine(transform.position - up * 0.11f, transform.position - up * 0.15f);
+            Gizmos.DrawLine(transform.position + upRight * 0.11f, transform.position + upRight * 0.15f);
+            Gizmos.DrawLine(transform.position - upRight * 0.11f, transform.position - upRight * 0.15f);
+            Gizmos.DrawLine(transform.position + downRight * 0.11f, transform.position + downRight * 0.15f);
+            Gizmos.DrawLine(transform.position - downRight * 0.11f, transform.position - downRight * 0.15f);
+        }
+
+        void DrawSpotGizmos()
+        {
+            Vector3 forward = -transform.forward;
+            Vector3 up = transform.up;
+            Vector3 right = transform.right;
+            float radius = Mathf.Tan(halfAngle) * lightRange;
+            Vector3 end = transform.position + forward * lightRange;
+            Handles.DrawWireDisc(end, forward, radius);
+            Handles.DrawLine(transform.position, end + up * radius);
+            Handles.DrawLine(transform.position, end - up * radius);
+            Handles.DrawLine(transform.position, end + right * radius);
+            Handles.DrawLine(transform.position, end - right * radius);
         }
 
         // TODO: fullfil
