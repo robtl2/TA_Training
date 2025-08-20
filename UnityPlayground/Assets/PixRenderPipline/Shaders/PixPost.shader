@@ -87,7 +87,6 @@ Shader "Hidden/Pix/Post"
                 range = 1 - smoothstep(0.5, 2,range);
                 range *= range;
                 range = lerp(1, range, intensity);
-                range = detherColor(range, uv, 256);
                 color *= range;
             }
 
@@ -120,7 +119,7 @@ Shader "Hidden/Pix/Post"
             #endif
 
             #ifdef PP_SUN_VOLUME
-            TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
+            // TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
             half4 _SunVolume;
             half4 _SunVolumeColor;
 

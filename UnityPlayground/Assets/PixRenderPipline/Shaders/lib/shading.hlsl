@@ -107,7 +107,6 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
     if(NoL_full<-0.1)
         return;
 
-
     half3 V = gbufferData.viewDir;
     half3 H = normalize(L + V);
     half NoV = gbufferData.NoV;
@@ -116,9 +115,15 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
     float LoH = saturate(dot(L, H));
 
     half shadow = 1;
-    shadow *= ContactShadow(light, gbufferData);
     shadow *= VisibilityShadow(light, gbufferData);
-    shadow *= ShadowMap(light, gbufferData, srceenUV);
+
+    if(light.shadowMapIndex>-1){
+        shadow *= gbufferData.shadows[light.shadowMapIndex];
+    }else{
+        shadow *= ContactShadow(light, gbufferData.positionWS);
+    }
+   
+    // shadow *= ShadowMap(light, gbufferData.positionWS, srceenUV);
 
     half3 diffuse = 0;
     if(light.enableDiffuse)

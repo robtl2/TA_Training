@@ -9,7 +9,7 @@
 
 static half IOR  = half(2.0);
 
-TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);
+TEXTURE2D(_PixGBuffer_0);SAMPLER(sampler_PixGBuffer_0);float2 _PixGBuffer_0_TexelSize;
 TEXTURE2D(_PixGBuffer_1);SAMPLER(sampler_PixGBuffer_1);
 TEXTURE2D(_PixGBuffer_2);SAMPLER(sampler_PixGBuffer_2);
 #ifdef MOTION_VECTOR_ON
@@ -18,20 +18,17 @@ TEXTURE2D(_PixGBuffer_3);SAMPLER(sampler_PixGBuffer_3);
 TEXTURE2D(_PixEarlyZDepth);SAMPLER(sampler_PixEarlyZDepth);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
-TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);
+TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);half2 _PixDepthDownSample_TexelSize;
+TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
 
 #ifdef DEBUG_LIGHT
     half _DebugBrightness;
 #endif
 
-UNITY_INSTANCING_BUFFER_START(Props)
-float2 _PixGBuffer_0_TexelSize;
-half2 _PixDepthDownSample_TexelSize;
-UNITY_INSTANCING_BUFFER_END(Props)
 
 float3 ReconstructWorldPos(float2 uv, float ndcDepth) 
 {
-    float3 ndc = float3(uv*2.0 - 1.0, ndcDepth); 
+    float3 ndc = float3(uv*2.0h - 1.0h, ndcDepth); 
 
     #if UNITY_UV_STARTS_AT_TOP
     ndc.y = -ndc.y;
@@ -55,19 +52,33 @@ half3 samplePositionWS(float2 uv){
 }
 
 half3 computeDiffuseColor(const half3 albedo, half metallic) {
-    return albedo * (1.0 - metallic);
+    return albedo * (1.0h - metallic);
 }
 
 half3 computeF0(const half3 albedo, half metallic, half reflectance) {
-    return albedo * (metallic + (2*reflectance * (1.0 - metallic)));
+    return albedo * (metallic + (2*reflectance * (1.0h - metallic)));
 }
 
 half computeDielectricF0(half reflectance) {
-    return 0.16 * reflectance * reflectance;
+    return 0.16h * reflectance * reflectance;
 }
 
 half iorToF0(half transmittedIor, half incidentIor) {
     return sq((transmittedIor - incidentIor) / (transmittedIor + incidentIor));
+}
+
+half4 DecodeShadow(half encodedFloat)
+{
+    // 反归一化到[0, 255]范围
+    uint packedValue = round(encodedFloat * 255.0);
+    // 提取每个2位字段
+    int a = (packedValue >> 6) & 0x3; // 提取最高2位
+    int b = (packedValue >> 4) & 0x3; // 提取次高2位
+    int c = (packedValue >> 2) & 0x3; // 提取次低2位
+    int d = packedValue & 0x3;        // 提取最低2位
+
+    half4 shadow = half4(a,b,c,d);
+    return shadow/3.0;
 }
 
 half3 GetScreenSpaceBlurredNormal(PixSSSProfile sssProfile, half3x3 viewToWorld, half depth, half2 uv, half2 texelSize){
@@ -123,15 +134,6 @@ GBufferData UnpackGBuffer(float2 uv)
     half4 gbuffer_3 = SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv);
 #endif
     float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
-
-    half2 pixGBuffer_0_TexelSize = UNITY_ACCESS_INSTANCED_PROP(Props, _PixGBuffer_0_TexelSize);
-    half2 pixDepthDownSample_TexelSize = UNITY_ACCESS_INSTANCED_PROP(Props, _PixDepthDownSample_TexelSize);
-
-#ifdef TAA
-    
-    half2 jitter = hash22(uv) * pixGBuffer_0_TexelSize;
-    // uv += jitter;
-#endif
 
     half3 albedo = gbuffer_0.rgb;
     half3 normalVS = UnpackNormalHemiOctEncode(gbuffer_1.xy*2-1);
@@ -190,7 +192,19 @@ GBufferData UnpackGBuffer(float2 uv)
     half fresnel = 1-normalVS.z;
     fresnel = pow5(fresnel);
 
+    half2 downSampleJitter = hash22(uv)*_PixDownSampling_TexelSize;
+    half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+downSampleJitter);
+
+    half sunVolume = downSampleColor.r;
+    half ssao = downSampleColor.g;
+    half4 shadow = DecodeShadow(downSampleColor.b);
+    half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
+
     GBufferData gbufferData;
+
+    gbufferData.sunVolume = sunVolume;
+    gbufferData.ssao = ssao;
+    gbufferData.shadows = shadows;
 
     gbufferData.shadingModel = shadingModel;
     gbufferData.albedo = albedo;
@@ -229,7 +243,7 @@ GBufferData UnpackGBuffer(float2 uv)
 #endif
 
     if (shadingModel == SHADING_MODEL_SSS && sssProfile.type == 1){
-        half3 sssNormal = GetScreenSpaceBlurredNormal(sssProfile, viewToWorld, depth, uv, pixGBuffer_0_TexelSize);
+        half3 sssNormal = GetScreenSpaceBlurredNormal(sssProfile, viewToWorld, depth, uv, _PixGBuffer_0_TexelSize);
         sssProfile.sssNormal = sssNormal;
     }
     else

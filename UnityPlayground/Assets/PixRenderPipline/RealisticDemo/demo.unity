@@ -166,9 +166,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 0
+  priority: 0
   color: {r: 0.9254902, g: 0.87058824, b: 0.39607844, a: 1}
   intensity: 1.1
   spotAngle: 0
+  lightRange: 0
   enableDiffuse: 1
   enableSpecular: 0
   f0: 1
@@ -276,9 +278,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 0
+  priority: 0
   color: {r: 0.9622642, g: 0.70940125, b: 0.29503384, a: 1}
   intensity: 14
   spotAngle: 0
+  lightRange: 0
   enableDiffuse: 0
   enableSpecular: 1
   f0: 0.124
@@ -288,15 +292,15 @@ MonoBehaviour:
   enableShadowMap: 1
   shadowMapSize: 512
   shadowMapJitter: 1
-  shadowMapBias: 0.0072
+  shadowMapBias: 0.0141
   shadowMapArea: 1
   boxArea: {fileID: 1795428412}
   enableContactShadow: 0
   contactShadowJitter: 1
-  contactShadowJitterRadius: 3
-  contactRayLength: 0.01
-  contactSampleCount: 1
-  contactBias: 0.000057
+  contactShadowJitterRadius: 1.13
+  contactRayLength: 0.707
+  contactSampleCount: 7
+  contactBias: 0.0000061
   enableVisbilityShadow: 0
   visibilityShadowSoftness: 0.174
   volumeLight: 0
@@ -401,12 +405,12 @@ MonoBehaviour:
   skyType: 2
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   blurLevel: 4.3
-  color: {r: 0.23909755, g: 0.24457583, b: 0.254717, a: 1}
-  intensity: 1.81
-  displayColor: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
+  color: {r: 1, g: 1, b: 1, a: 1}
+  intensity: 1
+  displayColor: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
   fovScale: 1.5
-  IrradianceColor: 0.467
-  IrradianceIntensity: 1.03
+  IrradianceColor: 0
+  IrradianceIntensity: 1
   scatteringOuter: 0.5
   OuterIntensity: 1
   scatteringInter: 0.95
@@ -498,9 +502,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 0
+  priority: 0
   color: {r: 0.96724814, g: 0.9811321, b: 0.9811321, a: 1}
   intensity: 3
   spotAngle: 0
+  lightRange: 0
   enableDiffuse: 1
   enableSpecular: 1
   f0: 1
@@ -508,7 +514,7 @@ MonoBehaviour:
   effectArea: {fileID: 0}
   areaFadeRange: 0
   enableShadowMap: 1
-  shadowMapSize: 512
+  shadowMapSize: 1024
   shadowMapJitter: 1
   shadowMapBias: 0.0043
   shadowMapArea: 1
@@ -768,7 +774,7 @@ MonoBehaviour:
   GPU_OCC_Culling: 0
   defaultFilterMode: 1
   downSampleSize: 0
-  blurDownsample: 1
+  blurDownsample: 3
   Enable_Fog: 0
   FogParams: {x: 0.1, y: 0.1, z: 200, w: 10}
   FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
@@ -784,16 +790,16 @@ MonoBehaviour:
   ssao_clipByDistance_2nd: 0
   SharpenStrength: 2.7
   SharpenMid: 0.24
-  Exposure: 1.14
+  Exposure: 0.88
   Vagnet: 0
   EnableBloom: 1
-  Bloom_Threshold: 0.8
-  Bloom_Radius: 5.11
+  Bloom_Threshold: 1
+  Bloom_Radius: 0.73
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 0.512
-  TAA_histroy: 0.808
+  TAA_jitter: 0.738
+  TAA_histroy: 0.85
   debugMode: 0
   debugSize: 1
   depthScale: 1
@@ -1119,9 +1125,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightType: 0
+  priority: 0
   color: {r: 0.3480331, g: 0.9339623, b: 0.9221209, a: 1}
   intensity: 15.4
   spotAngle: 0
+  lightRange: 0
   enableDiffuse: 0
   enableSpecular: 1
   f0: 0.142

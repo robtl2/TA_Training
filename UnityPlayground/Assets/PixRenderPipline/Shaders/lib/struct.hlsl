@@ -58,7 +58,6 @@ struct PixLight{
     half contactShadowJitter;
 
     half shadowMapBias;
-    // int shadowMapType;
     bool shadowMapJitter;
 
     bool enableDiffuse;
@@ -75,7 +74,7 @@ struct PixLight{
     float4x4 VP;
 };
 
-
+// TODO: 把normal和tangent放一组
 struct GBuffer
 {
     half4 gbuffer_0; //rgb:albedo a:ao
@@ -93,6 +92,10 @@ struct GBufferData
     half3 f0;
     half ao;
     half3 bentNormal;
+
+    half sunVolume;
+    half ssao;
+    half shadows[4];
 
     float3 positionWS;
     half3 normalWS;
@@ -113,12 +116,9 @@ struct GBufferData
 
     half3x3 viewToWorld;
 
-    // int sssProfileIndex;
     PixSSSProfile sssProfile;
 
-// #ifdef MOTION_VECTOR_ON
     half2 motionVector;
-// #endif
 };
 
 

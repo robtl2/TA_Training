@@ -86,7 +86,7 @@ Shader "Hidden/Pix/DownSampling"
                     if(sun.shadowMapJitter)
                         uv += hash22(screenUV).xy*sun.shadowMapSize.y;
 
-                    float depthSrc = saturate(ndcPos.z + sun.shadowMapBias);
+                    float depthSrc = ndcPos.z;
                     half depthDest = SampleShadowMap(sun.shadowMapIndex, uv);
 
                     volume += depthSrc>depthDest?1:0;
@@ -101,13 +101,66 @@ Shader "Hidden/Pix/DownSampling"
             }
             #endif
 
+            half PackShadow(int shadowResult[4]){
+                uint packedValue = (shadowResult[0] << 6) | (shadowResult[1] << 4) | (shadowResult[2] << 2) | shadowResult[3];
+                return packedValue/255.0;
+            }
+
+            void EvaluateShadow(inout half4 result, half3 positionWS, half2 screenUV){
+                int shadowIndex[4] = {-1,-1,-1,-1};
+                int lightIndex[4] = {-1,-1,-1,-1};
+
+                // 如果阴影只采样一次，那结果就只会是0或1，而这里记录为0-3(0,1,2,3)是预留将来最多阴影可以采样4次
+                // 因为4个shadowMap的shadow颜色有4阶的话，需要记录的数据就到了4的4次方=256了，而我又只想用一个8bit来记录shadow
+                // 所以抠门的PixRenderPipeline只会支持4个shadowMap,最多4次采样
+                int shadowResult[4] = {3,3,3,3}; 
+
+                if(PIX_LIGHT_COUNT > 0){
+                    int index = 0;
+
+                    [loop]
+                    for(int i = 0; i<PIX_LIGHT_COUNT; i++)
+                    {
+                        PixLight light = GetPixLight(i);
+
+                        // [branch]
+                        if(light.enabled && light.shadowMapIndex > -1)
+                        {
+                            if(index>3)break;
+
+                            lightIndex[index] = i;
+                            shadowIndex[index] = light.shadowMapIndex;
+                            index++;
+                        }
+                    }
+                }
+
+                for(int i = 0; i < 4; i++){
+                    if(lightIndex[i] != -1 && shadowIndex[i] != -1){
+                        PixLight light = GetPixLight(lightIndex[i]);
+
+                        half shadow = 1;
+                        shadow *= ContactShadow(light, positionWS);
+                        shadow *= ShadowMap(light, positionWS, screenUV);
+
+                        int shadowInt = (int)(floor(shadow * 3.00001));
+
+                        shadowResult[light.shadowMapIndex] = shadowInt;
+                    } 
+                }
+
+                result.b = PackShadow(shadowResult);
+            }
+
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
                 float2 uv = input.uv;
+
+                // 事情集中起来干能方便的避免重复计算
                 half depth = sampleDepthDownSample(uv);
                 half3 positionWS = ReconstructWorldPos(uv, depth);
 
-                half4 result = 0;
+                half4 result = 1;
 
                 #ifdef PP_SUN_VOLUME
                 SunVolume(result, positionWS, uv);
@@ -116,6 +169,8 @@ Shader "Hidden/Pix/DownSampling"
                 #ifndef SSAO_QUALITY_OFF
                 SSAO(result, depth, positionWS, uv);
                 #endif
+
+                EvaluateShadow(result, positionWS, uv);
                 
                 return result;
             }
@@ -130,7 +185,6 @@ Shader "Hidden/Pix/DownSampling"
             #pragma vertex vertFullScreen
             #pragma fragment frag
 
-            #pragma multi_compile _ BLUR_DOWNSAMPLE
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/fullscreen.hlsl"
@@ -143,18 +197,16 @@ Shader "Hidden/Pix/DownSampling"
             {
                 half2 uv = input.uv;
 
-                half2 result = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).xy;
+                half3 result = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).xyz;
 
-                #ifdef BLUR_DOWNSAMPLE
                 half2 offset = half2(0, _PixDownSampling_TexelSize.y)*_BlurDownsample;
-                result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).xy;
-                result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset*2).xy;
-                result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset).xy;
-                result += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset*2).xy;
-                result *= 0.2;
-                #endif
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset*2).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset*2).xy;
+                result.xy *= 0.2;
 
-                return half4(result,0,0);
+                return half4(result,0);
             }
             ENDHLSL
         }
@@ -167,8 +219,6 @@ Shader "Hidden/Pix/DownSampling"
             #pragma vertex vertFullScreen
             #pragma fragment frag
 
-            #pragma multi_compile _ BLUR_DOWNSAMPLE
-
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/fullscreen.hlsl"
 
@@ -179,18 +229,16 @@ Shader "Hidden/Pix/DownSampling"
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
                 half2 uv = input.uv;
-                half2 result = SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv).xy;
+                half3 result = SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv).xyz;
 
-                #ifdef BLUR_DOWNSAMPLE
                 half2 offset = half2(_PixDownSamplingBlur_TexelSize.x, 0)*_BlurDownsample;
-                result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset).xy;
-                result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset*2).xy;
-                result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset).xy;
-                result += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset*2).xy;
-                result *= 0.2;
-                #endif
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv+offset*2).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset*2).xy;
+                result.xy *= 0.2;
 
-                return half4(result,0,0);
+                return half4(result,0);
             }
             ENDHLSL
         }

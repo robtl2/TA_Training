@@ -883,7 +883,7 @@ MonoBehaviour:
   displayColor: {r: 0.33333337, g: 0.72386473, b: 0.94509804, a: 1}
   fovScale: 0.82
   IrradianceColor: 1
-  IrradianceIntensity: 0.25
+  IrradianceIntensity: 0.51
   scatteringOuter: -1.47
   OuterIntensity: 0.737
   scatteringInter: 0.64
@@ -891,7 +891,7 @@ MonoBehaviour:
   sun: {fileID: 1683865467}
   sunSize: 0.02
   sunIntensity: 0.1
-  sunVolume: 0.4
+  sunVolume: 0
   sunVolumeColor: {r: 0.8962264, g: 0.711727, b: 0.30015132, a: 1}
   rayStepLength: 0.17
   maxRayStep: 24
@@ -1776,7 +1776,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &726825538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3049,7 +3049,7 @@ MonoBehaviour:
   GPU_OCC_Culling: 1
   defaultFilterMode: 1
   downSampleSize: 0
-  blurDownsample: 1.07
+  blurDownsample: 0.34
   Enable_Fog: 1
   FogParams: {x: 2.62, y: 4.18, z: 39.1, w: 51.5}
   FogColor: {r: 0.1802243, g: 0.19702922, b: 0.8490566, a: 0.4627451}
@@ -3073,11 +3073,11 @@ MonoBehaviour:
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 0.17
+  TAA_jitter: 0.798
   TAA_histroy: 0.8
   debugMode: 0
   debugSize: 1
-  depthScale: 1
+  depthScale: 0.005
   useDebugMaterial: 0
   materialBrightness: 0.2
   showInstancingBounds: 0
@@ -4676,7 +4676,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1469888053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4908,7 +4908,7 @@ MonoBehaviour:
   effectArea: {fileID: 0}
   areaFadeRange: 0
   enableShadowMap: 1
-  shadowMapSize: 1024
+  shadowMapSize: 2048
   shadowMapJitter: 1
   shadowMapBias: 0.0037
   shadowMapArea: 1
@@ -6644,6 +6644,22 @@ PrefabInstance:
     - target: {fileID: 4833665959249571888, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
       propertyPath: m_Name
       value: Plant
+      objectReference: {fileID: 0}
+    - target: {fileID: 6746890707102616857, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.508
+      objectReference: {fileID: 0}
+    - target: {fileID: 6746890707102616857, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 3.29
+      objectReference: {fileID: 0}
+    - target: {fileID: 6749121577570057871, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6879069988900750059, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8292484501110405171, guid: 130c92c2fe14e4bcd85d2f2c743f961f, type: 3}
       propertyPath: m_LocalPosition.x

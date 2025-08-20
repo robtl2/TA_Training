@@ -113,10 +113,10 @@ half VisibilityShadow(PixLight light, GBufferData gbufferData){
     return shadow;
 }
 
-half ShadowMap(PixLight light, GBufferData gbufferData, half2 screenUV){
+half ShadowMap(PixLight light, half3 positionWS, half2 screenUV){
     if(light.shadowMapBias==0.0)return 1.0h;
 
-    float4 clipPos = mul(light.VP, float4(gbufferData.positionWS,1));
+    float4 clipPos = mul(light.VP, float4(positionWS,1));
     float3 ndcPos = clipPos.xyz / clipPos.w;
     float2 uv = ndcPos.xy * 0.5 + 0.5;
     uv.y = 1-uv.y;
@@ -171,19 +171,19 @@ half ContactShadow(half3 positionWS, half3 direction, half rayLengthDivStepCount
     return 1.0h;
 }
 
-half ContactShadow(PixLight light, GBufferData gbufferData){
+half ContactShadow(PixLight light, half3 positionWS){
     if(light.contactShadow == 0) return 1.0h;
 
     half3 direction = light.direction;
     if(light.lightType>0)
-        direction = normalize(light.position - gbufferData.positionWS);
-        
+        direction = normalize(light.position - positionWS);
+
     half rayLengthDivStepCount = light.contactShadow;
     int stepCount = light.contactSampleCount;
     half jitterRadius = light.contactShadowJitter*light.shadowMapSize.y;
     half bias = light.contactBias;
 
-    return ContactShadow(gbufferData.positionWS, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias, rayLengthDivStepCount*stepCount*0.5);
+    return ContactShadow(positionWS, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias, rayLengthDivStepCount*stepCount*0.5);
 }
 
 #endif

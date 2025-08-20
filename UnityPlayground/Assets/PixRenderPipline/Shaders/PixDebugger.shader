@@ -105,7 +105,7 @@ Shader "Hidden/Pix/Debugger"
                 if(_Channel == 11)
                     rgb *= _DepthScale;
 
-                half a = all(gbufferData.albedo > 0);
+                half a = any(gbufferData.albedo > 0);
                 return half4(rgb, a);
             }
             ENDHLSL

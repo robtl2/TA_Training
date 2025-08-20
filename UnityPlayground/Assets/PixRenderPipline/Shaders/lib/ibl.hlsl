@@ -3,11 +3,6 @@
 
 #include "bentnormal.hlsl"
 
-#ifndef SSAO_QUALITY_OFF
-    TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
-    // #include "lib/ssao.hlsl"
-#endif
-
 half4 _SkyColor;
 TEXTURECUBE(_SkyTex);SAMPLER(sampler_SkyTex);
 
@@ -79,12 +74,12 @@ half3 prefilteredRadiance(GBufferData gbufferData, half2 uv) {
 half3 diffuseIrradiance(half3 n) {
     n = rotate_y(n, _RotateSky);
     n = n.xzy;
-    half coff_0 = lerp(1.0h,0.282h, _IrradianceColor);
+    half coff_0 = lerp(1,0.282h, _IrradianceColor);
     half4 coff_1 = half4(0.489h, 0.489h, 0.489h, 1.1h);
     half4 coff_2 = half4(1.1h, 0.315h, 1.1h, 0.55h);
     coff_1 = lerp(1, coff_1, _IrradianceColor);
     coff_2 = lerp(1, coff_2, _IrradianceColor);
-    half m = lerp(1, 3.5, _IrradianceColor*_IrradianceColor);
+    half m = lerp(0.3, 1, _IrradianceColor*_IrradianceColor);
     
     half Y00 = coff_0;
     half Y1_1 = coff_1.x * n.y;
@@ -119,7 +114,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     else
         Fr = prefilteredRadiance(gbufferData, uv);
 
-    Fr = detherColor(Fr, uv, 64);
+    // Fr = detherColor(Fr, uv, 64);
 
     half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
     half3 ao = selfOcclusion(gbufferData, gbufferData.bentNormal, 1);
@@ -147,7 +142,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     }
 
     #ifndef SSAO_QUALITY_OFF
-        half ssao = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).y;
+        half ssao = gbufferData.ssao;
         ao *= ssao;
     #endif
 
