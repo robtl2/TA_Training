@@ -22,7 +22,7 @@ namespace PixRenderPipline
 
             if (!material) material = new Material(Shader.Find("Hidden/Pix/Deferred"));
             int2 size = renderer.size.xy;
-            renderer.cmb.GetTemporaryRT(ColorBuff, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.ARGB32, renderer.colorSpace);
+            renderer.cmb.GetTemporaryRT(ColorBuff, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.RGB111110Float, renderer.colorSpace);
             // GetTemporaryColorRT(ColorBuff);
 
             // TODO: TiledPass搞好后用Tile来剔除多余的栅格化

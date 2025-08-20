@@ -18,9 +18,9 @@ namespace PixRenderPipline
 
         public enum DownSampleSize
         {
+            Full,
             Div2,
             Div4,
-            Div8,
         }
 
         #region main

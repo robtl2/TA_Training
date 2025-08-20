@@ -76,9 +76,6 @@ namespace PixRenderPipline
                 case PixRenderSetting.DownSampleSize.Div4:
                     downSampleSize /= 4;
                     break;
-                case PixRenderSetting.DownSampleSize.Div8:
-                    downSampleSize /= 8;
-                    break;
                 default:
                     break;
             }
