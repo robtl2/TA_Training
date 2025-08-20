@@ -84,6 +84,7 @@ Shader "Hidden/Pix/Sky"
             void proceduralSky(float3 dir, inout half3 sky)
             {
                 float2 theta_phi = DirToThetaPhi(dir);
+                half3 L = rotate_y(_SunDirection, _RotateSky);
 
                 half phi = theta_phi.y*2-1;
                 half under = 1-saturate(-phi);
@@ -98,7 +99,7 @@ Shader "Hidden/Pix/Sky"
                 half scatteringInter = _Scattering.z;
                 half scatteringOuterIntensity = _Scattering.y;
                 half scatteringInterIntensity = _Scattering.w;
-                float NoL = dot(dir, _SunDirection);
+                float NoL = dot(dir, L);
                 float scatter_outer = sq(remap01(scatteringOuter, 1, NoL))*scatteringOuterIntensity;
                 scatter_outer *= scatter_outer;
                 

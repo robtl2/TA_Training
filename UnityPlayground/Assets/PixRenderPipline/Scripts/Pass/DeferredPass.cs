@@ -20,8 +20,10 @@ namespace PixRenderPipline
         {
             base.Execute();
 
-            if(!material)material = new Material(Shader.Find("Hidden/Pix/Deferred"));
-            GetTemporaryColorRT(ColorBuff);
+            if (!material) material = new Material(Shader.Find("Hidden/Pix/Deferred"));
+            int2 size = renderer.size.xy;
+            renderer.cmb.GetTemporaryRT(ColorBuff, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.ARGB32, renderer.colorSpace);
+            // GetTemporaryColorRT(ColorBuff);
 
             // TODO: TiledPass搞好后用Tile来剔除多余的栅格化
             // EarlyZpass画的深度下面要拿来用，所以不管是深度还是Stencil都不能在这个Pass拿来测试象素

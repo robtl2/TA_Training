@@ -58,6 +58,7 @@ namespace PixRenderPipline
         #region properties 
         [Header("Main")]
         public LightType lightType = LightType.Directional;
+        public int priority;
 
         public Color color = Color.white;
         public float intensity = 10;
@@ -287,6 +288,8 @@ namespace PixRenderPipline
         void UpLoadParameters()
         { 
            lightCount = Mathf.Min(lights.Count, MAX_LIGHT_COUNT);
+
+           lights.Sort((l1, l2) => l1.priority.CompareTo(l2.priority));
 
             int index = 0;
             for (int i = 0; i < lightCount; i++)

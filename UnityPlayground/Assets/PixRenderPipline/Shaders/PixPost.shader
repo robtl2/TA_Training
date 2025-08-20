@@ -161,7 +161,7 @@ Shader "Hidden/Pix/Post"
                 #ifdef PP_TONEMAPPING
                     Tonemap(rgb);
                 #endif
-
+                
                 return half4(rgb, 1);
             }
             ENDHLSL

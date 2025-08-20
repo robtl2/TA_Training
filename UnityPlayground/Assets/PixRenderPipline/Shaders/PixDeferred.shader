@@ -105,24 +105,13 @@ Shader "Hidden/Pix/Deferred"
 
                 evaluateIBL(gbufferData, uv, result);
                 
-                // TODO:应该给灯光加个order这样的排序参数，这样就不用为了排序做两次Loop了
                 if(PIX_LIGHT_COUNT > 0){
                     [loop]
                     for(int i = 0;i<PIX_LIGHT_COUNT;i++)
                     {
                         PixLight light = GetPixLight(i);
 
-                        if(light.enabled && light.isPositive)
-                            evaluateLight(light, gbufferData, uv, result);
-                    }
-
-                    // 祛光灯
-                    [loop]
-                    for(int i = 0;i<PIX_LIGHT_COUNT;i++)
-                    {
-                        PixLight light = GetPixLight(i);
-
-                        if(light.enabled && !light.isPositive)
+                        if(light.enabled)
                             evaluateLight(light, gbufferData, uv, result);
                     }
                 }
@@ -132,6 +121,7 @@ Shader "Hidden/Pix/Deferred"
                 #endif
 
                 half3 ldr = HDR2LDR(result);
+                
                 return half4(ldr,1);
             }
             ENDHLSL
