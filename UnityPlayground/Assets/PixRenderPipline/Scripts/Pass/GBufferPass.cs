@@ -12,7 +12,7 @@ namespace PixRenderPipline
         public static readonly int GbufferID_0 = Shader.PropertyToID("_PixGBuffer_0");
         public static readonly int GbufferID_1 = Shader.PropertyToID("_PixGBuffer_1");
         public static readonly int GbufferID_2 = Shader.PropertyToID("_PixGBuffer_2");
-        public static readonly int GbufferID_3 = Shader.PropertyToID("_PixGBuffer_3");
+        // public static readonly int GbufferID_3 = Shader.PropertyToID("_PixGBuffer_3");
 
         readonly RenderTargetIdentifier[] gbuffers;
         readonly RenderTargetIdentifier[] gbuffersWithMotionVec;
@@ -29,11 +29,9 @@ namespace PixRenderPipline
                 new(GbufferID_0),
                 new(GbufferID_1),
                 new(GbufferID_2),
-                new(GbufferID_3),
+                new(MotionVectorRT),
             };
         }
-
-        static Color gray = new Color(0.5f, 0.5f, 0, 0);
 
         public override void Execute()
         {
@@ -47,13 +45,13 @@ namespace PixRenderPipline
 
             if (setting.enable_TAA)
             {
-                renderer.cmb.GetTemporaryRT(GbufferID_3, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.RG32, renderer.colorSpace);
-                renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, EarlyZPass.depthID);
+                renderer.cmb.GetTemporaryRT(MotionVectorRT, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.RG32, renderer.colorSpace);
+                renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, ForwardEarlyZPass.buffID);
                 renderer.cmb.ClearRenderTarget(false, true, Color.clear);
             }
             else
             {
-                renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.depthID);
+                renderer.cmb.SetRenderTarget(gbuffers, ForwardEarlyZPass.buffID);
                 renderer.cmb.ClearRenderTarget(false, true, Color.clear);
             }
 
@@ -64,9 +62,11 @@ namespace PixRenderPipline
             if (list.isValid)
                 renderer.cmb.DrawRendererList(list);
 
-            PixInstance.DrawPass(renderer, 0, renderer.frustum);
+            PixInstance.DrawPass(renderer, 1, renderer.frustum);
 
             TriggerEvent(PixRenderEventName.AfterGBuffer);
+
+            renderer.cmb.SetGlobalTexture(MotionVectorRT, MotionVectorRT);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

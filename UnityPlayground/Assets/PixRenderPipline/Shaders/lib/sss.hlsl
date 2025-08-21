@@ -8,7 +8,6 @@
 int _SSS_ProfileCount;
 half4x4 _SSS_Profiles[MAX_PROFILE_COUNT];
 
-
 PixSSSProfile GetPixSSSProfile(int index){
     int i = max(0, index-1);
     i = min(i, MAX_PROFILE_COUNT-1);
@@ -39,6 +38,7 @@ PixSSSProfile GetPixSSSProfile(int index){
     sssProfile.transmissionColor = transmissionColor;
     sssProfile.transmissionRadius = transmissionRadius;
     sssProfile.transmissionIntensity = transmissionIntensity;
+    sssProfile.sssNormal = half3(0,0,1);
     return sssProfile;
 }
 

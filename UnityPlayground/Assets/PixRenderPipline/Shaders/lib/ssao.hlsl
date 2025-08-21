@@ -4,10 +4,12 @@
 #include "sampler.hlsl"
 #include "light.hlsl"
 
+#define SSAO_BIASE 0.00007
+
 half4 _SSAO_Props;
 half2 _SSAO_Clip;
 
-half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
+half calculateSSAO(half2 uv, half depth_src, half3 pos_src, half3 normalWS)
 {
 #if defined SSAO_QUALITY_OFF
     return 1.0h;
@@ -18,6 +20,9 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
     half maxDistance = _SSAO_Clip.x;
     half rMaxDistance = rcp(maxDistance);
 
+    half clip = 0.3;
+
+    depth_src += SSAO_BIASE;
 
     float3 cameraPos = _WorldSpaceCameraPos;
     half len = length(cameraPos - pos_src);
@@ -35,7 +40,13 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
         }
         else if(maxDistance>0){
             half3 pos_dest = ReconstructWorldPos(uv_dest, depth_dest);
+            half3 dir = pos_dest - pos_src;
             half dist = length(pos_dest - pos_src);
+            dir /= dist;
+
+            half NoD = dot(normalWS, dir);
+            dist = NoD>clip?dist:maxDistance;
+
             dist = min(dist, maxDistance);
             ao += dist*rMaxDistance;
         }
@@ -67,7 +78,13 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src)
             }
             else if(maxDistance_2nd>0){
                 half3 pos_dest = ReconstructWorldPos(uv_dest, depth_dest);
-                half dist = length(pos_dest - pos_src);
+                half3 dir = pos_dest - pos_src;
+                half dist = length(dir);
+                dir/=dist;
+
+                half NoD = dot(normalWS, dir);
+                dist = NoD>clip?dist:maxDistance_2nd;
+
                 dist = min(dist, maxDistance_2nd);
                 ao_2nd += dist*rMaxDistance_2nd;
             }

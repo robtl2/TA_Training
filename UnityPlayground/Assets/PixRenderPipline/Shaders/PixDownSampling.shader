@@ -20,6 +20,7 @@ Shader "Hidden/Pix/DownSampling"
 
             #pragma multi_compile SSAO_QUALITY_OFF SSAO_QUALITY_POOR SSAO_QUALITY_LOW SSAO_QUALITY_MEDIUM SSAO_QUALITY_HIGH
             #pragma multi_compile _ PP_SUN_VOLUME
+            #pragma multi_compile FORWARD_PIPELINE DEFERRED_PIPELINE
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/fullscreen.hlsl"
@@ -29,8 +30,8 @@ Shader "Hidden/Pix/DownSampling"
             #ifndef SSAO_QUALITY_OFF
             #include "lib/ssao.hlsl"
 
-            void SSAO(inout half4 result, half depth, half3 positionWS, half2 screenUV){
-                half ao = calculateSSAO(screenUV, depth, positionWS);
+            void SSAO(inout half4 result, half depth, half3 positionWS, half3 normalWS, half2 screenUV){
+                half ao = calculateSSAO(screenUV, depth, positionWS, normalWS);
                 result.y = ao;
             }
             #endif
@@ -50,7 +51,7 @@ Shader "Hidden/Pix/DownSampling"
                 fade = remap01(5,50,len);
                 fade *= fade;
 
-                half LoV = saturate(dot(sun.direction, V)*0.8+0.2);
+                half LoV = saturate(dot(sun.direction, V));
                 fade = lerp(fade,1,LoV);
 
                 uint maxStep = (uint)_SunVolume.z;
@@ -155,10 +156,11 @@ Shader "Hidden/Pix/DownSampling"
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
                 float2 uv = input.uv;
-
+                
                 // 事情集中起来干能方便的避免重复计算
-                half depth = sampleDepthDownSample(uv);
-                half3 positionWS = ReconstructWorldPos(uv, depth);
+                half3 positionWS;
+                half3 normalWS;
+                half depth = sampleDepthDownSample(uv, positionWS, normalWS);
 
                 half4 result = 1;
 
@@ -167,7 +169,7 @@ Shader "Hidden/Pix/DownSampling"
                 #endif
 
                 #ifndef SSAO_QUALITY_OFF
-                SSAO(result, depth, positionWS, uv);
+                SSAO(result, depth, positionWS, normalWS, uv);
                 #endif
 
                 EvaluateShadow(result, positionWS, uv);
@@ -237,6 +239,8 @@ Shader "Hidden/Pix/DownSampling"
                 result.xy += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset).xy;
                 result.xy += SAMPLE_TEXTURE2D(_PixDownSamplingBlur, sampler_PixDownSamplingBlur, uv-offset*2).xy;
                 result.xy *= 0.2;
+
+                result.y *= result.y;
 
                 return half4(result,0);
             }

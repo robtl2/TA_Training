@@ -76,7 +76,7 @@ namespace PixRenderPipline
         public bool enableSpecular = true;
 
         // 灯光可以自由设置f0的强度，做逆光灯时很方便
-        [Range(0, 1)]
+        [Range(0, 2)]
         public float f0 = 1.0f;
 
         [Range(1,5)]
@@ -88,6 +88,14 @@ namespace PixRenderPipline
         [Header("ShadowMap")]
         public bool enableShadowMap = false;
         public int shadowMapSize = 512;
+        int getShadowMapSize
+        {
+            get
+            {
+                if (shadowMapSize < 64) return 64;
+                return shadowMapSize;
+            }
+        }
         public bool shadowMapJitter = false;
 
         [Range(0.00001f, 0.03f)]
@@ -211,7 +219,7 @@ namespace PixRenderPipline
             renderer.cmb.name = shadowMapPassName;
             int shadowMapName = PixShadowMapIDs[shadowMapIndex];
 
-            renderer.cmb.GetTemporaryRT(shadowMapName, shadowMapSize, shadowMapSize, 32, FilterMode.Point, RenderTextureFormat.Depth);
+            renderer.cmb.GetTemporaryRT(shadowMapName, getShadowMapSize, getShadowMapSize, 32, FilterMode.Point, RenderTextureFormat.Depth);
             renderer.cmb.SetRenderTarget(shadowMapName);
             renderer.cmb.ClearRenderTarget(true, true, Color.clear);
             renderer.cmb.SetGlobalInt(_LightIndex, index);
@@ -227,7 +235,7 @@ namespace PixRenderPipline
             if (PixGPUSkin.gpuSkins.Count > 0)
                 foreach (var gpuskin in PixGPUSkin.gpuSkins) gpuskin.ExecuteGPUskinPass(renderer);
 
-            PixInstance.DrawPass(renderer, 2, frustum);
+            PixInstance.DrawPass(renderer, 4, frustum);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
@@ -347,7 +355,7 @@ namespace PixRenderPipline
 
             float visibilityShadow = visibilityShadowSoftness;
             if (!enableVisbilityShadow) visibilityShadow = 0;
-            shadowmapSizePropList[i] = new Vector4(shadowMapSize, 1.0f / shadowMapSize, visibilityShadow, f0);
+            shadowmapSizePropList[i] = new Vector4(getShadowMapSize, 1.0f / getShadowMapSize, visibilityShadow, f0);
 
             Vector3 pos = transform.position;
             Vector4 posProp = new Vector4(pos.x, pos.y, pos.z, (int)lightType);

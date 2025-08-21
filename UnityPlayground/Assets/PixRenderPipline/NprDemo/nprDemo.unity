@@ -885,14 +885,14 @@ MonoBehaviour:
   IrradianceColor: 1
   IrradianceIntensity: 0.51
   scatteringOuter: -1.47
-  OuterIntensity: 0.737
-  scatteringInter: 0.64
-  InterIntensity: 1
+  OuterIntensity: 0.968
+  scatteringInter: 0.83
+  InterIntensity: 0.936
   sun: {fileID: 1683865467}
-  sunSize: 0.02
+  sunSize: 0.048
   sunIntensity: 0.1
-  sunVolume: 0
-  sunVolumeColor: {r: 0.8962264, g: 0.711727, b: 0.30015132, a: 1}
+  sunVolume: 0.336
+  sunVolumeColor: {r: 0.8584906, g: 0.71098596, b: 0.4251958, a: 1}
   rayStepLength: 0.17
   maxRayStep: 24
   detherStep: 64
@@ -2080,8 +2080,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 755518752}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.021860316, y: -0.9745888, z: -0.19400997, w: -0.1098135}
-  m_LocalPosition: {x: -4.2263656, y: -2.815095, z: 13.226027}
+  m_LocalRotation: {x: 0.03610071, y: -0.9622582, z: -0.21720108, w: -0.15993612}
+  m_LocalPosition: {x: -5.1978464, y: -3.2467728, z: 13.453583}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3045,14 +3045,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9400df227dd284a93856fb8447fa0993, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pipeline: 0
   style: 0
   GPU_OCC_Culling: 1
   defaultFilterMode: 1
-  downSampleSize: 0
-  blurDownsample: 0.34
+  downSampleSize: 1
+  blurDownsample: 0.5
   Enable_Fog: 1
   FogParams: {x: 2.62, y: 4.18, z: 39.1, w: 51.5}
-  FogColor: {r: 0.1802243, g: 0.19702922, b: 0.8490566, a: 0.4627451}
+  FogColor: {r: 0.022116425, g: 0.037267122, b: 0.6698113, a: 0.7176471}
   ao_factor: 1
   Enable_SSAO: 1
   ssao_quality: 2
@@ -3061,20 +3062,20 @@ MonoBehaviour:
   ssao_clipByDistance: 11.44
   Enable_SSAO_2nd: 1
   ssao_factor_2nd: 1
-  ssao_radius_2nd: 10
-  ssao_clipByDistance_2nd: 18.87
-  SharpenStrength: 2.16
-  SharpenMid: 0.22
+  ssao_radius_2nd: 11.06
+  ssao_clipByDistance_2nd: 11.9
+  SharpenStrength: 2.45
+  SharpenMid: 0.285
   Exposure: 1
   Vagnet: 0.759
-  EnableBloom: 1
+  EnableBloom: 0
   Bloom_Threshold: 0.51
   Bloom_Radius: 2
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 0.798
-  TAA_histroy: 0.8
+  TAA_jitter: 0.8
+  TAA_histroy: 0.788
   debugMode: 0
   debugSize: 1
   depthScale: 0.005
@@ -4910,15 +4911,15 @@ MonoBehaviour:
   enableShadowMap: 1
   shadowMapSize: 2048
   shadowMapJitter: 1
-  shadowMapBias: 0.0037
+  shadowMapBias: 0.0024
   shadowMapArea: 1
   boxArea: {fileID: 1914101454}
   enableContactShadow: 1
   contactShadowJitter: 1
   contactShadowJitterRadius: 0.55
-  contactRayLength: 0.736
+  contactRayLength: 1
   contactSampleCount: 16
-  contactBias: 0
+  contactBias: 0.0000168
   enableVisbilityShadow: 0
   visibilityShadowSoftness: 0.2
   volumeLight: 0
@@ -5295,8 +5296,8 @@ Transform:
   m_GameObject: {fileID: 1914101453}
   serializedVersion: 2
   m_LocalRotation: {x: 0.00000000758656, y: -0.0000000074505797, z: -0.000000011084012, w: 1}
-  m_LocalPosition: {x: -2.5, y: 8.28, z: -12.900001}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.06, y: 8.28, z: -12.06}
+  m_LocalScale: {x: 1, y: 1, z: 1.5085379}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

@@ -123,8 +123,6 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
         shadow *= ContactShadow(light, gbufferData.positionWS);
     }
    
-    // shadow *= ShadowMap(light, gbufferData.positionWS, srceenUV);
-
     half3 diffuse = 0;
     if(light.enableDiffuse)
         diffuse = diffuseLobe(gbufferData, NoV, NoL, LoH);

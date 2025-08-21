@@ -24,6 +24,10 @@ namespace PixRenderPipline
         int _MainTex_ST = Shader.PropertyToID("_MainTex_ST");
         int _ShadingModel = Shader.PropertyToID("_ShadingModel");
         int _Alpha = Shader.PropertyToID("_Alpha");
+
+        int _BlendMode = Shader.PropertyToID("_BlendMode");
+        int _BlendSrc = Shader.PropertyToID("_BlendSrc");
+        int _BlendDst = Shader.PropertyToID("_BlendDst");
         
         /// 没有使用SRP batch, 因为我感觉SRP batch的性能不如直接DrawMeshInstanced
         /// 如果我感觉错了, 那就亏大了
@@ -48,8 +52,6 @@ namespace PixRenderPipline
 
             if (visibleDecals.Count == 0)
                 return;
-
-            renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff, EarlyZPass.depthID);
 
             // 先把前两个stencil pass全画了，因为这两个pass没有参数
             for (int i = 0; i < visibleDecals.Count; i++)
@@ -97,20 +99,20 @@ namespace PixRenderPipline
 
                 // 设置blend mode
                 var blendMode = decals[0].asset.blendMode;
-                material.SetInt("_BlendMode", (int)blendMode);
+                material.SetInt(_BlendMode, (int)blendMode);
                 switch (blendMode)
                 {
                     case PixDecal.BlendMode.Transparent:
-                        material.SetInt("_BlendSrc", (int)BlendMode.SrcAlpha);
-                        material.SetInt("_BlendDst", (int)BlendMode.OneMinusSrcAlpha);
+                        material.SetInt(_BlendSrc, (int)BlendMode.SrcAlpha);
+                        material.SetInt(_BlendDst, (int)BlendMode.OneMinusSrcAlpha);
                         break;
                     case PixDecal.BlendMode.Additive:
-                        material.SetInt("_BlendSrc", (int)BlendMode.SrcAlpha);
-                        material.SetInt("_BlendDst", (int)BlendMode.One);
+                        material.SetInt(_BlendSrc, (int)BlendMode.SrcAlpha);
+                        material.SetInt(_BlendDst, (int)BlendMode.One);
                         break;
                     case PixDecal.BlendMode.Multiply:
-                        material.SetInt("_BlendSrc", (int)BlendMode.DstColor);
-                        material.SetInt("_BlendDst", (int)BlendMode.Zero);
+                        material.SetInt(_BlendSrc, (int)BlendMode.DstColor);
+                        material.SetInt(_BlendDst, (int)BlendMode.Zero);
                         break;
                 }
 

@@ -8,7 +8,11 @@ namespace PixRenderPipline
     {
         public static PixRenderSetting instance;
 
-
+        public enum Pipeline
+        {
+            Forward,
+            Deferred,
+        }
        
         public enum Style
         {
@@ -24,6 +28,7 @@ namespace PixRenderPipline
         }
 
         #region main
+        public Pipeline pipeline = Pipeline.Forward;
         public Style style;
 
         public bool GPU_OCC_Culling = true;

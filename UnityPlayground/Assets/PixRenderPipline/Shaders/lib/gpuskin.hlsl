@@ -1,7 +1,7 @@
 #ifndef GPUSKIN_INCLUDED
 #define GPUSKIN_INCLUDED
 
-
+// TODO: fullfil GpuSkin on DrawInstanced
 
 #define MAX_BONE_COUNT  256
 UNITY_INSTANCING_BUFFER_START(Props_gpu_skin)

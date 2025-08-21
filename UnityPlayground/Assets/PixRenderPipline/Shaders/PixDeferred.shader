@@ -29,6 +29,7 @@ Shader "Hidden/Pix/Deferred"
             #pragma multi_compile _ ORTHOGRAPHIC
             #pragma multi_compile _ TAA
             #pragma multi_compile _ FOG
+            #pragma multi_compile _ PP_SUN_VOLUME
             #pragma multi_compile PIX_STYLE_PBR PIX_STYLE_NPR
             #pragma multi_compile SSAO_QUALITY_OFF SSAO_QUALITY_POOR SSAO_QUALITY_LOW SSAO_QUALITY_MEDIUM SSAO_QUALITY_HIGH
             
@@ -72,25 +73,6 @@ Shader "Hidden/Pix/Deferred"
                 return output;
             }
 
-            half4 _FogParams;
-            half4 _FogColor;
-
-            void evaluateFog(GBufferData gbufferData, inout half3 color)
-            {
-                float fogDensity = _FogParams.x;
-                float fogStart = _FogParams.y;
-                float fogEnd = _FogParams.z;
-                float fogHeight = _FogParams.w;
-
-                float heightFactor = saturate((gbufferData.positionWS.y - _WorldSpaceCameraPos.y) / fogHeight);
-                float fogFactor = gbufferData.depth - fogStart;
-                fogFactor = saturate(fogFactor / (fogEnd - fogStart));
-                fogFactor *= fogFactor * _FogColor.a;
-                fogFactor *= heightFactor;
-
-                color = lerp(color, _FogColor.rgb, fogFactor);
-            }
-
             half4 frag(VaryingsDepth input) : SV_Target
             {
                 float2 uv = input.uv;
@@ -120,7 +102,13 @@ Shader "Hidden/Pix/Deferred"
                 evaluateFog(gbufferData, result);
                 #endif
 
+                
+
                 half3 ldr = HDR2LDR(result);
+
+                #ifdef PP_SUN_VOLUME
+                evaluateSunVolume(ldr, uv);
+                #endif
                 
                 return half4(ldr,1);
             }

@@ -49,7 +49,7 @@ namespace PixRenderPipline
             if(!materialTAA) materialTAA = new Material(Shader.Find("Hidden/Pix/TAA"));
 
             var setting = PixRenderSetting.instance;
-            PixDeferredRenderer dr = renderer as PixDeferredRenderer;
+            // PixDeferredRenderer dr = renderer as PixDeferredRenderer;
 
             if (setting.EnableBloom)
             {
@@ -73,7 +73,7 @@ namespace PixRenderPipline
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 3);
             }
 
-            renderer.cmb.SetRenderTarget(DeferredPass.ColorBuff);
+            renderer.cmb.SetRenderTarget(OpaqueRT);
             renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, TransparentPass.ColorBuff);
 
             if (setting.EnableBloom)
@@ -114,6 +114,8 @@ namespace PixRenderPipline
             renderer.cmb.ReleaseTemporaryRT(TransparentPass.ColorBuff);
             renderer.cmb.ReleaseTemporaryRT(EarlyZPass.DepthDownSample);
             renderer.cmb.ReleaseTemporaryRT(DownSamplingPass.rtID);
+            renderer.cmb.ReleaseTemporaryRT(ForwardEarlyZPass.buffName);
+            renderer.cmb.ReleaseTemporaryRT(ForwardEarlyZPass.downSample);
 
             if (setting.EnableBloom)
             {
@@ -123,14 +125,15 @@ namespace PixRenderPipline
 
             if (setting.enable_TAA)
             {
-                materialTAA.SetTexture(ColorBuff_Front, dr.frontRT[renderer.camera]);
+                renderer.cmb.SetGlobalTexture(MotionVectorRT, MotionVectorRT);
+                materialTAA.SetTexture(ColorBuff_Front, renderer.frontRT[renderer.camera]);
                 materialTAA.SetFloat(_HistroyWeight, setting.TAA_histroy);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
-                renderer.cmb.SetRenderTarget(dr.frontRT[renderer.camera]);
-                renderer.cmb.SetGlobalTexture(_MainTex, DeferredPass.ColorBuff);
+                renderer.cmb.SetRenderTarget(renderer.frontRT[renderer.camera]);
+                renderer.cmb.SetGlobalTexture(_MainTex, OpaqueRT);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 1);
 
-                renderer.cmb.ReleaseTemporaryRT(GBufferPass.GbufferID_3);
+                renderer.cmb.ReleaseTemporaryRT(MotionVectorRT);
             }
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);

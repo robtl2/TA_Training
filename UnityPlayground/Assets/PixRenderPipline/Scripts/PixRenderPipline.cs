@@ -12,13 +12,15 @@ namespace PixRenderPipline
     public class PixRenderPipline : RenderPipeline
     {
         public PixRenderPiplineAsset asset { get; private set; }
-        public PixRenderer renderer { get; private set; }
+        public PixRenderer deferredRenderer { get; private set; }
+        public PixRenderer forwardRenderer{ get; private set; }
 
         int frameIndex = 0;
         public PixRenderPipline(PixRenderPiplineAsset asset)
         {
             this.asset = asset;
-            renderer = new PixDeferredRenderer();
+            deferredRenderer = new PixDeferredRenderer();
+            forwardRenderer = new PixForwardRenderer();
         }
 
         /// <summary>
@@ -26,10 +28,13 @@ namespace PixRenderPipline
         /// </summary>
         /// <param name="context">厨房管事儿的给过来的空菜单</param>
         /// <param name="cameras">点菜的客人</param>
-        [Obsolete("神它喵要过时，倒是先把新的方法给出来再报要过时行不，而且就把Array换成List，纯没事找事闲出屁了")]
+        [Obsolete("下个版本的API就把Array换成了List，闲出屁了")]
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
         {
             if (!PixRenderSetting.instance) return;
+
+            var setting = PixRenderSetting.instance;
+            var renderer = setting.pipeline == PixRenderSetting.Pipeline.Forward ? forwardRenderer : deferredRenderer;
             
             frameIndex++;
             // 按照深度排序相机
@@ -51,7 +56,8 @@ namespace PixRenderPipline
         {
             base.Dispose(disposing);
 
-            renderer.CleanUp();
+            deferredRenderer.CleanUp();
+            forwardRenderer.CleanUp();
         }
     }
 }

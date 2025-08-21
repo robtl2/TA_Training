@@ -32,7 +32,7 @@ namespace PixRenderPipline
 
             filterMaterial.SetFloat(_IsSceneView, renderer.isSceneView ? 1 : 0);
 
-            renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, DeferredPass.ColorBuff);
+            renderer.cmb.SetGlobalTexture(TransparentPass.ColorBuff, OpaqueRT);
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
 
@@ -60,9 +60,9 @@ namespace PixRenderPipline
             }
             else
     #endif
-                renderer.cmb.Blit(DeferredPass.ColorBuff, BuiltinRenderTextureType.CameraTarget, filterMaterial);
+                renderer.cmb.Blit(OpaqueRT, BuiltinRenderTextureType.CameraTarget, filterMaterial);
 
-            renderer.cmb.ReleaseTemporaryRT(DeferredPass.ColorBuff);
+            renderer.cmb.ReleaseTemporaryRT(OpaqueRT);
             renderer.cmb.ReleaseTemporaryRT(EarlyZPass.nameID);
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);

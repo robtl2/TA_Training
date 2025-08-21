@@ -18,21 +18,27 @@ Shader "Hidden/Pix/TAA"
             HLSLPROGRAM
             #pragma vertex vertFullScreen
             #pragma fragment frag
+            #pragma multi_compile FORWARD_PIPELINE DEFERRED_PIPELINE
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/fullscreen.hlsl"
             #include "lib/common.hlsl"
 
             TEXTURE2D(_PixColorTex_Front);SAMPLER(sampler_PixColorTex_Front);
-            TEXTURE2D(_PixGBuffer_3);SAMPLER(sampler_PixGBuffer_3);
+            TEXTURE2D(_PixMotionVectorTex);SAMPLER(sampler_PixMotionVectorTex);
 
             half _HistroyWeight;
 
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
+                // return half4(0,1,1,1);
                 float2 uv = input.uv;
 
-                half2 motionVector =  SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv).xy;
+                half2 motionVector =  SAMPLE_TEXTURE2D(_PixMotionVectorTex, sampler_PixMotionVectorTex, uv).xy;
+                
+                #ifdef DEFERRED_PIPELINE
                 motionVector.y = 1-motionVector.y;
+                #endif
+
                 motionVector = motionVector*2-1;
 
                 uv += motionVector;

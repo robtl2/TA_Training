@@ -210,6 +210,17 @@ namespace PixRenderPipline
         {
             var setting = PixRenderSetting.instance;
 
+            if (setting.pipeline == PixRenderSetting.Pipeline.Forward)
+            {
+                Shader.EnableKeyword("FORWARD_PIPELINE");
+                Shader.DisableKeyword("DEFERRED_PIPELINE");
+            }
+            else
+            {
+                Shader.EnableKeyword("DEFERRED_PIPELINE");
+                Shader.DisableKeyword("FORWARD_PIPELINE");
+            }
+
             if (setting.style == PixRenderSetting.Style.PBR)
             {
                 Shader.EnableKeyword("PIX_STYLE_PBR");

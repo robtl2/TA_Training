@@ -1,34 +1,31 @@
 using UnityEngine.Rendering;
 
 /// <summary>
-/// 呐，几乎干的所有事情就是写下来我给的菜品方案而已
-/// 然后每样菜写之前和写之后还顺便告诉下别人，这时别人还能再加点料到菜单上
+/// 这里的Forward管线是在EarlyZ阶段把Normal也画了，画Normal时会有点OverDraw, 
+/// ForwardEarlyZ阶段因为要进象素，所以这个阶段会比Deferred的EarlyZ贵一点
+/// 不过后面流程中的带宽就血赚了
+/// 反正就是试试嘛
 /// </summary>
 namespace PixRenderPipline
 {
-    public class PixDeferredRenderer : PixRenderer
+    public class PixForwardRenderer : PixRenderer
     {
-        public ForwardEarlyZPass earlyZPass { get; private set; }
+        public ForwardEarlyZPass forwardEarlyZPass { get; private set; }
         public OcclusionCullingPass occlusionCullingPass { get; private set; }
-        public DownSamplingPass downSamplingPass{ get; private set; }
-        public GBufferPass gBufferPass { get; private set; }
-        public TiledPass tiledPass { get; private set; }
-        public DeferredPass deferredPass { get; private set; }
+        public DownSamplingPass downSamplingPass { get; private set; }
+        public OpaquePass opaquePass { get; private set; }
         public SkyPass skyPass { get; private set; }
         public DecalPass decalPass { get; private set; }
         public TransparentPass transparentPass { get; private set; }
         public PostProcessPass postProcessPass { get; private set; }
         public FinalPass finalPass { get; private set; }
 
-        
-        public PixDeferredRenderer()
+        public PixForwardRenderer()
         {
-            earlyZPass = new(this);
+            forwardEarlyZPass = new(this);
             occlusionCullingPass = new(this);
             downSamplingPass = new(this);
-            gBufferPass = new(this);
-            tiledPass = new(this);
-            deferredPass = new(this);
+            opaquePass = new(this);
             skyPass = new(this);
             decalPass = new(this);
             transparentPass = new(this);
@@ -40,23 +37,21 @@ namespace PixRenderPipline
         {
             base.Render();
             
-            ExecutePass(earlyZPass);
+            ExecutePass(forwardEarlyZPass);
             ExecutePass(occlusionCullingPass);
             ExecutePass(downSamplingPass);
-            ExecutePass(gBufferPass);
-            ExecutePass(tiledPass);
-            ExecutePass(deferredPass);
+            ExecutePass(opaquePass);
             ExecutePass(skyPass);
             ExecutePass(decalPass);
             ExecutePass(transparentPass);
             ExecutePass(postProcessPass);
             ExecutePass(finalPass);
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             // 绘制编辑器视图中的Gizmos
             if (isSceneView)
                 context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
-#endif
+            #endif
 
             //菜单以及工艺都写完了，交还给厨房管事儿的
             context.Submit();
@@ -66,6 +61,6 @@ namespace PixRenderPipline
         {
             pass.Execute();
         }
-
+       
     }
 }

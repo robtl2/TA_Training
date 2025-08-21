@@ -49,7 +49,6 @@ half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData, half2 uv)
     dominantDir = lerp(dominantDir, L, abs(gbufferData.anisotropy));
 
     half v = selfOcclusion(gbufferData, dominantDir, gbufferData.roughness) * _SkyColor.a;
-
     dominantDir = rotate_y(dominantDir, _RotateSky);
     
     return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, dominantDir, mipLevel) * gbufferData.fresnel * v;
@@ -60,8 +59,6 @@ half3 prefilteredRadiance(GBufferData gbufferData, half2 uv) {
 
     half3 r = gbufferData.reflectDir;
     r = rotate_y(r, _RotateSky);
-    // half3 jitter = hash23(uv)*0.5h/gbufferData.depth;
-    // r = normalize(r + jitter);
     float lod = perceptualRoughnessToLod(gbufferData.perceptualRoughness);
 
     return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, r, lod) * gbufferData.fresnel * v;
@@ -69,7 +66,7 @@ half3 prefilteredRadiance(GBufferData gbufferData, half2 uv) {
 
 
 // 其实吧。。也不一定就非得把bake时的系数套进去
-// 咱们TA都是以视觉效果为主, 这里只套基函数效果还好些
+// 咱们TA都是以视觉效果为主, 有时只套基函数效果还好些
 // 加入参数让美术自己决定Irradiance的颜色影响强度
 half3 diffuseIrradiance(half3 n) {
     n = rotate_y(n, _RotateSky);
@@ -114,8 +111,6 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     else
         Fr = prefilteredRadiance(gbufferData, uv);
 
-    // Fr = detherColor(Fr, uv, 64);
-
     half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
     half3 ao = selfOcclusion(gbufferData, gbufferData.bentNormal, 1);
     
@@ -142,8 +137,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     }
 
     #ifndef SSAO_QUALITY_OFF
-        half ssao = gbufferData.ssao;
-        ao *= ssao;
+        ao *= gbufferData.ssao;
     #endif
 
     Fd *= ao;

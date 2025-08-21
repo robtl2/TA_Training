@@ -15,14 +15,29 @@ TEXTURE2D(_PixGBuffer_2);SAMPLER(sampler_PixGBuffer_2);
 #ifdef MOTION_VECTOR_ON
 TEXTURE2D(_PixGBuffer_3);SAMPLER(sampler_PixGBuffer_3);
 #endif
-TEXTURE2D(_PixEarlyZDepth);SAMPLER(sampler_PixEarlyZDepth);
+TEXTURE2D(_PixDepthNormal);SAMPLER(sampler_PixDepthNormal);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
 TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);half2 _PixDepthDownSample_TexelSize;
 TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
 
+TEXTURE2D(_PixDepthNormalDownSample);SAMPLER(sampler_PixDepthNormalDownSample);float2 _PixDepthNormalDownSample_TexelSize;
+
+
 #ifdef DEBUG_LIGHT
     half _DebugBrightness;
+#endif
+
+#ifdef PP_SUN_VOLUME
+// TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
+// half4 _SunVolume;
+half4 _SunVolumeColor;
+
+void evaluateSunVolume(inout half3 color, half2 screenUV){
+    // volume sun light的计算放下采样里去了
+    half3 volume = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV).x;
+    color = lerp(color, _SunVolumeColor.rgb, volume);
+}
 #endif
 
 
@@ -39,12 +54,40 @@ float3 ReconstructWorldPos(float2 uv, float ndcDepth)
 }
 
 half sampleDepth(float2 uv){
-    return SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
+    float2 depth = SAMPLE_TEXTURE2D(_PixDepthNormal, sampler_PixDepthNormal, uv).rg;
+    return DecodeFloatRG(depth);
+    // return SAMPLE_TEXTURE2D(_PixDepthNormal, sampler_PixDepthNormal, uv).r;
+}
+
+half sampleDepthDownSample(float2 uv, out half3 positionWS, out half3 normalWS){
+    half4 depthNormal = SAMPLE_TEXTURE2D(_PixDepthNormalDownSample, sampler_PixDepthNormalDownSample, uv);
+    half depth = DecodeFloatRG(depthNormal.rg);
+    positionWS = ReconstructWorldPos(uv, depth);
+
+    half3 normalVS = UnpackNormalHemiOctEncode(depthNormal.zw*2-1);
+    float3x3 Matrix_V = GetMatrix_WorldToView(positionWS);
+    normalWS = mul(normalVS, Matrix_V);
+
+    // #ifdef UNITY_REVERSED_Z
+    //     depth = 1.0 - depth;
+    // #else
+    //     depth = depth * 2 - 1;
+    // #endif
+
+    return depth;
 }
 
 half sampleDepthDownSample(float2 uv){
-    return SAMPLE_TEXTURE2D(_PixDepthDownSample, sampler_PixDepthDownSample, uv).r;
+    half4 depthNormal = SAMPLE_TEXTURE2D(_PixDepthNormalDownSample, sampler_PixDepthNormalDownSample, uv);
+    half depth = DecodeFloatRG(depthNormal.rg);
+    // #ifdef UNITY_REVERSED_Z
+    //     depth = 1.0 - depth;
+    // #else
+    //     depth = depth * 2 - 1;
+    // #endif
+    return depth;
 }
+
 
 half3 samplePositionWS(float2 uv){
     half depth = sampleDepth(uv);
@@ -133,7 +176,8 @@ GBufferData UnpackGBuffer(float2 uv)
 #ifdef MOTION_VECTOR_ON
     half4 gbuffer_3 = SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv);
 #endif
-    float ndcDepth = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).r;
+    // float2 ndcPos = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).zw;
+    float ndcDepth = sampleDepth(uv);
 
     half3 albedo = gbuffer_0.rgb;
     half3 normalVS = UnpackNormalHemiOctEncode(gbuffer_1.xy*2-1);
@@ -145,12 +189,8 @@ GBufferData UnpackGBuffer(float2 uv)
     half3 viewDir = cameraPos - worldPos;
     half depth = length(viewDir);
     viewDir /= depth;
-
-    half3 viewUp = half3(0.0, 1.0, 0.0);
-    half3 up = mul((half3x3)UNITY_MATRIX_I_V, viewUp);
-    half3 right = normalize(cross(viewDir, up));
-    up = cross(right, viewDir);
-    half3x3 viewToWorld = half3x3(right, up, viewDir);
+    
+    half3x3 viewToWorld = GetMatrix_WorldToView(worldPos);
     half3 normalWS = mul(normalVS, viewToWorld);
     half3 bitangentWS = cross(normalWS, tangentWS);
 
@@ -192,8 +232,8 @@ GBufferData UnpackGBuffer(float2 uv)
     half fresnel = 1-normalVS.z;
     fresnel = pow5(fresnel);
 
-    half2 downSampleJitter = hash22(uv)*_PixDownSampling_TexelSize;
-    half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+downSampleJitter);
+    // half2 downSampleJitter = hash22(uv)*_PixDownSampling_TexelSize;
+    half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv);
 
     half sunVolume = downSampleColor.r;
     half ssao = downSampleColor.g;
@@ -217,7 +257,6 @@ GBufferData UnpackGBuffer(float2 uv)
     gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
 
 #ifdef DEBUG_LIGHT
-    gbufferData.shadingModel = shadingModel;
     gbufferData.albedo = _DebugBrightness;
     gbufferData.diffuse = _DebugBrightness;
 #endif
@@ -253,5 +292,7 @@ GBufferData UnpackGBuffer(float2 uv)
 
     return gbufferData;
 }
+
+
 
 #endif

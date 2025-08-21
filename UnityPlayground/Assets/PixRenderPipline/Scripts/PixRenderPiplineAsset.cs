@@ -60,8 +60,8 @@ namespace PixRenderPipline
                     break;
             }
             int2 size = new((int)(h * aspect), h);
-            // 让size.x是8的倍数
-            size.x = (size.x + 7) / 8 * 8;
+            // 让size是8的倍数
+            size = (size + 7) / 8 * 8;
             
             // 确保尺寸不为零
             if (size.x < 8) size.x = 8;

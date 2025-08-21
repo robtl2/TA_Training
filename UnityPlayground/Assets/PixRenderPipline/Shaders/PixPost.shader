@@ -118,19 +118,19 @@ Shader "Hidden/Pix/Post"
             }
             #endif
 
-            #ifdef PP_SUN_VOLUME
-            // TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
-            half4 _SunVolume;
-            half4 _SunVolumeColor;
+            // #ifdef PP_SUN_VOLUME
+            // // TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
+            // half4 _SunVolume;
+            // half4 _SunVolumeColor;
 
-            void SunVolume(inout half3 color, half2 screenUV, half mask){
-                // volume sun light的计算放下采样里去了
-                half3 volume = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV).x;
-                half m = lerp(mask,1,_SunVolumeColor.a);
-                color = lerp(color, _SunVolumeColor.rgb, volume*m);
-            }
+            // void SunVolume(inout half3 color, half2 screenUV, half mask){
+            //     // volume sun light的计算放下采样里去了
+            //     half3 volume = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV).x;
+            //     half m = lerp(mask,1,_SunVolumeColor.a);
+            //     color = lerp(color, _SunVolumeColor.rgb, volume*m);
+            // }
 
-            #endif
+            // #endif
 
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
@@ -149,9 +149,9 @@ Shader "Hidden/Pix/Post"
 
                 rgb = LDR2HDR(rgb);
 
-                #ifdef PP_SUN_VOLUME
-                    SunVolume(rgb, uv, color.a);
-                #endif
+                // #ifdef PP_SUN_VOLUME
+                //     SunVolume(rgb, uv, color.a);
+                // #endif
 
                 rgb *= _Exposure;
 

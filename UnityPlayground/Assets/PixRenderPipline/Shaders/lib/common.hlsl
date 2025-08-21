@@ -7,6 +7,42 @@
 
 #define MATH_ACC 1
 
+half4 _FogParams;
+half4 _FogColor;
+
+void evaluateFog(GBufferData gbufferData, inout half3 color)
+{
+    float fogDensity = _FogParams.x;
+    float fogStart = _FogParams.y;
+    float fogEnd = _FogParams.z;
+    float fogHeight = _FogParams.w;
+
+    float heightFactor = saturate((gbufferData.positionWS.y - _WorldSpaceCameraPos.y) / fogHeight);
+    float fogFactor = gbufferData.depth - fogStart;
+    fogFactor = saturate(fogFactor / (fogEnd - fogStart));
+    fogFactor *= fogFactor * _FogColor.a;
+    fogFactor *= heightFactor;
+
+    color = lerp(color, _FogColor.rgb, fogFactor);
+}
+
+
+
+inline float2 EncodeFloatRG( float v )
+{
+    float2 kEncodeMul = float2(1.0, 255.0);
+    float kEncodeBit = 1.0/255.0;
+    float2 enc = kEncodeMul * v;
+    enc = frac (enc);
+    enc.x -= enc.y * kEncodeBit;
+    return enc;
+}
+inline float DecodeFloatRG( float2 enc )
+{
+    float2 kDecodeDot = float2(1.0, 1/255.0);
+    return dot( enc, kDecodeDot );
+}
+
 void TestAlpha(half alpha, half cutOff, half2 screenUV){
     #ifdef TAA
         clip(detherAlpha(alpha, cutOff, screenUV));
@@ -163,6 +199,16 @@ half3 rotate_y(half3 v, half angle)
     );
 
     return mul(rotationMatrix, v);
+}
+
+float3x3 GetMatrix_WorldToView(float3 positionWS){
+    float3 cameraPos = _WorldSpaceCameraPos;
+    float3 viewDir = normalize(cameraPos - positionWS);
+    float3 viewUp = float3(0.0, 1.0, 0.0);
+    float3 up = mul((float3x3)UNITY_MATRIX_I_V, viewUp);
+    float3 right = normalize(cross(viewDir, up));
+
+    return float3x3(right, up, viewDir);
 }
 
 

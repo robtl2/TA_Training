@@ -22,9 +22,9 @@ namespace PixRenderPipline
             base.Execute();
 
             GetTemporaryColorRT(ColorBuff);
-            //先把之前Deferred渲染的结果复制过来
-            renderer.cmb.Blit(DeferredPass.ColorBuff, ColorBuff);
-            renderer.cmb.SetRenderTarget(ColorBuff, EarlyZPass.depthID);
+            //先把之前Opaque渲染的结果复制过来
+            renderer.cmb.Blit(OpaqueRT, ColorBuff);
+            renderer.cmb.SetRenderTarget(ColorBuff, ForwardEarlyZPass.buffID);
 
             TriggerEvent(PixRenderEventName.BeforeTransparent);
 
@@ -33,8 +33,6 @@ namespace PixRenderPipline
                 renderer.cmb.DrawRendererList(list);
 
             TriggerEvent(PixRenderEventName.AfterTransparent);
-
-
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

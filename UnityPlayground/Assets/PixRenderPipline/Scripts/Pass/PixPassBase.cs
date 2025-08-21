@@ -13,6 +13,8 @@ namespace PixRenderPipline
         #region 这里放的都是做菜时常用的配料
 
         public static readonly int _MainTex= Shader.PropertyToID("_MainTex");
+        public static readonly int OpaqueRT = Shader.PropertyToID("_PixOpaqueTex");
+        public static readonly int MotionVectorRT = Shader.PropertyToID("_PixMotionVectorTex");
         public static readonly ShaderTagId shadowCasterTag = new("PixShadowCaster");
         static Material _blitMat;
         public Material blitMat

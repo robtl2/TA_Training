@@ -6,9 +6,6 @@ namespace PixRenderPipline
 {
     public class DeferredPass : PixPassBase
     {
-        public static readonly int ColorBuff = Shader.PropertyToID("_PixOpaqueTex");
-        public static readonly RenderTargetIdentifier ColorBuffID = new(ColorBuff);
-        
         public Material material;
         
         public DeferredPass(PixRenderer renderer) : base("PixDeferredPass", renderer)
@@ -22,7 +19,7 @@ namespace PixRenderPipline
 
             if (!material) material = new Material(Shader.Find("Hidden/Pix/Deferred"));
             int2 size = renderer.size.xy;
-            renderer.cmb.GetTemporaryRT(ColorBuff, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.RGB111110Float, renderer.colorSpace);
+            renderer.cmb.GetTemporaryRT(OpaqueRT, size.x, size.y, 0, FilterMode.Point, RenderTextureFormat.RGB111110Float, renderer.colorSpace);
             // GetTemporaryColorRT(ColorBuff);
 
             // TODO: TiledPass搞好后用Tile来剔除多余的栅格化
@@ -31,7 +28,7 @@ namespace PixRenderPipline
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
             renderer.cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
             renderer.cmb.SetGlobalTexture(TiledPass.tileID, TiledPass.tileID);
-            renderer.cmb.SetRenderTarget(ColorBuff);
+            renderer.cmb.SetRenderTarget(OpaqueRT);
 
             TriggerEvent(PixRenderEventName.BeforeDeferred);
 

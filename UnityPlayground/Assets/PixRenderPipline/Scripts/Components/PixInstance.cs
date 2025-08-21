@@ -37,6 +37,7 @@ namespace PixRenderPipline
         /// <summary>
         /// 交给渲染管线调用的渲染Pass
         /// 要是这里的passID能用管线里的ShaderTagID作为参数的话会更体面
+        /// 哪个阶段该用哪个id的pass在PixStandard.shader里有写
         /// </summary>
         public static void DrawPass(PixRenderer renderer, int passID, Plane[] frustum)
         {
