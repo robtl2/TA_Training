@@ -879,11 +879,11 @@ MonoBehaviour:
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   blurLevel: 3.6
   color: {r: 0.3537736, g: 0.52522135, b: 1, a: 0.07058824}
-  intensity: 1.6
+  intensity: 1.31
   displayColor: {r: 0.33333337, g: 0.72386473, b: 0.94509804, a: 1}
   fovScale: 0.82
   IrradianceColor: 1
-  IrradianceIntensity: 0.5
+  IrradianceIntensity: 0.1
   scatteringOuter: -1.47
   OuterIntensity: 1
   scatteringInter: 0.06
@@ -3050,7 +3050,7 @@ MonoBehaviour:
   GPU_OCC_Culling: 1
   defaultFilterMode: 1
   downSampleSize: 1
-  blurDownsample: 0.87
+  blurDownsample: 0.72
   Enable_Fog: 1
   FogParams: {x: 2.62, y: 4.18, z: 39.1, w: 51.5}
   FogColor: {r: 0.022116425, g: 0.037267122, b: 0.6698113, a: 0.6745098}
@@ -3058,11 +3058,11 @@ MonoBehaviour:
   Enable_SSAO: 1
   ssao_quality: 2
   ssao_factor: 1
-  ssao_radius: 31.4
+  ssao_radius: 46.3
   ssao_clipByDistance: 11.44
   Enable_SSAO_2nd: 1
   ssao_factor_2nd: 1
-  ssao_radius_2nd: 11.06
+  ssao_radius_2nd: 10.46
   ssao_clipByDistance_2nd: 11.9
   SharpenStrength: 0
   SharpenMid: 0.256
@@ -3075,7 +3075,7 @@ MonoBehaviour:
   Enable_Tonemapping: 1
   enable_TAA: 1
   TAA_jitter: 0.5
-  TAA_histroy: 0.788
+  TAA_histroy: 0.75
   debugMode: 0
   debugSize: 1
   depthScale: 0.005
@@ -4909,17 +4909,17 @@ MonoBehaviour:
   effectArea: {fileID: 0}
   areaFadeRange: 0
   enableShadowMap: 1
-  shadowMapSize: 1024
+  shadowMapSize: 2048
   shadowMapJitter: 1
-  shadowMapBias: 0.0112
+  shadowMapBias: 0.0092
   shadowMapArea: 1
   boxArea: {fileID: 1914101454}
   enableContactShadow: 1
   contactShadowJitter: 1
-  contactShadowJitterRadius: 0.99
-  contactRayLength: 1
+  contactShadowJitterRadius: 3
+  contactRayLength: 0.978
   contactSampleCount: 16
-  contactBias: 0.0000075
+  contactBias: 0.0000097
   enableVisbilityShadow: 0
   visibilityShadowSoftness: 0.2
   volumeLight: 0

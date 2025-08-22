@@ -76,7 +76,7 @@ half3 diffuseIrradiance(half3 n) {
     half4 coff_2 = half4(1.1h, 0.315h, 1.1h, 0.55h);
     coff_1 = lerp(1, coff_1, _IrradianceColor);
     coff_2 = lerp(1, coff_2, _IrradianceColor);
-    half m = lerp(0.3, 1, _IrradianceColor*_IrradianceColor);
+    half m = lerp(1, 4, _IrradianceColor*_IrradianceColor);
     
     half Y00 = coff_0;
     half Y1_1 = coff_1.x * n.y;

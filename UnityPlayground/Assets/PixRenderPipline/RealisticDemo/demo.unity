@@ -406,10 +406,10 @@ MonoBehaviour:
   texture: {fileID: 8900000, guid: 86095980ea8ec438bbdff06de2731fc0, type: 3}
   blurLevel: 4.3
   color: {r: 1, g: 1, b: 1, a: 1}
-  intensity: 1
-  displayColor: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
+  intensity: 0.62
+  displayColor: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 1}
   fovScale: 1.5
-  IrradianceColor: 0
+  IrradianceColor: 0.165
   IrradianceIntensity: 1
   scatteringOuter: 0.5
   OuterIntensity: 1
@@ -521,7 +521,7 @@ MonoBehaviour:
   boxArea: {fileID: 1795428412}
   enableContactShadow: 1
   contactShadowJitter: 1
-  contactShadowJitterRadius: 0.87
+  contactShadowJitterRadius: 3
   contactRayLength: 0.04
   contactSampleCount: 8
   contactBias: 0.0000172
@@ -721,8 +721,8 @@ MonoBehaviour:
   profileName: skin_girl_default
   sssType: 0
   scatteringColor: {r: 0.9622642, g: 0, b: 0, a: 1}
-  scatteringRadius: 0.3
-  scatteringIntensity: 0.3
+  scatteringRadius: 0.261
+  scatteringIntensity: 0.246
   transmissionColor: {r: 1, g: 0, b: 0, a: 1}
   transmissionRadius: 1
   transmissionIntensity: 1
@@ -770,25 +770,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9400df227dd284a93856fb8447fa0993, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pipeline: 1
   style: 0
   GPU_OCC_Culling: 0
   defaultFilterMode: 1
-  downSampleSize: 0
-  blurDownsample: 3
+  downSampleSize: 1
+  blurDownsample: 1.31
   Enable_Fog: 0
   FogParams: {x: 0.1, y: 0.1, z: 200, w: 10}
   FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  ao_factor: 0.711
+  ao_factor: 0.702
   Enable_SSAO: 1
-  ssao_quality: 1
-  ssao_factor: 0.934
-  ssao_radius: 12.5
-  ssao_clipByDistance: 0
+  ssao_quality: 2
+  ssao_factor: 0.876
+  ssao_radius: 19.1
+  ssao_clipByDistance: 5
   Enable_SSAO_2nd: 0
   ssao_factor_2nd: 1
   ssao_radius_2nd: 0.02
   ssao_clipByDistance_2nd: 0
-  SharpenStrength: 2.7
+  SharpenStrength: 0
   SharpenMid: 0.24
   Exposure: 0.88
   Vagnet: 0
@@ -798,8 +799,8 @@ MonoBehaviour:
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 0.738
-  TAA_histroy: 0.85
+  TAA_jitter: 0.5
+  TAA_histroy: 0.806
   debugMode: 0
   debugSize: 1
   depthScale: 1
