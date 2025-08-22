@@ -134,10 +134,9 @@ half ShadowMap(PixLight light, half3 positionWS, half2 screenUV){
     return depthSrc>depthDest;
 }
 
-half ContactShadow(half3 positionWS, half3 direction, half rayLengthDivStepCount, int stepCount, half jitterRadius, half bias, half clip, half outOfUV = 1.0){
+half ContactShadow(half3 positionWS, half3 direction, half rayLength, int stepCount, half jitterRadius, half bias, half clip, half outOfUV = 1.0){
     int sampleCount = stepCount + 1; 
-    half rayLength = rayLengthDivStepCount*stepCount;
-    half step = rayLengthDivStepCount; //采样步长
+    half step = rayLength/stepCount; //采样步长
     half3 pos_ori = positionWS; //ray的起点
     half3 pos_src = pos_ori;
     
@@ -178,12 +177,12 @@ half ContactShadow(PixLight light, half3 positionWS){
     if(light.lightType>0)
         direction = normalize(light.position - positionWS);
 
-    half rayLengthDivStepCount = light.contactShadow;
+    half rayLength = light.contactShadow;
     int stepCount = light.contactSampleCount;
     half jitterRadius = light.contactShadowJitter*light.shadowMapSize.y;
     half bias = light.contactBias;
 
-    return ContactShadow(positionWS, direction, rayLengthDivStepCount, stepCount, jitterRadius, bias, rayLengthDivStepCount*stepCount*0.5);
+    return ContactShadow(positionWS, direction, rayLength, stepCount, jitterRadius, bias, rayLength*0.5);
 }
 
 #endif

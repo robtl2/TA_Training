@@ -53,11 +53,10 @@ float3 ReconstructWorldPos(float2 uv, float ndcDepth)
 half sampleDepth(float2 uv){
     float2 depth = SAMPLE_TEXTURE2D(_PixDepthNormal, sampler_PixDepthNormal, uv).rg;
     return DecodeFloatRG(depth);
-    // return SAMPLE_TEXTURE2D(_PixDepthNormal, sampler_PixDepthNormal, uv).r;
 }
 
-half sampleDepthDownSample(float2 uv, out half3 positionWS, out half3 normalWS){
-    half4 depthNormal = SAMPLE_TEXTURE2D(_PixDepthNormalDownSample, sampler_PixDepthNormalDownSample, uv);
+half sampleDepth(float2 uv, out half3 positionWS, out half3 normalWS){
+    float4 depthNormal = SAMPLE_TEXTURE2D(_PixDepthNormal, sampler_PixDepthNormal, uv);
     half depth = DecodeFloatRG(depthNormal.rg);
     positionWS = ReconstructWorldPos(uv, depth);
 
@@ -65,11 +64,17 @@ half sampleDepthDownSample(float2 uv, out half3 positionWS, out half3 normalWS){
     float3x3 Matrix_V = GetMatrix_WorldToView(positionWS);
     normalWS = mul(normalVS, Matrix_V);
 
-    // #ifdef UNITY_REVERSED_Z
-    //     depth = 1.0 - depth;
-    // #else
-    //     depth = depth * 2 - 1;
-    // #endif
+    return depth;
+}
+
+half sampleDepthDownSample(float2 uv, out half3 positionWS, out half3 normalWS){
+    float4 depthNormal = SAMPLE_TEXTURE2D(_PixDepthNormalDownSample, sampler_PixDepthNormalDownSample, uv);
+    half depth = DecodeFloatRG(depthNormal.rg);
+    positionWS = ReconstructWorldPos(uv, depth);
+
+    half3 normalVS = UnpackNormalHemiOctEncode(depthNormal.zw*2-1);
+    float3x3 Matrix_V = GetMatrix_WorldToView(positionWS);
+    normalWS = mul(normalVS, Matrix_V);
 
     return depth;
 }
@@ -77,11 +82,7 @@ half sampleDepthDownSample(float2 uv, out half3 positionWS, out half3 normalWS){
 half sampleDepthDownSample(float2 uv){
     half4 depthNormal = SAMPLE_TEXTURE2D(_PixDepthNormalDownSample, sampler_PixDepthNormalDownSample, uv);
     half depth = DecodeFloatRG(depthNormal.rg);
-    // #ifdef UNITY_REVERSED_Z
-    //     depth = 1.0 - depth;
-    // #else
-    //     depth = depth * 2 - 1;
-    // #endif
+    
     return depth;
 }
 
@@ -174,7 +175,8 @@ MaterialData UnpackGBuffer(float2 uv)
     half4 gbuffer_3 = SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv);
 #endif
     // float2 ndcPos = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).zw;
-    float ndcDepth = sampleDepth(uv);
+    half ndcDepth = sampleDepth(uv);
+    half ndcDepthDownSample = sampleDepthDownSample(uv);
 
     half3 albedo = gbuffer_0.rgb;
     half3 normalVS = UnpackNormalHemiOctEncode(gbuffer_1.xy*2-1);
@@ -233,13 +235,14 @@ MaterialData UnpackGBuffer(float2 uv)
     half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).rgb;
     half sunVolume = downSampleColor.r;
     half ssao = downSampleColor.g;
-    half4 shadow = DecodeShadow(downSampleColor.b);
-    half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
+    // 暂时不用
+    // half4 shadow = DecodeShadow(downSampleColor.b);
+    // half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
 
     MaterialData matData;
     matData.sunVolume = sunVolume;
     matData.ssao = ssao;
-    matData.shadows = shadows;
+    // matData.shadows = shadows;
     matData.shadingModel = shadingModel;
     matData.albedo = albedo;
     matData.diffuse = diffuse;
@@ -260,6 +263,7 @@ MaterialData UnpackGBuffer(float2 uv)
     matData.reflectDir = reflect(-viewDir, normalWS);
     matData.NoV = normalVS.z;
     matData.ndcDepth = ndcDepth;
+    matData.ndcDepthDownSample = ndcDepthDownSample;
     matData.depth = depth;
     matData.viewToWorld = viewToWorld;
     matData.sssProfile = sssProfile;

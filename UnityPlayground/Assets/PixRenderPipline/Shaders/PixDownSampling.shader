@@ -51,7 +51,7 @@ Shader "Hidden/Pix/DownSampling"
                 fade = remap01(5,50,len);
                 fade *= fade;
 
-                half LoV = saturate(dot(sun.direction, V));
+                half LoV = saturate(dot(sun.direction, V)*0.8 + 0.2);
                 fade = lerp(fade,1,LoV);
 
                 uint maxStep = (uint)_SunVolume.z;
@@ -107,6 +107,8 @@ Shader "Hidden/Pix/DownSampling"
                 return packedValue/255.0;
             }
 
+            // 暂时没用这个
+            /*
             void EvaluateShadow(inout half4 result, half3 positionWS, half2 screenUV){
                 int shadowIndex[4] = {-1,-1,-1,-1};
                 int lightIndex[4] = {-1,-1,-1,-1};
@@ -152,6 +154,7 @@ Shader "Hidden/Pix/DownSampling"
 
                 result.b = PackShadow(shadowResult);
             }
+            */
 
             half4 frag(VarFullScreenQuad input) : SV_Target
             {
@@ -160,7 +163,7 @@ Shader "Hidden/Pix/DownSampling"
                 // 事情集中起来干能方便的避免重复计算
                 half3 positionWS;
                 half3 normalWS;
-                half depth = sampleDepthDownSample(uv, positionWS, normalWS);
+                half depth = sampleDepth(uv, positionWS, normalWS);
 
                 half4 result = 1;
 
@@ -172,7 +175,8 @@ Shader "Hidden/Pix/DownSampling"
                 SSAO(result, depth, positionWS, normalWS, uv);
                 #endif
 
-                EvaluateShadow(result, positionWS, uv);
+                // shadow效果还有点不对，暂时不在这里做
+                // EvaluateShadow(result, positionWS, uv);
                 
                 return result;
             }

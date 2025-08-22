@@ -52,8 +52,10 @@ half3 diffuseLobe(MaterialData matData,  float NoV, float NoL, float LoH) {
 }
 
 // 后面ShadingModel计算的入口
-void evaluateLight(PixLight light, MaterialData matData, half2 srceenUV, inout half3 result) 
+void evaluateLight(PixLight light, MaterialData matData, half2 screenUV, inout half3 result) 
 {
+    
+
     half effect = 1.0h;
     if(light.enableAreaEffect){
         float4 posInArea = mul(light.effectArea, float4(matData.positionWS, 1.0f));
@@ -73,6 +75,9 @@ void evaluateLight(PixLight light, MaterialData matData, half2 srceenUV, inout h
         result *= lerp(1, light.color, effect);
         return;
     }
+
+    // result = ContactShadow(light, matData.positionWS);
+    // return;
 
     half3 N = matData.normalWS;
     half3 L = light.direction;
@@ -117,11 +122,14 @@ void evaluateLight(PixLight light, MaterialData matData, half2 srceenUV, inout h
     half shadow = 1;
     shadow *= VisibilityShadow(light, matData);
 
-    if(light.shadowMapIndex>-1){
-        shadow *= matData.shadows[light.shadowMapIndex];
-    }else{
-        shadow *= ContactShadow(light, matData.positionWS);
-    }
+    shadow *= ShadowMap(light, matData.positionWS, screenUV);
+    shadow *= ContactShadow(light, matData.positionWS);
+
+    // if(light.shadowMapIndex>-1){
+    //     shadow *= matData.shadows[light.shadowMapIndex];
+    // }else{
+    //     shadow *= ContactShadow(light, matData.positionWS);
+    // }
    
     half3 diffuse = 0;
     if(light.enableDiffuse)

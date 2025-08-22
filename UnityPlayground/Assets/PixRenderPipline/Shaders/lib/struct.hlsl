@@ -95,7 +95,7 @@ struct MaterialData
 
     half sunVolume;
     half ssao;
-    half shadows[4];
+    // half shadows[4];
 
     float3 positionWS;
     half3 normalWS;
@@ -108,6 +108,7 @@ struct MaterialData
     half NoV;
     half3 fresnel;
     half ndcDepth;
+    half ndcDepthDownSample;
     half depth;
     half perceptualRoughness;
     half roughness;

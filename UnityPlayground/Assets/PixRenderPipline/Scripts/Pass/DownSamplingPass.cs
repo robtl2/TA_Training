@@ -23,8 +23,9 @@ namespace PixRenderPipline
 
             var setting = PixRenderSetting.instance;
 
-            renderer.cmb.GetTemporaryRT(rtID, renderer.size.z, renderer.size.w, 0, FilterMode.Point, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            renderer.cmb.GetTemporaryRT(rtID, renderer.size.z, renderer.size.w, 0, FilterMode.Point, RenderTextureFormat.ARGB64, RenderTextureReadWrite.Linear);
             renderer.cmb.SetRenderTarget(rtID);
+            // renderer.cmb.ClearRenderTarget(true, true, Color.clear);
 
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
 
@@ -32,7 +33,7 @@ namespace PixRenderPipline
             {
                 renderer.cmb.SetGlobalFloat(_BlurDownsample, setting.blurDownsample);
 
-                renderer.cmb.GetTemporaryRT(blurRT, renderer.size.z, renderer.size.w, 0, FilterMode.Point, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                renderer.cmb.GetTemporaryRT(blurRT, renderer.size.z, renderer.size.w, 0, FilterMode.Point, RenderTextureFormat.ARGB64, RenderTextureReadWrite.Linear);
                 renderer.cmb.SetGlobalTexture(rtID, rtID);
                 renderer.cmb.SetRenderTarget(blurRT);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 1);

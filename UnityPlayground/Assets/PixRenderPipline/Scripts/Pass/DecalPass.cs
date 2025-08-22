@@ -116,7 +116,7 @@ namespace PixRenderPipline
                         break;
                 }
 
-                material.SetTexture(_MainTex, texture);
+                material.SetTexture(MainTex, texture);
                 decalsPropertyBlock.SetVectorArray(_MainTex_ST, rects.ToArray());
                 decalsPropertyBlock.SetFloatArray(_ShadingModel, shadingModels.ToArray());
                 decalsPropertyBlock.SetFloatArray(_Alpha, alphas.ToArray());

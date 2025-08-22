@@ -188,6 +188,7 @@ Shader "Pix/DemoGround"
                 half2 screenUV = ndcPos.xy*0.5+0.5;
                 screenUV.y = 1-screenUV.y;
                 half ndcDepth = ndcPos.z;
+                half ndcDepthDownSample = sampleDepthDownSample(uv);
 
                 #if _ALPHATEST_ON
                     TestAlpha(color.a, _Cutoff, screenUV);
@@ -235,8 +236,8 @@ Shader "Pix/DemoGround"
                 half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV+downSampleJitter);
                 half sunVolume = downSampleColor.r;
                 half ssao = downSampleColor.g;
-                half4 shadow = DecodeShadow(downSampleColor.b);
-                half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
+                // half4 shadow = DecodeShadow(downSampleColor.b);
+                // half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
 
                 MaterialData matData;
                     matData.shadingModel = 1;
@@ -262,6 +263,7 @@ Shader "Pix/DemoGround"
                     matData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel); 
 
                     matData.ndcDepth = ndcDepth;
+                    matData.ndcDepthDownSample = ndcDepthDownSample;
                     matData.depth = depth;
                     matData.viewToWorld = input.tbnVS;
 
@@ -270,7 +272,7 @@ Shader "Pix/DemoGround"
 
                     matData.sunVolume = sunVolume;
                     matData.ssao = ssao;
-                    matData.shadows = shadows;
+                    // matData.shadows = shadows;
 
                     #ifdef DEBUG_LIGHT
                     matData.albedo = _DebugBrightness;

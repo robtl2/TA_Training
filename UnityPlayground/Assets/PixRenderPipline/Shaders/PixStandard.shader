@@ -254,6 +254,8 @@ Shader "Pix/Standard"
                 screenUV.y = 1-screenUV.y;
                 half ndcDepth = ndcPos.z;
 
+                half ndcDepthDownSample = sampleDepthDownSample(screenUV);
+
                 #if _ALPHATEST_ON
                     TestAlpha(color.a, _Cutoff, screenUV);
                 #endif
@@ -318,8 +320,8 @@ Shader "Pix/Standard"
                 half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV);
                 half sunVolume = downSampleColor.r;
                 half ssao = downSampleColor.g;
-                half4 shadow = DecodeShadow(downSampleColor.b);
-                half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
+                // half4 shadow = DecodeShadow(downSampleColor.b);
+                // half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
 
                 MaterialData matData;
                     matData.shadingModel = _ShadingModel;
@@ -345,6 +347,7 @@ Shader "Pix/Standard"
                     matData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel); 
 
                     matData.ndcDepth = ndcDepth;
+                    matData.ndcDepthDownSample = ndcDepthDownSample;
                     matData.depth = depth;
                     matData.viewToWorld = input.tbnVS;
 
@@ -353,7 +356,7 @@ Shader "Pix/Standard"
 
                     matData.sunVolume = sunVolume;
                     matData.ssao = ssao;
-                    matData.shadows = shadows;
+                    // matData.shadows = shadows;
 
                     #ifdef DEBUG_LIGHT
                     matData.albedo = _DebugBrightness;
@@ -648,7 +651,7 @@ Shader "Pix/Standard"
             ENDHLSL
         }
 
-        // 2 earlyZ
+        // 2 earlyZ (暂时没有使用了，用的是下面那个forwardEarlyZ)
         Pass
         {
             Name "PixEarlyZ"
@@ -881,6 +884,8 @@ Shader "Pix/Standard"
                 // #else
                 //     depth = ndcPos.z * 0.5 + 0.5;
                 // #endif
+
+                // 
 
                 return half4(EncodeFloatRG(depth), PackNormalHemiOctEncode(normal)*0.5+0.5);
             }

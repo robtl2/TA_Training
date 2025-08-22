@@ -129,7 +129,7 @@ namespace PixRenderPipline
                 materialTAA.SetFloat(_HistroyWeight, setting.TAA_histroy);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, materialTAA, 0, 0);
                 renderer.cmb.SetRenderTarget(renderer.frontRT[renderer.camera]);
-                renderer.cmb.SetGlobalTexture(_MainTex, OpaqueRT);
+                renderer.cmb.SetGlobalTexture(MainTex, OpaqueRT);
                 renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, blitMat, 0, 1);
 
                 renderer.cmb.ReleaseTemporaryRT(MotionVectorRT);

@@ -883,15 +883,15 @@ MonoBehaviour:
   displayColor: {r: 0.33333337, g: 0.72386473, b: 0.94509804, a: 1}
   fovScale: 0.82
   IrradianceColor: 1
-  IrradianceIntensity: 0.51
+  IrradianceIntensity: 0.5
   scatteringOuter: -1.47
-  OuterIntensity: 0.968
-  scatteringInter: 0.83
-  InterIntensity: 0.936
+  OuterIntensity: 1
+  scatteringInter: 0.06
+  InterIntensity: 1
   sun: {fileID: 1683865467}
   sunSize: 0.048
   sunIntensity: 0.1
-  sunVolume: 0.336
+  sunVolume: 0.377
   sunVolumeColor: {r: 0.8584906, g: 0.71098596, b: 0.4251958, a: 1}
   rayStepLength: 0.17
   maxRayStep: 24
@@ -2080,8 +2080,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 755518752}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.03610071, y: -0.9622582, z: -0.21720108, w: -0.15993612}
-  m_LocalPosition: {x: -5.1978464, y: -3.2467728, z: 13.453583}
+  m_LocalRotation: {x: -0.0074724704, y: -0.9849361, z: 0.16704407, w: -0.044059373}
+  m_LocalPosition: {x: -6.0132427, y: 22.245607, z: 44.58767}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3050,10 +3050,10 @@ MonoBehaviour:
   GPU_OCC_Culling: 1
   defaultFilterMode: 1
   downSampleSize: 1
-  blurDownsample: 0.5
+  blurDownsample: 0.87
   Enable_Fog: 1
   FogParams: {x: 2.62, y: 4.18, z: 39.1, w: 51.5}
-  FogColor: {r: 0.022116425, g: 0.037267122, b: 0.6698113, a: 0.7176471}
+  FogColor: {r: 0.022116425, g: 0.037267122, b: 0.6698113, a: 0.6745098}
   ao_factor: 1
   Enable_SSAO: 1
   ssao_quality: 2
@@ -3064,17 +3064,17 @@ MonoBehaviour:
   ssao_factor_2nd: 1
   ssao_radius_2nd: 11.06
   ssao_clipByDistance_2nd: 11.9
-  SharpenStrength: 2.45
-  SharpenMid: 0.285
+  SharpenStrength: 0
+  SharpenMid: 0.256
   Exposure: 1
-  Vagnet: 0.759
+  Vagnet: 0
   EnableBloom: 0
-  Bloom_Threshold: 0.51
+  Bloom_Threshold: 0.8
   Bloom_Radius: 2
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
   enable_TAA: 1
-  TAA_jitter: 0.8
+  TAA_jitter: 0.5
   TAA_histroy: 0.788
   debugMode: 0
   debugSize: 1
@@ -4909,17 +4909,17 @@ MonoBehaviour:
   effectArea: {fileID: 0}
   areaFadeRange: 0
   enableShadowMap: 1
-  shadowMapSize: 2048
+  shadowMapSize: 1024
   shadowMapJitter: 1
-  shadowMapBias: 0.0024
+  shadowMapBias: 0.0112
   shadowMapArea: 1
   boxArea: {fileID: 1914101454}
   enableContactShadow: 1
   contactShadowJitter: 1
-  contactShadowJitterRadius: 0.55
+  contactShadowJitterRadius: 0.99
   contactRayLength: 1
   contactSampleCount: 16
-  contactBias: 0.0000168
+  contactBias: 0.0000075
   enableVisbilityShadow: 0
   visibilityShadowSoftness: 0.2
   volumeLight: 0
@@ -4932,13 +4932,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1683865466}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.624052, y: 0.12149321, z: -0.5486962, w: -0.54289144}
+  m_LocalRotation: {x: 0.26274785, y: 0.5789345, z: 0.12430981, w: -0.7618041}
   m_LocalPosition: {x: -2.8028283, y: -0.38224936, z: 1.0643762}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 281959628}
-  m_LocalEulerAnglesHint: {x: -32.974, y: -76.798, z: -242.988}
+  m_LocalEulerAnglesHint: {x: -32.974, y: -76.798, z: -352.133}
 --- !u!1 &1721413414 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6763927252471423082, guid: a8f691e28a6344a669911288373e2e72, type: 3}
@@ -5296,8 +5296,8 @@ Transform:
   m_GameObject: {fileID: 1914101453}
   serializedVersion: 2
   m_LocalRotation: {x: 0.00000000758656, y: -0.0000000074505797, z: -0.000000011084012, w: 1}
-  m_LocalPosition: {x: -0.06, y: 8.28, z: -12.06}
-  m_LocalScale: {x: 1, y: 1, z: 1.5085379}
+  m_LocalPosition: {x: -4.72, y: 8.28, z: -12.06}
+  m_LocalScale: {x: 0.58356, y: 1, z: 1.5031003}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

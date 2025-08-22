@@ -368,8 +368,8 @@ namespace PixRenderPipline
             colorPropList[i] = new Vector4(_color.r, _color.g, _color.b, intensity);
 
             Vector4 contactShadowParam = Vector4.zero;
-            float contactShadow = enableContactShadow ? contactRayLength : 0;
-            contactShadow /= contactSampleCount;
+            float contactShadow = enableContactShadow ? contactRayLength: 0;
+            // contactShadow /= contactSampleCount;
             contactShadowParam.x = contactShadow;
             contactShadowParam.y = contactSampleCount;
             contactShadowParam.z = contactBias;
