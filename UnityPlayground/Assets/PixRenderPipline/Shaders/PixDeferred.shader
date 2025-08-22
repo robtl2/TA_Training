@@ -15,8 +15,8 @@ Shader "Hidden/Pix/Deferred"
 
         Stencil
         {
-            Ref 1
-            Comp Equal
+            Ref 0
+            Comp LESS
         }
 
         Pass
@@ -76,16 +76,16 @@ Shader "Hidden/Pix/Deferred"
             half4 frag(VaryingsDepth input) : SV_Target
             {
                 float2 uv = input.uv;
-                GBufferData gbufferData = UnpackGBuffer(uv);
+                MaterialData matData = UnpackGBuffer(uv);
 
-                if(gbufferData.shadingModel == SHADING_MODEL_UNLIT)
-                    return half4(gbufferData.albedo, 1);
+                if(matData.shadingModel == SHADING_MODEL_UNLIT)
+                    return half4(matData.albedo, 1);
 
-                // return selfOcclusion(gbufferData, gbufferData.reflectDir, gbufferData.roughness);
+                // return selfOcclusion(matData, matData.reflectDir, matData.roughness);
 
                 half3 result = half3(0, 0, 0);
 
-                evaluateIBL(gbufferData, uv, result);
+                evaluateIBL(matData, uv, result);
                 
                 if(PIX_LIGHT_COUNT > 0){
                     [loop]
@@ -94,12 +94,12 @@ Shader "Hidden/Pix/Deferred"
                         PixLight light = GetPixLight(i);
 
                         if(light.enabled)
-                            evaluateLight(light, gbufferData, uv, result);
+                            evaluateLight(light, matData, uv, result);
                     }
                 }
 
                 #ifdef FOG
-                evaluateFog(gbufferData, result);
+                evaluateFog(matData, result);
                 #endif
 
                 

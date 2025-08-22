@@ -104,11 +104,11 @@ PixLight GetPixLight(int index)
     return light;
 }
 
-half VisibilityShadow(PixLight light, GBufferData gbufferData){
+half VisibilityShadow(PixLight light, MaterialData matData){
     if(light.visibilityShadow == 0)return 1.0h;
 
     half3 L = light.direction;
-    half shadow = selfOcclusion(gbufferData, L, light.visibilityShadow);
+    half shadow = selfOcclusion(matData, L, light.visibilityShadow);
 
     return shadow;
 }

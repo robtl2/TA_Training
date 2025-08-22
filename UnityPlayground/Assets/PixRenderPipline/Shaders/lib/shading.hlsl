@@ -5,12 +5,12 @@
 #include "bentnormal.hlsl"
 #include "gbuffer.hlsl"
 
-half3 anisotropicLobe(GBufferData gbufferData, const half3 L, const half3 H,
+half3 anisotropicLobe(MaterialData matData, const half3 L, const half3 H,
         half NoV, half NoL, half NoH, half LoH) {
 
-    half3 T = gbufferData.tangentWS;
-    half3 B = gbufferData.bitangentWS;
-    half3 V = gbufferData.viewDir;
+    half3 T = matData.tangentWS;
+    half3 B = matData.bitangentWS;
+    half3 V = matData.viewDir;
 
     half ToV = dot(T, V);
     half BoV = dot(B, V);
@@ -19,44 +19,44 @@ half3 anisotropicLobe(GBufferData gbufferData, const half3 L, const half3 H,
     half ToH = dot(T, H);
     half BoH = dot(B, H);
 
-    half anisotropy = gbufferData.anisotropy;
+    half anisotropy = matData.anisotropy;
 
-    half at = max(gbufferData.roughness * (1.0 + anisotropy), MIN_ROUGHNESS);
-    half ab = max(gbufferData.roughness * (1.0 - anisotropy), MIN_ROUGHNESS);
+    half at = max(matData.roughness * (1.0 + anisotropy), MIN_ROUGHNESS);
+    half ab = max(matData.roughness * (1.0 - anisotropy), MIN_ROUGHNESS);
 
     // specular anisotropic BRDF
     half D = distributionAnisotropic(at, ab, ToH, BoH, NoH);
-    half v = visibilityAnisotropic(gbufferData.roughness, at, ab, ToV, BoV, ToL, BoL, NoV, NoL);
-    half3  F = fresnel(gbufferData.f0, LoH);
+    half v = visibilityAnisotropic(matData.roughness, at, ab, ToV, BoV, ToL, BoL, NoV, NoL);
+    half3  F = fresnel(matData.f0, LoH);
 
     return  min(3 , D*v) * F;
 }
 
-half3 isotropicLobe(GBufferData gbufferData, half3 N, half NoH, half3 H, half NoV, half NoL, half LoH) {
-    float D = distribution(gbufferData.roughness, N, NoH, H);
-    float V = visibility(gbufferData.roughness, NoV, NoL);
-    half3  F = fresnel(gbufferData.f0, LoH);
+half3 isotropicLobe(MaterialData matData, half3 N, half NoH, half3 H, half NoV, half NoL, half LoH) {
+    float D = distribution(matData.roughness, N, NoH, H);
+    float V = visibility(matData.roughness, NoV, NoL);
+    half3  F = fresnel(matData.f0, LoH);
     return D * V * F;
 }
 
-half3 specularLobe(GBufferData gbufferData,half3 L, half3 N, half NoH, half3 H, half NoV, half NoL, half LoH) {
-    if(gbufferData.shadingModel == SHADING_MODEL_HAIR){
-        return anisotropicLobe(gbufferData, L, H, NoV, NoL, NoH, LoH);
+half3 specularLobe(MaterialData matData,half3 L, half3 N, half NoH, half3 H, half NoV, half NoL, half LoH) {
+    if(matData.shadingModel == SHADING_MODEL_HAIR){
+        return anisotropicLobe(matData, L, H, NoV, NoL, NoH, LoH);
     }else{
-        return isotropicLobe(gbufferData, N, NoH, H, NoV, NoL, LoH);
+        return isotropicLobe(matData, N, NoH, H, NoV, NoL, LoH);
     }
 }
 
-half3 diffuseLobe(GBufferData gbufferData,  float NoV, float NoL, float LoH) {
-    return gbufferData.diffuse * diffuse(gbufferData.roughness, NoV, NoL, LoH);
+half3 diffuseLobe(MaterialData matData,  float NoV, float NoL, float LoH) {
+    return matData.diffuse * diffuse(matData.roughness, NoV, NoL, LoH);
 }
 
 // 后面ShadingModel计算的入口
-void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inout half3 result) 
+void evaluateLight(PixLight light, MaterialData matData, half2 srceenUV, inout half3 result) 
 {
     half effect = 1.0h;
     if(light.enableAreaEffect){
-        float4 posInArea = mul(light.effectArea, float4(gbufferData.positionWS, 1.0f));
+        float4 posInArea = mul(light.effectArea, float4(matData.positionWS, 1.0f));
         
         if(any(posInArea>1 || posInArea<-1)){
             //在影响范围外
@@ -74,10 +74,10 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
         return;
     }
 
-    half3 N = gbufferData.normalWS;
+    half3 N = matData.normalWS;
     half3 L = light.direction;
     if(light.lightType>0){
-        L = light.position - gbufferData.positionWS;
+        L = light.position - matData.positionWS;
         half dist = length(L);
         L /= dist;
 
@@ -107,40 +107,40 @@ void evaluateLight(PixLight light, GBufferData gbufferData, half2 srceenUV, inou
     if(NoL_full<-0.1)
         return;
 
-    half3 V = gbufferData.viewDir;
+    half3 V = matData.viewDir;
     half3 H = normalize(L + V);
-    half NoV = gbufferData.NoV;
+    half NoV = matData.NoV;
     half3 NoL = saturate(NoL_full);
     half NoH = saturate(dot(N, H));
     float LoH = saturate(dot(L, H));
 
     half shadow = 1;
-    shadow *= VisibilityShadow(light, gbufferData);
+    shadow *= VisibilityShadow(light, matData);
 
     if(light.shadowMapIndex>-1){
-        shadow *= gbufferData.shadows[light.shadowMapIndex];
+        shadow *= matData.shadows[light.shadowMapIndex];
     }else{
-        shadow *= ContactShadow(light, gbufferData.positionWS);
+        shadow *= ContactShadow(light, matData.positionWS);
     }
    
     half3 diffuse = 0;
     if(light.enableDiffuse)
-        diffuse = diffuseLobe(gbufferData, NoV, NoL, LoH);
+        diffuse = diffuseLobe(matData, NoV, NoL, LoH);
 
     half3 specular = 0;
     if(light.enableSpecular && light.isPositive){
-        half f0 = gbufferData.f0;
+        half f0 = matData.f0;
 
-        gbufferData.f0 *= light.f0;
-        specular = specularLobe(gbufferData, L, N, NoH, H, NoV, NoL, LoH);
-        gbufferData.f0 = f0;
+        matData.f0 *= light.f0;
+        specular = specularLobe(matData, L, N, NoH, H, NoV, NoL, LoH);
+        matData.f0 = f0;
 
-        half occ = selfOcclusion(gbufferData, H, gbufferData.roughness);
+        half occ = selfOcclusion(matData, H, matData.roughness);
         specular *= occ;
     }
 
-    if(gbufferData.shadingModel == SHADING_MODEL_SSS){
-        PixSSSProfile sssProfile = gbufferData.sssProfile;
+    if(matData.shadingModel == SHADING_MODEL_SSS){
+        PixSSSProfile sssProfile = matData.sssProfile;
 
         half radius = sssProfile.scatteringRadius*2;
         half3 NoL_b = dot(sssProfile.sssNormal, L)+radius;

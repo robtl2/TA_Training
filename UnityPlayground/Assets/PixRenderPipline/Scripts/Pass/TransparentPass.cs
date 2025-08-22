@@ -24,7 +24,7 @@ namespace PixRenderPipline
             GetTemporaryColorRT(ColorBuff);
             //先把之前Opaque渲染的结果复制过来
             renderer.cmb.Blit(OpaqueRT, ColorBuff);
-            renderer.cmb.SetRenderTarget(ColorBuff, ForwardEarlyZPass.buffID);
+            renderer.cmb.SetRenderTarget(ColorBuff, EarlyZPass.buffID);
 
             TriggerEvent(PixRenderEventName.BeforeTransparent);
 

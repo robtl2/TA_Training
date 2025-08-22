@@ -58,10 +58,10 @@ half4 frag_decal(Varyings_Decal input) : SV_Target
     
     // 通过屏幕坐标UV拿取GBuffer数据
     half2 screenUV = input.uv.xy * input.uv.w;
-    GBufferData gbufferData = UnpackGBuffer(screenUV);
+    MaterialData matData = UnpackGBuffer(screenUV);
 
     // 把原场景象素的世界坐标转换到Decal的局部坐标
-    half3 pos = gbufferData.positionWS;
+    half3 pos = matData.positionWS;
     half4 posLocal = mul(UNITY_MATRIX_I_M, half4(pos, 1));
 
     // 把局部坐标转换到UV空间

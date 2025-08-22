@@ -84,7 +84,7 @@ struct GBuffer
 };
 
 
-struct GBufferData
+struct MaterialData
 {
     int shadingModel;
     half3 albedo;

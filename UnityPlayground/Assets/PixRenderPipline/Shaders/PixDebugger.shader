@@ -79,23 +79,23 @@ Shader "Hidden/Pix/Debugger"
             half4 frag(VaryingsDepth input) : SV_Target
             {
                 float2 uv = input.uv;
-                GBufferData gbufferData = UnpackGBuffer(uv);
+                MaterialData matData = UnpackGBuffer(uv);
 
                 half3 debugColor[13] = {
-                    gbufferData.albedo,
-                    gbufferData.diffuse,
-                    gbufferData.f0,
-                    gbufferData.ao.xxx,
-                    gbufferData.bentNormal,
-                    gbufferData.positionWS,
-                    gbufferData.normalWS,
-                    gbufferData.normalVS,
-                    gbufferData.tangentWS,
-                    gbufferData.viewDir,
-                    gbufferData.NoV.xxx,
-                    gbufferData.depth.xxx,
+                    matData.albedo,
+                    matData.diffuse,
+                    matData.f0,
+                    matData.ao.xxx,
+                    matData.bentNormal,
+                    matData.positionWS,
+                    matData.normalWS,
+                    matData.normalVS,
+                    matData.tangentWS,
+                    matData.viewDir,
+                    matData.NoV.xxx,
+                    matData.depth.xxx,
                 #ifdef MOTION_VECTOR_ON
-                    half3(gbufferData.motionVector.xy,0),
+                    half3(matData.motionVector.xy,0),
                 #else
                     half3(0,0,1),
                 #endif
@@ -105,7 +105,7 @@ Shader "Hidden/Pix/Debugger"
                 if(_Channel == 11)
                     rgb *= _DepthScale;
 
-                half a = any(gbufferData.albedo > 0);
+                half a = any(matData.albedo > 0);
                 return half4(rgb, a);
             }
             ENDHLSL

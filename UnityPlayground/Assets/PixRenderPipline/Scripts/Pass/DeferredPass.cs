@@ -23,12 +23,10 @@ namespace PixRenderPipline
             // GetTemporaryColorRT(ColorBuff);
 
             // TODO: TiledPass搞好后用Tile来剔除多余的栅格化
-            // EarlyZpass画的深度下面要拿来用，所以不管是深度还是Stencil都不能在这个Pass拿来测试象素
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_0, GBufferPass.GbufferID_0);
             renderer.cmb.SetGlobalTexture(GBufferPass.GbufferID_1, GBufferPass.GbufferID_1);
-            renderer.cmb.SetGlobalTexture(EarlyZPass.nameID, EarlyZPass.depthID, RenderTextureSubElement.Depth);
             renderer.cmb.SetGlobalTexture(TiledPass.tileID, TiledPass.tileID);
-            renderer.cmb.SetRenderTarget(OpaqueRT);
+            renderer.cmb.SetRenderTarget(OpaqueRT, EarlyZPass.buffID);
 
             TriggerEvent(PixRenderEventName.BeforeDeferred);
 

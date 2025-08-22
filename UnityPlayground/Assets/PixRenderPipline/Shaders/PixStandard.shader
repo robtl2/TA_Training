@@ -229,6 +229,7 @@ Shader "Pix/Standard"
                 return output;
             }
 
+            #ifdef TAA
             // MRT 输出
             struct FragmentOutput
             {
@@ -237,6 +238,9 @@ Shader "Pix/Standard"
             };
 
             FragmentOutput frag(Varying input, float facing : VFACE)
+            #else
+            half4 frag(Varying input, float facing : VFACE): SV_Target
+            #endif
             {
                 UNITY_SETUP_INSTANCE_ID(input);
 
@@ -317,55 +321,55 @@ Shader "Pix/Standard"
                 half4 shadow = DecodeShadow(downSampleColor.b);
                 half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
 
-                GBufferData gbufferData;
-                    gbufferData.shadingModel = _ShadingModel;
-                    gbufferData.albedo = albedo;
-                    gbufferData.metallic = metallic;
-                    gbufferData.roughness = roughness;
-                    gbufferData.perceptualRoughness = perceptualRoughness;
-                    gbufferData.anisotropy = anisotropy;
-                    gbufferData.diffuse = computeDiffuseColor(albedo, metallic);
-                    gbufferData.f0 = f0;
-                    gbufferData.ao = bentNormal.a;
-                    gbufferData.bentNormal = bentNormal.xyz;
+                MaterialData matData;
+                    matData.shadingModel = _ShadingModel;
+                    matData.albedo = albedo;
+                    matData.metallic = metallic;
+                    matData.roughness = roughness;
+                    matData.perceptualRoughness = perceptualRoughness;
+                    matData.anisotropy = anisotropy;
+                    matData.diffuse = computeDiffuseColor(albedo, metallic);
+                    matData.f0 = f0;
+                    matData.ao = bentNormal.a;
+                    matData.bentNormal = bentNormal.xyz;
                     
-                    gbufferData.positionWS = positionWS;
-                    gbufferData.normalWS = normal;
-                    gbufferData.tangentWS = input.tbnWS[0];
-                    gbufferData.bitangentWS = input.tbnWS[1];
+                    matData.positionWS = positionWS;
+                    matData.normalWS = normal;
+                    matData.tangentWS = input.tbnWS[0];
+                    matData.bitangentWS = input.tbnWS[1];
 
-                    gbufferData.normalVS = normalVS;
-                    gbufferData.viewDir = viewDir;
-                    gbufferData.reflectDir = reflect(-viewDir, gbufferData.normalWS);
-                    gbufferData.NoV = NoV;
-                    gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel); 
+                    matData.normalVS = normalVS;
+                    matData.viewDir = viewDir;
+                    matData.reflectDir = reflect(-viewDir, matData.normalWS);
+                    matData.NoV = NoV;
+                    matData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel); 
 
-                    gbufferData.ndcDepth = ndcDepth;
-                    gbufferData.depth = depth;
-                    gbufferData.viewToWorld = input.tbnVS;
+                    matData.ndcDepth = ndcDepth;
+                    matData.depth = depth;
+                    matData.viewToWorld = input.tbnVS;
 
-                    gbufferData.motionVector = motionVector;
-                    gbufferData.sssProfile = sssProfile;
+                    matData.motionVector = motionVector;
+                    matData.sssProfile = sssProfile;
 
-                    gbufferData.sunVolume = sunVolume;
-                    gbufferData.ssao = ssao;
-                    gbufferData.shadows = shadows;
+                    matData.sunVolume = sunVolume;
+                    matData.ssao = ssao;
+                    matData.shadows = shadows;
 
                     #ifdef DEBUG_LIGHT
-                    gbufferData.albedo = _DebugBrightness;
-                    gbufferData.diffuse = _DebugBrightness;
+                    matData.albedo = _DebugBrightness;
+                    matData.diffuse = _DebugBrightness;
                     #endif
 
-                // return half4(gbufferData.ssao.xxx, 1);
+                // return half4(matData.ssao.xxx, 1);
                 //----------------shading
                 
 
                 half3 result = half3(0, 0, 0);
 
-                if(gbufferData.shadingModel == SHADING_MODEL_UNLIT){
-                    result = gbufferData.albedo;
+                if(matData.shadingModel == SHADING_MODEL_UNLIT){
+                    result = matData.albedo;
                 }else{
-                    evaluateIBL(gbufferData, screenUV, result);
+                    evaluateIBL(matData, screenUV, result);
                 
                     if(PIX_LIGHT_COUNT > 0){
                         [loop]
@@ -374,12 +378,12 @@ Shader "Pix/Standard"
                             PixLight light = GetPixLight(i);
 
                             if(light.enabled)
-                                evaluateLight(light, gbufferData, screenUV, result);
+                                evaluateLight(light, matData, screenUV, result);
                         }
                     }
 
                     #ifdef FOG
-                    evaluateFog(gbufferData, result);
+                    evaluateFog(matData, result);
                     #endif
 
                     
@@ -391,11 +395,15 @@ Shader "Pix/Standard"
                 evaluateSunVolume(ldr, screenUV);
                 #endif
 
+                #ifdef TAA
                 FragmentOutput output;
-                output.color = half4(ldr,1);
-                output.motionVector = half4(motionVector*0.5+0.5,0,0);
+                output.color = half4(ldr, 1);
+                output.motionVector = half4(motionVector*0.5 + 0.5, 0, 0);
                 
                 return output;
+                #else
+                return half4(ldr, 1);
+                #endif
             }
             ENDHLSL
         }

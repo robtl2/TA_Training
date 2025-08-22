@@ -1,16 +1,14 @@
 using UnityEngine.Rendering;
 
 /// <summary>
-/// 这里的Forward管线是在EarlyZ阶段把Normal也画了，画Normal时会有点OverDraw, 
-/// ForwardEarlyZ阶段因为要进象素，所以这个阶段会比Deferred的EarlyZ贵一点
-/// 不过后面流程中的带宽就血赚了
-/// 反正就是试试嘛
+/// 试试Forward管线，
+/// 帧率还掉了好几帧，就离谱
 /// </summary>
 namespace PixRenderPipline
 {
     public class PixForwardRenderer : PixRenderer
     {
-        public ForwardEarlyZPass forwardEarlyZPass { get; private set; }
+        public EarlyZPass earlyZPass { get; private set; }
         public OcclusionCullingPass occlusionCullingPass { get; private set; }
         public DownSamplingPass downSamplingPass { get; private set; }
         public OpaquePass opaquePass { get; private set; }
@@ -22,7 +20,7 @@ namespace PixRenderPipline
 
         public PixForwardRenderer()
         {
-            forwardEarlyZPass = new(this);
+            earlyZPass = new(this);
             occlusionCullingPass = new(this);
             downSamplingPass = new(this);
             opaquePass = new(this);
@@ -37,7 +35,7 @@ namespace PixRenderPipline
         {
             base.Render();
             
-            ExecutePass(forwardEarlyZPass);
+            ExecutePass(earlyZPass);
             ExecutePass(occlusionCullingPass);
             ExecutePass(downSamplingPass);
             ExecutePass(opaquePass);

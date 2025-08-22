@@ -10,15 +10,15 @@
 half4 _FogParams;
 half4 _FogColor;
 
-void evaluateFog(GBufferData gbufferData, inout half3 color)
+void evaluateFog(MaterialData matData, inout half3 color)
 {
     float fogDensity = _FogParams.x;
     float fogStart = _FogParams.y;
     float fogEnd = _FogParams.z;
     float fogHeight = _FogParams.w;
 
-    float heightFactor = saturate((gbufferData.positionWS.y - _WorldSpaceCameraPos.y) / fogHeight);
-    float fogFactor = gbufferData.depth - fogStart;
+    float heightFactor = saturate((matData.positionWS.y - _WorldSpaceCameraPos.y) / fogHeight);
+    float fogFactor = matData.depth - fogStart;
     fogFactor = saturate(fogFactor / (fogEnd - fogStart));
     fogFactor *= fogFactor * _FogColor.a;
     fogFactor *= heightFactor;

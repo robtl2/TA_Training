@@ -16,7 +16,7 @@ namespace PixRenderPipline
             // var depthID = setting.pipeline == PixRenderSetting.Pipeline.Deferred ? EarlyZPass.depthID : ForwardEarlyZPass.buffID;
 
             var material = PixSky.instance.material;
-            renderer.cmb.SetRenderTarget(OpaqueRT, ForwardEarlyZPass.buffID);
+            renderer.cmb.SetRenderTarget(OpaqueRT, EarlyZPass.buffID);
             renderer.cmb.DrawMesh(FullScreenQuad, Matrix4x4.identity, material, 0, 0);
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();

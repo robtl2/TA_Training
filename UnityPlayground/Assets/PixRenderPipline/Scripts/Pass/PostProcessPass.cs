@@ -112,10 +112,9 @@ namespace PixRenderPipline
             TriggerEvent(PixRenderEventName.AfterPostProcess);
 
             renderer.cmb.ReleaseTemporaryRT(TransparentPass.ColorBuff);
-            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.DepthDownSample);
             renderer.cmb.ReleaseTemporaryRT(DownSamplingPass.rtID);
-            renderer.cmb.ReleaseTemporaryRT(ForwardEarlyZPass.buffName);
-            renderer.cmb.ReleaseTemporaryRT(ForwardEarlyZPass.downSample);
+            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.buffName);
+            renderer.cmb.ReleaseTemporaryRT(EarlyZPass.downSample);
 
             if (setting.EnableBloom)
             {

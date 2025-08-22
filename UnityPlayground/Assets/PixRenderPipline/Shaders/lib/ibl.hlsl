@@ -35,33 +35,33 @@ half3 getSpecularDominantDir(half3 N, half3 R, half roughness)
     return lerp(N, R, factor);
 }
 
-half3 getPrefilterAnisotropicSpecularLD(GBufferData gbufferData, half2 uv)
+half3 getPrefilterAnisotropicSpecularLD(MaterialData matData, half2 uv)
 {
-    half3 V = gbufferData.viewDir;
-    half3 T = gbufferData.tangentWS;
-    half3 B = gbufferData.bitangentWS;
-    half3 N = gbufferData.normalWS;
+    half3 V = matData.viewDir;
+    half3 T = matData.tangentWS;
+    half3 B = matData.bitangentWS;
+    half3 N = matData.normalWS;
 
-    half mipLevel = perceptualRoughnessToLod(gbufferData.perceptualRoughness * (1 - abs(gbufferData.anisotropy) * 0.8));
+    half mipLevel = perceptualRoughnessToLod(matData.perceptualRoughness * (1 - abs(matData.anisotropy) * 0.8));
 
-    half3 L = getAnisotropicReflectionDir(V, T, B, N, gbufferData.perceptualRoughness , gbufferData.anisotropy);
-    half3 dominantDir = getSpecularDominantDir(N, L, gbufferData.roughness);
-    dominantDir = lerp(dominantDir, L, abs(gbufferData.anisotropy));
+    half3 L = getAnisotropicReflectionDir(V, T, B, N, matData.perceptualRoughness , matData.anisotropy);
+    half3 dominantDir = getSpecularDominantDir(N, L, matData.roughness);
+    dominantDir = lerp(dominantDir, L, abs(matData.anisotropy));
 
-    half v = selfOcclusion(gbufferData, dominantDir, gbufferData.roughness) * _SkyColor.a;
+    half v = selfOcclusion(matData, dominantDir, matData.roughness) * _SkyColor.a;
     dominantDir = rotate_y(dominantDir, _RotateSky);
     
-    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, dominantDir, mipLevel) * gbufferData.fresnel * v;
+    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, dominantDir, mipLevel) * matData.fresnel * v;
 }
 
-half3 prefilteredRadiance(GBufferData gbufferData, half2 uv) {
-    half v = selfOcclusion(gbufferData, gbufferData.reflectDir, gbufferData.roughness) * _SkyColor.a;
+half3 prefilteredRadiance(MaterialData matData, half2 uv) {
+    half v = selfOcclusion(matData, matData.reflectDir, matData.roughness) * _SkyColor.a;
 
-    half3 r = gbufferData.reflectDir;
+    half3 r = matData.reflectDir;
     r = rotate_y(r, _RotateSky);
-    float lod = perceptualRoughnessToLod(gbufferData.perceptualRoughness);
+    float lod = perceptualRoughnessToLod(matData.perceptualRoughness);
 
-    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, r, lod) * gbufferData.fresnel * v;
+    return SAMPLE_TEXTURECUBE_LOD(_SkyTex, sampler_SkyTex, r, lod) * matData.fresnel * v;
 }
 
 
@@ -104,28 +104,28 @@ half3 diffuseIrradiance(half3 n) {
     return max(sh * m * _IrradianceIntensity, 0.0h);
 }
 
-void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
+void evaluateIBL(MaterialData matData, half2 uv, inout half3 result) {
     half3 Fr = 0;
-    if(gbufferData.shadingModel == SHADING_MODEL_HAIR)
-        Fr = getPrefilterAnisotropicSpecularLD(gbufferData, uv);
+    if(matData.shadingModel == SHADING_MODEL_HAIR)
+        Fr = getPrefilterAnisotropicSpecularLD(matData, uv);
     else
-        Fr = prefilteredRadiance(gbufferData, uv);
+        Fr = prefilteredRadiance(matData, uv);
 
-    half3 Fd = gbufferData.diffuse * diffuseIrradiance(gbufferData.normalWS);
-    half3 ao = selfOcclusion(gbufferData, gbufferData.bentNormal, 1);
+    half3 Fd = matData.diffuse * diffuseIrradiance(matData.normalWS);
+    half3 ao = selfOcclusion(matData, matData.bentNormal, 1);
     
     if(_AO_Factor<0.999)
         ao = lerp(1,ao,_AO_Factor);
     
     Fd *= ao;
     
-    if(gbufferData.shadingModel == SHADING_MODEL_SSS)
+    if(matData.shadingModel == SHADING_MODEL_SSS)
     {
-        PixSSSProfile sssProfile = gbufferData.sssProfile;
+        PixSSSProfile sssProfile = matData.sssProfile;
 
-        half3 Fd_b = gbufferData.diffuse * diffuseIrradiance(sssProfile.sssNormal);
+        half3 Fd_b = matData.diffuse * diffuseIrradiance(sssProfile.sssNormal);
 
-        half3 ao_b = selfOcclusion(gbufferData, sssProfile.sssNormal, 1);
+        half3 ao_b = selfOcclusion(matData, sssProfile.sssNormal, 1);
         ao_b = remap01(0, 1-sssProfile.scatteringRadius, ao_b);
         
         if(_AO_Factor<0.999)
@@ -137,7 +137,7 @@ void evaluateIBL(GBufferData gbufferData, half2 uv, inout half3 result) {
     }
 
     #ifndef SSAO_QUALITY_OFF
-        ao *= gbufferData.ssao;
+        ao *= matData.ssao;
     #endif
 
     Fd *= ao;

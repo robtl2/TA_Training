@@ -42,11 +42,11 @@ PixSSSProfile GetPixSSSProfile(int index){
     return sssProfile;
 }
 
-half3 GetSSSNormalFromBentNorm(GBufferData gbufferData, half3 L, half NoL){
-    PixSSSProfile sssProfile = gbufferData.sssProfile;
+half3 GetSSSNormalFromBentNorm(MaterialData matData, half3 L, half NoL){
+    PixSSSProfile sssProfile = matData.sssProfile;
 
     half radius = sssProfile.scatteringRadius*2;
-    half3 NoL_b = dot(gbufferData.bentNormal, L)+radius;
+    half3 NoL_b = dot(matData.bentNormal, L)+radius;
     NoL_b = remap01(0, 1+radius, NoL_b);
 
     NoL = lerp(NoL, NoL_b, sssProfile.scatteringColor * sssProfile.scatteringIntensity);

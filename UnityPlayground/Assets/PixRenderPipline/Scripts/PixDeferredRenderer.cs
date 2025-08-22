@@ -8,7 +8,7 @@ namespace PixRenderPipline
 {
     public class PixDeferredRenderer : PixRenderer
     {
-        public ForwardEarlyZPass earlyZPass { get; private set; }
+        public EarlyZPass earlyZPass { get; private set; }
         public OcclusionCullingPass occlusionCullingPass { get; private set; }
         public DownSamplingPass downSamplingPass{ get; private set; }
         public GBufferPass gBufferPass { get; private set; }

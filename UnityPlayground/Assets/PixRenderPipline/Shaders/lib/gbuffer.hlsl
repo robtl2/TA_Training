@@ -18,7 +18,7 @@ TEXTURE2D(_PixGBuffer_3);SAMPLER(sampler_PixGBuffer_3);
 TEXTURE2D(_PixDepthNormal);SAMPLER(sampler_PixDepthNormal);
 TEXTURE2D(_PixTiledID);SAMPLER(sampler_PixTiledID);
 
-TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);half2 _PixDepthDownSample_TexelSize;
+// TEXTURE2D(_PixDepthDownSample);SAMPLER(sampler_PixDepthDownSample);half2 _PixDepthDownSample_TexelSize;
 TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
 
 TEXTURE2D(_PixDepthNormalDownSample);SAMPLER(sampler_PixDepthNormalDownSample);float2 _PixDepthNormalDownSample_TexelSize;
@@ -29,10 +29,7 @@ TEXTURE2D(_PixDepthNormalDownSample);SAMPLER(sampler_PixDepthNormalDownSample);f
 #endif
 
 #ifdef PP_SUN_VOLUME
-// TEXTURE2D(_PixDownSampling);SAMPLER(sampler_PixDownSampling);float2 _PixDownSampling_TexelSize;
-// half4 _SunVolume;
 half4 _SunVolumeColor;
-
 void evaluateSunVolume(inout half3 color, half2 screenUV){
     // volume sun light的计算放下采样里去了
     half3 volume = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV).x;
@@ -168,7 +165,7 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     return gbuffer;
 }
 
-GBufferData UnpackGBuffer(float2 uv)
+MaterialData UnpackGBuffer(float2 uv)
 {
     half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
     half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
@@ -232,53 +229,50 @@ GBufferData UnpackGBuffer(float2 uv)
     half fresnel = 1-normalVS.z;
     fresnel = pow5(fresnel);
 
-    // half2 downSampleJitter = hash22(uv)*_PixDownSampling_TexelSize;
-    half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv);
 
+    half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).rgb;
     half sunVolume = downSampleColor.r;
     half ssao = downSampleColor.g;
     half4 shadow = DecodeShadow(downSampleColor.b);
     half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
 
-    GBufferData gbufferData;
-
-    gbufferData.sunVolume = sunVolume;
-    gbufferData.ssao = ssao;
-    gbufferData.shadows = shadows;
-
-    gbufferData.shadingModel = shadingModel;
-    gbufferData.albedo = albedo;
-    gbufferData.diffuse = diffuse;
-    gbufferData.f0 = f0;
-    gbufferData.perceptualRoughness = perceptualRoughness;
-    gbufferData.roughness = roughness;
-    gbufferData.metallic = metallic;
-    gbufferData.anisotropy = anisotropy;
-    gbufferData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
+    MaterialData matData;
+    matData.sunVolume = sunVolume;
+    matData.ssao = ssao;
+    matData.shadows = shadows;
+    matData.shadingModel = shadingModel;
+    matData.albedo = albedo;
+    matData.diffuse = diffuse;
+    matData.f0 = f0;
+    matData.perceptualRoughness = perceptualRoughness;
+    matData.roughness = roughness;
+    matData.metallic = metallic;
+    matData.anisotropy = anisotropy;
+    matData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
+    matData.ao = ao;
+    matData.bentNormal = bentNormalWS;
+    matData.positionWS = worldPos;
+    matData.normalWS = normalWS;
+    matData.tangentWS = tangentWS;
+    matData.bitangentWS = bitangentWS;
+    matData.normalVS = normalVS;
+    matData.viewDir = viewDir;
+    matData.reflectDir = reflect(-viewDir, normalWS);
+    matData.NoV = normalVS.z;
+    matData.ndcDepth = ndcDepth;
+    matData.depth = depth;
+    matData.viewToWorld = viewToWorld;
+    matData.sssProfile = sssProfile;
 
 #ifdef DEBUG_LIGHT
-    gbufferData.albedo = _DebugBrightness;
-    gbufferData.diffuse = _DebugBrightness;
+    matData.albedo = _DebugBrightness;
+    matData.diffuse = _DebugBrightness;
 #endif
 
-    gbufferData.ao = ao;
-    gbufferData.bentNormal = bentNormalWS;
-    gbufferData.positionWS = worldPos;
-    gbufferData.normalWS = normalWS;
-    gbufferData.tangentWS = tangentWS;
-    gbufferData.bitangentWS = bitangentWS;
-    gbufferData.normalVS = normalVS;
-    gbufferData.viewDir = viewDir;
-    gbufferData.reflectDir = reflect(-viewDir, normalWS);
-    gbufferData.NoV = normalVS.z;
-    gbufferData.ndcDepth = ndcDepth;
-    gbufferData.depth = depth;
-    gbufferData.viewToWorld = viewToWorld;
-
 #ifdef MOTION_VECTOR_ON
-    gbufferData.motionVector = gbuffer_3.xy*2-1;
+    matData.motionVector = gbuffer_3.xy*2-1;
 #else
-    gbufferData.motionVector = half2(0, 0);
+    matData.motionVector = half2(0, 0);
 #endif
 
     if (shadingModel == SHADING_MODEL_SSS && sssProfile.type == 1){
@@ -288,9 +282,7 @@ GBufferData UnpackGBuffer(float2 uv)
     else
         sssProfile.sssNormal = bentNormalWS;
 
-    gbufferData.sssProfile = sssProfile;
-
-    return gbufferData;
+    return matData;
 }
 
 

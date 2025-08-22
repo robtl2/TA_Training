@@ -46,12 +46,12 @@ namespace PixRenderPipline
             if (setting.enable_TAA)
             {
                 renderer.cmb.GetTemporaryRT(MotionVectorRT, renderer.size.x, renderer.size.y, 0, FilterMode.Point, RenderTextureFormat.RG32, renderer.colorSpace);
-                renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, ForwardEarlyZPass.buffID);
+                renderer.cmb.SetRenderTarget(gbuffersWithMotionVec, EarlyZPass.buffID);
                 renderer.cmb.ClearRenderTarget(false, true, Color.clear);
             }
             else
             {
-                renderer.cmb.SetRenderTarget(gbuffers, ForwardEarlyZPass.buffID);
+                renderer.cmb.SetRenderTarget(gbuffers, EarlyZPass.buffID);
                 renderer.cmb.ClearRenderTarget(false, true, Color.clear);
             }
 
@@ -66,7 +66,7 @@ namespace PixRenderPipline
 
             TriggerEvent(PixRenderEventName.AfterGBuffer);
 
-            renderer.cmb.SetGlobalTexture(MotionVectorRT, MotionVectorRT);
+            
 
             renderer.context.ExecuteCommandBuffer(renderer.cmb);
             renderer.cmb.Clear();
