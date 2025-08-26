@@ -36,11 +36,7 @@ Shader "Hidden/Pix/Deferred"
             #pragma shader_feature DEBUG_LIGHT
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "lib/light.hlsl"
-            #include "lib/gbuffer.hlsl"
-            #include "lib/sss.hlsl"
-            #include "lib/shading.hlsl"
-            #include "lib/ibl.hlsl"
+            #include "lib/standard.hlsl"
 
             struct AttributesDepth
             {
@@ -78,39 +74,10 @@ Shader "Hidden/Pix/Deferred"
                 float2 uv = input.uv;
                 MaterialData matData = UnpackGBuffer(uv);
 
-                if(matData.shadingModel == SHADING_MODEL_UNLIT)
-                    return half4(matData.albedo, 1);
-
-                // return selfOcclusion(matData, matData.reflectDir, matData.roughness);
-
                 half3 result = half3(0, 0, 0);
-
-                evaluateIBL(matData, uv, result);
+                evaluateAll(matData, uv, result);
                 
-                if(PIX_LIGHT_COUNT > 0){
-                    [loop]
-                    for(int i = 0;i<PIX_LIGHT_COUNT;i++)
-                    {
-                        PixLight light = GetPixLight(i);
-
-                        if(light.enabled)
-                            evaluateLight(light, matData, uv, result);
-                    }
-                }
-
-                #ifdef FOG
-                evaluateFog(matData, result);
-                #endif
-
-                
-
-                half3 ldr = HDR2LDR(result);
-
-                #ifdef PP_SUN_VOLUME
-                evaluateSunVolume(ldr, uv);
-                #endif
-                
-                return half4(ldr,1);
+                return half4(result,1);
             }
             ENDHLSL
         }

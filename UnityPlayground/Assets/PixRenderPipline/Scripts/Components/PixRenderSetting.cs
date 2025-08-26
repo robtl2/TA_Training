@@ -14,11 +14,11 @@ namespace PixRenderPipline
             Deferred,
         }
        
-        public enum Style
-        {
-            PBR,
-            NPR,
-        }
+        // public enum Style
+        // {
+        //     PBR,
+        //     NPR,
+        // }
 
         public enum DownSampleSize
         {
@@ -29,7 +29,7 @@ namespace PixRenderPipline
 
         #region main
         public Pipeline pipeline = Pipeline.Forward;
-        public Style style;
+        // public Style style;
 
         public bool GPU_OCC_Culling = true;
 
@@ -124,7 +124,6 @@ namespace PixRenderPipline
             ViewDir,
             NdotV,
             Depth,
-            MotionVector,
         }
 
         [Header("GBuffer Debug")]

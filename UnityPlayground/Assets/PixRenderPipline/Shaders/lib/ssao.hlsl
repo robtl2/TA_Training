@@ -20,7 +20,7 @@ half calculateSSAO(half2 uv, half depth_src, half3 pos_src, half3 normalWS)
     half maxDistance = _SSAO_Clip.x;
     half rMaxDistance = rcp(maxDistance);
 
-    half clip = 0.3;
+    half clip = 0.2h;
 
     depth_src += SSAO_BIASE;
 

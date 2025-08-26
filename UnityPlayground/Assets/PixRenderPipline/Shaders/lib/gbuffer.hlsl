@@ -166,127 +166,115 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     return gbuffer;
 }
 
+MaterialData PackMaterialData(half2 screenUV, half shadingModel, half3 albedo, half metallic, half linearRoughness, half anisotropy,
+    half4 bentNormal, float3 positionWS, half3 tangentWS, half3 bitangentWS, half3 normalWS, half3 normalVS, half3x3 tbnVS, 
+    int sssProfileIndex){
+    
+    half ndcDepth = sampleDepth(screenUV);
+
+    half perceptualRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, linearRoughness);
+    half roughness = perceptualRoughness*perceptualRoughness;
+    
+    half ior = IOR;
+    if (shadingModel == SHADING_MODEL_HAIR)
+        ior *= 1.5;
+    
+    half reflectance = iorToF0(max(1.0, ior), 1.0);
+    half3 f0 = computeF0(albedo, metallic, reflectance);
+
+    float3 cameraPos = _WorldSpaceCameraPos;
+    float3 viewDir = cameraPos - positionWS;
+    float depth = length(viewDir);
+    viewDir /= depth;
+
+    half fresnel = 1-normalVS.z;
+    fresnel = pow5(fresnel);
+    
+    half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV);
+    half sunVolume = downSampleColor.r;
+    half ssao = downSampleColor.g;
+
+    PixSSSProfile sssProfile = GetPixSSSProfile(sssProfileIndex);
+
+    MaterialData matData;
+        matData.shadingModel = shadingModel;
+        matData.albedo = albedo;
+        matData.metallic = metallic;
+        matData.roughness = roughness;
+        matData.perceptualRoughness = perceptualRoughness;
+        matData.anisotropy = anisotropy;
+        matData.diffuse = computeDiffuseColor(albedo, metallic);
+        matData.f0 = f0;
+        matData.ao = bentNormal.a;
+        matData.bentNormal = bentNormal.xyz;
+        matData.positionWS = positionWS;
+        matData.viewDir = viewDir;
+        matData.depth = depth;
+        matData.tangentWS = tangentWS;
+        matData.bitangentWS = bitangentWS;
+        matData.normalWS = normalWS;
+        matData.reflectDir = reflect(-viewDir, normalWS);
+        matData.ndcDepth = ndcDepth;
+        matData.normalVS = normalVS;
+        matData.NoV = normalVS.z;
+        matData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel); 
+        matData.viewToWorld = tbnVS;
+        matData.sssProfile = sssProfile;
+        matData.sunVolume = sunVolume;
+        matData.ssao = ssao;
+
+        #ifdef DEBUG_LIGHT
+        matData.albedo = _DebugBrightness;
+        matData.diffuse = _DebugBrightness;
+        #endif
+
+    return matData;
+}
+
 MaterialData UnpackGBuffer(float2 uv)
 {
     half4 gbuffer_0 = SAMPLE_TEXTURE2D(_PixGBuffer_0, sampler_PixGBuffer_0, uv);
     half4 gbuffer_1 = SAMPLE_TEXTURE2D(_PixGBuffer_1, sampler_PixGBuffer_1, uv);
     half4 gbuffer_2 = SAMPLE_TEXTURE2D(_PixGBuffer_2, sampler_PixGBuffer_2, uv);
-#ifdef MOTION_VECTOR_ON
-    half4 gbuffer_3 = SAMPLE_TEXTURE2D(_PixGBuffer_3, sampler_PixGBuffer_3, uv);
-#endif
-    // float2 ndcPos = SAMPLE_TEXTURE2D(_PixEarlyZDepth, sampler_PixEarlyZDepth, uv).zw;
-    half ndcDepth = sampleDepth(uv);
-    half ndcDepthDownSample = sampleDepthDownSample(uv);
 
     half3 albedo = gbuffer_0.rgb;
     half3 normalVS = UnpackNormalHemiOctEncode(gbuffer_1.xy*2-1);
     half3 tangentWS = UnpackNormalHemiOctEncode(gbuffer_2.xy*2-1);
+    half ndcDepth = sampleDepth(uv);
 
-    float3 worldPos = ReconstructWorldPos(uv, ndcDepth);
-
-    half3 cameraPos = _WorldSpaceCameraPos;
-    half3 viewDir = cameraPos - worldPos;
-    half depth = length(viewDir);
-    viewDir /= depth;
+    float3 positionWS = ReconstructWorldPos(uv, ndcDepth);
     
-    half3x3 viewToWorld = GetMatrix_WorldToView(worldPos);
+    half3x3 viewToWorld = GetMatrix_WorldToView(positionWS);
     half3 normalWS = mul(normalVS, viewToWorld);
     half3 bitangentWS = cross(normalWS, tangentWS);
 
     half2 params = gbuffer_2.zw;
-    half perceptualRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, params.x);
-    half roughness = perceptualRoughness*perceptualRoughness;
+    half linearRoughness = params.x;
     half packedMetallicShadingModel = params.y;
     int metallicInt, shadingModel;
     UnpackFloatToTwoInt(packedMetallicShadingModel, metallicInt, shadingModel);
     half metallic = (half)metallicInt/31.0;
 
-    half ior = IOR;
-
     int sssProfileIndex = 0;
-    PixSSSProfile sssProfile;
     // shadingModel是Hair时，是用metallic来装的anisotropy
     half anisotropy = metallic*2 - 1;
     if (shadingModel == SHADING_MODEL_HAIR){
         metallic = 0;
-        ior *= 1.5;
     }else if (shadingModel == SHADING_MODEL_SSS){
         metallic = 0;
         sssProfileIndex = metallicInt;
     }
-    sssProfile = GetPixSSSProfile(sssProfileIndex);
-
-    half reflectance = iorToF0(max(1.0, ior), 1.0);
-    half3 f0 = computeF0(albedo, metallic, reflectance);
-
-    if (shadingModel == SHADING_MODEL_HAIR)
-        f0*=1.2;
-
-    half3 diffuse = computeDiffuseColor(albedo, metallic);
 
     half ao = gbuffer_0.a;
     half3 bentNormalVS = UnpackNormalHemiOctEncode(gbuffer_1.zw*2-1);
     half3 bentNormalWS = mul(bentNormalVS, viewToWorld);
+    half4 bentNormal = half4(bentNormalWS, ao);
 
-    half fresnel = 1-normalVS.z;
-    fresnel = pow5(fresnel);
-
-
-    half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv).rgb;
-    half sunVolume = downSampleColor.r;
-    half ssao = downSampleColor.g;
-    // 暂时不用
-    // half4 shadow = DecodeShadow(downSampleColor.b);
-    // half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
-
-    MaterialData matData;
-    matData.sunVolume = sunVolume;
-    matData.ssao = ssao;
-    // matData.shadows = shadows;
-    matData.shadingModel = shadingModel;
-    matData.albedo = albedo;
-    matData.diffuse = diffuse;
-    matData.f0 = f0;
-    matData.perceptualRoughness = perceptualRoughness;
-    matData.roughness = roughness;
-    matData.metallic = metallic;
-    matData.anisotropy = anisotropy;
-    matData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel);
-    matData.ao = ao;
-    matData.bentNormal = bentNormalWS;
-    matData.positionWS = worldPos;
-    matData.normalWS = normalWS;
-    matData.tangentWS = tangentWS;
-    matData.bitangentWS = bitangentWS;
-    matData.normalVS = normalVS;
-    matData.viewDir = viewDir;
-    matData.reflectDir = reflect(-viewDir, normalWS);
-    matData.NoV = normalVS.z;
-    matData.ndcDepth = ndcDepth;
-    matData.ndcDepthDownSample = ndcDepthDownSample;
-    matData.depth = depth;
-    matData.viewToWorld = viewToWorld;
-    matData.sssProfile = sssProfile;
-
-#ifdef DEBUG_LIGHT
-    matData.albedo = _DebugBrightness;
-    matData.diffuse = _DebugBrightness;
-#endif
-
-#ifdef MOTION_VECTOR_ON
-    matData.motionVector = gbuffer_3.xy*2-1;
-#else
-    matData.motionVector = half2(0, 0);
-#endif
-
-    if (shadingModel == SHADING_MODEL_SSS && sssProfile.type == 1){
-        half3 sssNormal = GetScreenSpaceBlurredNormal(sssProfile, viewToWorld, depth, uv, _PixGBuffer_0_TexelSize);
-        sssProfile.sssNormal = sssNormal;
-    }
-    else
-        sssProfile.sssNormal = bentNormalWS;
+    MaterialData matData = PackMaterialData(uv, shadingModel, albedo, metallic, linearRoughness, anisotropy,
+    bentNormal, positionWS, tangentWS, bitangentWS, normalWS, normalVS, viewToWorld, sssProfileIndex);
 
     return matData;
+    
 }
 
 

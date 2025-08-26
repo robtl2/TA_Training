@@ -118,8 +118,6 @@ struct MaterialData
     half3x3 viewToWorld;
 
     PixSSSProfile sssProfile;
-
-    half2 motionVector;
 };
 
 

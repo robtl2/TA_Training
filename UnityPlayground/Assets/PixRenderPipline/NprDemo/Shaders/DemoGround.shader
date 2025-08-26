@@ -48,17 +48,8 @@ Shader "Pix/DemoGround"
             #pragma multi_compile _ FOG
             #pragma multi_compile _ PP_SUN_VOLUME
             #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
-            #pragma shader_feature EXPORT_TANGENT 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-
-            #if defined TAA || defined MOTION_BLUR
-                #define MOTION_VECTOR_ON
-            #endif
-
-            #include "../../Shaders/lib/gbuffer.hlsl"
-            #include "../../Shaders/lib/ibl.hlsl"
-            #include "../../Shaders/lib/light.hlsl"
-            #include "../../Shaders/lib/shading.hlsl"
+            #include "../../Shaders/lib/standard.hlsl"
             
             struct Attributes
             {
@@ -90,12 +81,6 @@ Shader "Pix/DemoGround"
             half _ColorMultiply;
             half _NormalIntensity;
             half3 _Roughness;
-            float4x4 _MatrixVP;
-
-            #ifdef MOTION_VECTOR_ON
-            float4x4 _PreviousLocalToWorld;
-            float4x4 _MatrixVP_Prev;
-            #endif
 
             TEXTURE2D(_GrassTex);SAMPLER(sampler_GrassTex);float4 _GrassTex_ST;
             TEXTURE2D(_SoilTex);SAMPLER(sampler_SoilTex);float4 _SoilTex_ST;
@@ -172,151 +157,46 @@ Shader "Pix/DemoGround"
                 half3 brickColor = SAMPLE_TEXTURE2D(_BrickTex, sampler_BrickTex, input.uv2.zw).rgb;
                 half2 mix = input.color.rb;
 
-                half3 color = lerp(soilColor,brickColor,  mix.r);
-                color = lerp(color, grassColor, mix.g);
-                color *= _Color.rgb;
-                color *= _ColorMultiply;
+                half3 albedo = lerp(soilColor, brickColor, mix.r);
+                albedo = lerp(albedo, grassColor, mix.g);
+                albedo *= _Color.rgb;
+                albedo *= _ColorMultiply;
 
-                half3 albedo = color;
-
-                half2 uv = input.uv1.xy;
-
-                half roughness = lerp(_Roughness.g, _Roughness.b, mix.r);
-                roughness = lerp(roughness, _Roughness.r, mix.g);
+                half linearRoughness = lerp(_Roughness.g, _Roughness.b, mix.r);
+                linearRoughness = lerp(linearRoughness, _Roughness.r, mix.g);
 
                 half3 ndcPos = input.screenUV.xyz/input.screenUV.w;
                 half2 screenUV = ndcPos.xy*0.5+0.5;
                 screenUV.y = 1-screenUV.y;
-                half ndcDepth = ndcPos.z;
-                half ndcDepthDownSample = sampleDepthDownSample(uv);
-
-                #if _ALPHATEST_ON
-                    TestAlpha(color.a, _Cutoff, screenUV);
-                #endif
 
                 float3 normal = normalize(input.tbnWS[2]);
                 float3 tangent = input.tbnWS[0];
                 float3 bitangent = input.tbnWS[1];
-
-                half metallic = 0;
-                half perceptualRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, roughness);
-                roughness = perceptualRoughness*perceptualRoughness;
-
                 half4 bentNormal = half4(normal, 1);
-                float2 motionVector = float2(0, 0);
+                half3 positionWS = input.positionWS.xyz;
+                half3 normalVS = input.tbnVS[2];
+                normalVS.z = max(0.01, normalVS.z);
+               
+                MaterialData matData = PackMaterialData(screenUV, 1, albedo, 0, linearRoughness, 0,
+                    bentNormal, positionWS, tangent, bitangent, normal, normalVS, input.tbnVS, 0);
+
+                //----------------shading
+                half3 result = half3(0, 0, 0);
+                evaluateAll(matData, screenUV, result);
 
                 #ifdef MOTION_VECTOR_ON
                 float2 preNdcPos = input.prevPosCS.xy / input.prevPosCS.w;
                 float2 preScreenUV = preNdcPos * 0.5 + 0.5;
                 preScreenUV.y = 1-preScreenUV.y;
-                motionVector = preScreenUV - screenUV;
-                #endif
+                half2 motionVector = preScreenUV - screenUV;
 
-                half ior = 2;
-                half reflectance = iorToF0(max(1.0, ior), 1.0);
-                half3 f0 = computeF0(albedo, metallic, reflectance);
-
-                half3 positionWS = input.positionWS.xyz;
-                half3 cameraPos = _WorldSpaceCameraPos;
-                half3 viewDir = cameraPos - positionWS;
-                half depth = length(viewDir);
-                viewDir /= depth;
-
-                half3 normalVS = input.tbnVS[2];
-                normalVS.z = max(0.01, normalVS.z);
-                half NoV = normalVS.z;
-                half fresnel = 1-NoV;
-                fresnel = pow5(fresnel);
-
-                half anisotropy = 0;
-
-                PixSSSProfile sssProfile = GetPixSSSProfile(0);
-
-                half2 downSampleJitter = hash22(screenUV)*_PixDownSampling_TexelSize;
-                half3 downSampleColor = SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, screenUV+downSampleJitter);
-                half sunVolume = downSampleColor.r;
-                half ssao = downSampleColor.g;
-                // half4 shadow = DecodeShadow(downSampleColor.b);
-                // half shadows[4] = {shadow.x, shadow.y, shadow.z, shadow.w};
-
-                MaterialData matData;
-                    matData.shadingModel = 1;
-                    matData.albedo = albedo;
-                    matData.metallic = metallic;
-                    matData.roughness = roughness;
-                    matData.perceptualRoughness = perceptualRoughness;
-                    matData.anisotropy = anisotropy;
-                    matData.diffuse = computeDiffuseColor(albedo, metallic);
-                    matData.f0 = f0;
-                    matData.ao = bentNormal.a;
-                    matData.bentNormal = bentNormal.xyz;
-                    
-                    matData.positionWS = positionWS;
-                    matData.normalWS = normal;
-                    matData.tangentWS = input.tbnWS[0];
-                    matData.bitangentWS = input.tbnWS[1];
-
-                    matData.normalVS = normalVS;
-                    matData.viewDir = viewDir;
-                    matData.reflectDir = reflect(-viewDir, matData.normalWS);
-                    matData.NoV = NoV;
-                    matData.fresnel = lerp(f0, 0.95, -roughness*fresnel + fresnel); 
-
-                    matData.ndcDepth = ndcDepth;
-                    matData.ndcDepthDownSample = ndcDepthDownSample;
-                    matData.depth = depth;
-                    matData.viewToWorld = input.tbnVS;
-
-                    matData.motionVector = motionVector;
-                    matData.sssProfile = sssProfile;
-
-                    matData.sunVolume = sunVolume;
-                    matData.ssao = ssao;
-                    // matData.shadows = shadows;
-
-                    #ifdef DEBUG_LIGHT
-                    matData.albedo = _DebugBrightness;
-                    matData.diffuse = _DebugBrightness;
-                    #endif
-
-                //----------------shading
-                half3 result = half3(0, 0, 0);
-
-                if(matData.shadingModel == SHADING_MODEL_UNLIT){
-                    result = matData.albedo;
-                }else{
-                    evaluateIBL(matData, screenUV, result);
-                
-                    if(PIX_LIGHT_COUNT > 0){
-                        [loop]
-                        for(int i = 0;i<PIX_LIGHT_COUNT;i++)
-                        {
-                            PixLight light = GetPixLight(i);
-
-                            if(light.enabled)
-                                evaluateLight(light, matData, screenUV, result);
-                        }
-                    }
-
-                    #ifdef FOG
-                    evaluateFog(matData, result);
-                    #endif
-                }
-
-                half3 ldr = HDR2LDR(result);
-
-                #ifdef PP_SUN_VOLUME
-                evaluateSunVolume(ldr, screenUV);
-                #endif
-
-                #ifdef TAA
                 FragmentOutput output;
-                output.color = half4(ldr, 1);
+                output.color = half4(result, 1);
                 output.motionVector = half4(motionVector*0.5 + 0.5, 0, 0);
                 
                 return output;
                 #else
-                return half4(ldr, 1);
+                return half4(result, 1);
                 #endif
                 
             }
@@ -335,7 +215,7 @@ Shader "Pix/DemoGround"
             #pragma multi_compile_instancing
             #pragma multi_compile _ TAA
             #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
-            #pragma shader_feature EXPORT_TANGENT 
+            // #pragma shader_feature EXPORT_TANGENT 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             #if defined TAA || defined MOTION_BLUR
@@ -486,8 +366,6 @@ Shader "Pix/DemoGround"
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalTex, sampler_NormalTex, uv));
                 float3x3 TBN = float3x3(input.tangentVS, input.bitangentVS, input.normalVS);
                 normal = lerp(normal, normalize(mul(normalTS, TBN)), _NormalIntensity);
-
-                
 
                 half4 bentNormal = half4(normal, 1);
                 

@@ -221,16 +221,16 @@ namespace PixRenderPipline
                 Shader.DisableKeyword("FORWARD_PIPELINE");
             }
 
-            if (setting.style == PixRenderSetting.Style.PBR)
-            {
-                Shader.EnableKeyword("PIX_STYLE_PBR");
-                Shader.DisableKeyword("PIX_STYLE_NPR");
-            }
-            else
-            {
-                Shader.EnableKeyword("PIX_STYLE_NPR");
-                Shader.DisableKeyword("PIX_STYLE_PBR");
-            }
+            // if (setting.style == PixRenderSetting.Style.PBR)
+            // {
+            //     Shader.EnableKeyword("PIX_STYLE_PBR");
+            //     Shader.DisableKeyword("PIX_STYLE_NPR");
+            // }
+            // else
+            // {
+            //     Shader.EnableKeyword("PIX_STYLE_NPR");
+            //     Shader.DisableKeyword("PIX_STYLE_PBR");
+            // }
 
             if(setting.Enable_Fog)
             {

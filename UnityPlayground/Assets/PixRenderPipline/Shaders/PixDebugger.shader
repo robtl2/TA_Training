@@ -81,7 +81,7 @@ Shader "Hidden/Pix/Debugger"
                 float2 uv = input.uv;
                 MaterialData matData = UnpackGBuffer(uv);
 
-                half3 debugColor[13] = {
+                half3 debugColor[12] = {
                     matData.albedo,
                     matData.diffuse,
                     matData.f0,
@@ -94,11 +94,6 @@ Shader "Hidden/Pix/Debugger"
                     matData.viewDir,
                     matData.NoV.xxx,
                     matData.depth.xxx,
-                #ifdef MOTION_VECTOR_ON
-                    half3(matData.motionVector.xy,0),
-                #else
-                    half3(0,0,1),
-                #endif
                 };
 
                 half3 rgb = debugColor[_Channel];
