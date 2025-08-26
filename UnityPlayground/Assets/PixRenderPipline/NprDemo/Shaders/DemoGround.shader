@@ -47,7 +47,7 @@ Shader "Pix/DemoGround"
             #pragma multi_compile _ TAA
             #pragma multi_compile _ FOG
             #pragma multi_compile _ PP_SUN_VOLUME
-            #pragma shader_feature PIX_STYLE_PBR PIX_STYLE_NPR 
+            #pragma shader_feature DEBUG_LIGHT
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "../../Shaders/lib/standard.hlsl"
             

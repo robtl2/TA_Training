@@ -60,6 +60,7 @@ Shader "Pix/Standard"
             #pragma multi_compile _ FOG
             #pragma multi_compile _ PP_SUN_VOLUME
             #pragma shader_feature ENABLE_BENTNORMAL
+            #pragma shader_feature DEBUG_LIGHT
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "lib/standard.hlsl"
 
@@ -110,8 +111,8 @@ Shader "Pix/Standard"
 
                 half3 albedo = color.rgb;
                 float3 normal = normalize(input.tbnWS[2]);
-                float3 tangent = input.tbnWS[0];
-                float3 bitangent = input.tbnWS[1];
+                float3 tangent = normalize(input.tbnWS[0]);
+                float3 bitangent = normalize(input.tbnWS[1]);
 
                 half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalTex, sampler_NormalTex, input.uv));
                 normal = lerp(normal, normalize(mul(normalTS, float3x3(tangent,bitangent,normal))), _NormalIntensity);
@@ -131,7 +132,7 @@ Shader "Pix/Standard"
                 normalVS.z = max(0.01, normalVS.z);
 
                 half anisotropy = _Anisotropy;
-                if (_ShadingModel != SHADING_MODEL_SSS){
+                if (_ShadingModel != SHADING_MODEL_HAIR){
                     anisotropy = 0;
                 }
 

@@ -21,7 +21,6 @@
 
 
 float4x4 _MatrixVP;
-half _DebugBrightness;
 
 #ifdef MOTION_VECTOR_ON
 float4x4 _MatrixVP_Prev;

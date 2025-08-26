@@ -778,7 +778,7 @@ MonoBehaviour:
   Enable_Fog: 0
   FogParams: {x: 0.1, y: 0.1, z: 200, w: 10}
   FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  ao_factor: 0.62
+  ao_factor: 0.68
   Enable_SSAO: 1
   ssao_quality: 2
   ssao_factor: 0.876
@@ -797,7 +797,7 @@ MonoBehaviour:
   Bloom_Radius: 0.73
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
-  enable_TAA: 1
+  enable_TAA: 0
   TAA_jitter: 0.5
   TAA_histroy: 0.806
   debugMode: 0

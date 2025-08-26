@@ -166,7 +166,7 @@ GBuffer PackGBuffer(half4 color, int shadingModel, half3 normalVS, half4 bentNor
     return gbuffer;
 }
 
-MaterialData PackMaterialData(half2 screenUV, half shadingModel, half3 albedo, half metallic, half linearRoughness, half anisotropy,
+MaterialData PackMaterialData(half2 screenUV, int shadingModel, half3 albedo, half metallic, half linearRoughness, half anisotropy,
     half4 bentNormal, float3 positionWS, half3 tangentWS, half3 bitangentWS, half3 normalWS, half3 normalVS, half3x3 tbnVS, 
     int sssProfileIndex){
     
