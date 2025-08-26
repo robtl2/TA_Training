@@ -289,7 +289,7 @@ MonoBehaviour:
   f90: 1
   effectArea: {fileID: 0}
   areaFadeRange: 0
-  enableShadowMap: 1
+  enableShadowMap: 0
   shadowMapSize: 512
   shadowMapJitter: 1
   shadowMapBias: 0.0141
@@ -301,8 +301,8 @@ MonoBehaviour:
   contactRayLength: 0.707
   contactSampleCount: 7
   contactBias: 0.0000061
-  enableVisbilityShadow: 0
-  visibilityShadowSoftness: 0.174
+  enableVisbilityShadow: 1
+  visibilityShadowSoftness: 0.001
   volumeLight: 0
   bakedShadowMap: {fileID: 0}
 --- !u!23 &164846891
@@ -771,7 +771,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pipeline: 1
-  style: 0
   GPU_OCC_Culling: 0
   defaultFilterMode: 1
   downSampleSize: 1
@@ -779,7 +778,7 @@ MonoBehaviour:
   Enable_Fog: 0
   FogParams: {x: 0.1, y: 0.1, z: 200, w: 10}
   FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  ao_factor: 0.702
+  ao_factor: 0.62
   Enable_SSAO: 1
   ssao_quality: 2
   ssao_factor: 0.876

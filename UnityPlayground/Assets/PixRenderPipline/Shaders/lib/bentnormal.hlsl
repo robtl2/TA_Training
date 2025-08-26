@@ -13,8 +13,8 @@ half selfOcclusion(MaterialData matData, half3 dir){
 
 half selfOcclusion(MaterialData matData, half3 dir, half roughness){
     half occ = selfOcclusion(matData, dir);
-    half from = lerp(0.2, 0.0, roughness);
-    half to = lerp(0.3, 1, roughness);
+    half from = lerp(0.0, 0.0, roughness);
+    half to = lerp(0.2, 1, roughness);
     occ = remap01(from,to,occ);
     return occ;
 }

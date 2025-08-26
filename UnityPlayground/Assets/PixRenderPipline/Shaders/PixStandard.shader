@@ -236,7 +236,8 @@ Shader "Pix/Standard"
 
                 half4 bentNormal = half4(normal, 1);
                 #ifdef ENABLE_BENTNORMAL
-                bentNormal = input.bentNormalVS;
+                bentNormal = input.bentNormalWS;
+                bentNormal.xyz = mul(input.tbnVS, bentNormal.xyz);
                 #endif
 
                 float2 motionVector = float2(0, 0);
