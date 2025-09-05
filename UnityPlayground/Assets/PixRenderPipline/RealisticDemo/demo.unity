@@ -465,7 +465,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 611652128}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fbc2a0b95cd494323b3a8ce6cf95c9e2, type: 3}
   m_Name: 
@@ -721,8 +721,8 @@ MonoBehaviour:
   profileName: skin_girl_default
   sssType: 0
   scatteringColor: {r: 0.9622642, g: 0, b: 0, a: 1}
-  scatteringRadius: 0.261
-  scatteringIntensity: 0.246
+  scatteringRadius: 0.257
+  scatteringIntensity: 0.093
   transmissionColor: {r: 1, g: 0, b: 0, a: 1}
   transmissionRadius: 1
   transmissionIntensity: 1
@@ -778,11 +778,11 @@ MonoBehaviour:
   Enable_Fog: 0
   FogParams: {x: 0.1, y: 0.1, z: 200, w: 10}
   FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  ao_factor: 0.68
+  ao_factor: 0.7
   Enable_SSAO: 1
-  ssao_quality: 2
-  ssao_factor: 0.876
-  ssao_radius: 19.1
+  ssao_quality: 1
+  ssao_factor: 1
+  ssao_radius: 31.1
   ssao_clipByDistance: 5
   Enable_SSAO_2nd: 0
   ssao_factor_2nd: 1
@@ -797,7 +797,7 @@ MonoBehaviour:
   Bloom_Radius: 0.73
   Bloom_Intensity: 1
   Enable_Tonemapping: 1
-  enable_TAA: 0
+  enable_TAA: 1
   TAA_jitter: 0.5
   TAA_histroy: 0.806
   debugMode: 0
@@ -891,7 +891,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -3371277038297954237, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -3371277038297954237, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -903,7 +903,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -179203690647629487, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -179203690647629487, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_RenderingLayerMask
@@ -935,7 +935,7 @@ PrefabInstance:
       objectReference: {fileID: 4300000, guid: 5394221b6ade04497a657e45366feca5, type: 2}
     - target: {fileID: 1492799238806561092, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1492799238806561092, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -943,7 +943,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 54ca34bc5db3243799f17da68400cda5, type: 2}
     - target: {fileID: 1630794972795428178, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1630794972795428178, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -955,7 +955,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2853768270042634523, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2853768270042634523, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -967,7 +967,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4927228362899884761, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4927228362899884761, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_CastShadows
@@ -983,7 +983,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6868716418057165105, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6868716418057165105, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1011,7 +1011,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8166072703074800176, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8166072703074800176, guid: fe12b64575b6a474c94aa858b9184ab9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

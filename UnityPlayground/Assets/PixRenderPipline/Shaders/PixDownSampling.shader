@@ -208,8 +208,10 @@ Shader "Hidden/Pix/DownSampling"
                 half2 offset = half2(0, _PixDownSampling_TexelSize.y)*_BlurDownsample;
                 result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset).xy;
                 result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset*2).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv+offset*3).xy;
                 result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset).xy;
                 result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset*2).xy;
+                result.xy += SAMPLE_TEXTURE2D(_PixDownSampling, sampler_PixDownSampling, uv-offset*3).xy;
                 result.xy *= 0.2;
 
                 return half4(result,0);

@@ -56,53 +56,30 @@ namespace PixRenderPipline
             }
         }
 
-        static bool preTAA_enabled = false;
         public void ExecuteGPUskinPass(PixRenderer renderer)
         {
-            var setting = PixRenderSetting.instance;
-
-            if (setting.enable_TAA != preTAA_enabled)
+            
+            foreach (var rm in meshInRenderer)
             {
-                preTAA_enabled = setting.enable_TAA;
-
-                if (!preTAA_enabled)
-                {
-                    foreach (var rm in meshInRenderer)
-                    {
-                        var ren = rm.Key;
-                        ren.enabled = true;
-
-                        var mat = ren.sharedMaterial;
-                        mat.DisableKeyword("SKINNED_MESH");
-                    }
-
-                    return;
-                }
-                else
-                {
-                    foreach (var rm in meshInRenderer)
-                    {
-                        rm.Key.enabled = false;
-                        rm.Key.sharedMaterial.EnableKeyword("SKINNED_MESH");
-                    }
-                }
+                rm.Key.enabled = false;
+                rm.Key.sharedMaterial.EnableKeyword("SKINNED_MESH");
             }
 
             int passID = 0;
-            if (renderer.cmb.name == "PixEarlyZPass")
+            if (renderer.cmb.name == "PixGBufferPass")
                 passID = 1;
-            else if (renderer.cmb.name == "PixShadowMap")
-                passID = 2;
-            else if (renderer.cmb.name == "PixTransparentPass")
+            else if (renderer.cmb.name == "PixEarlyZPass")
                 passID = 3;
-
+            else if (renderer.cmb.name == "PixShadowMap")
+                passID = 4;
+                
             foreach (var rm in meshInRenderer)
             {
                 var ren = rm.Key;
                 var mat = ren.sharedMaterial;
                 var mesh = rm.Value;
 
-                if (renderer.FrustumCull(mesh.bounds)) 
+                if (renderer.FrustumCull(mesh.bounds))
                     renderer.cmb.DrawMesh(mesh, ren.transform.localToWorldMatrix, mat, 0, passID);
             }
         }

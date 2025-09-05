@@ -12,7 +12,7 @@ namespace PixRenderPipline
     /// </summary>
     public class EarlyZPass : PixPassBase
     {
-        public EarlyZPass(PixRenderer renderer) : base("PixForwardEarlyZPass", renderer) { }
+        public EarlyZPass(PixRenderer renderer) : base("PixEarlyZPass", renderer) { }
         static ShaderTagId depthNormalTag = new("PixForwardEarlyZ");
         public static readonly int buffName = Shader.PropertyToID("_PixDepthNormal");
         public static readonly int downSample = Shader.PropertyToID("_PixDepthNormalDownSample");
@@ -28,10 +28,14 @@ namespace PixRenderPipline
             renderer.cmb.ClearRenderTarget(true, true, Color.clear);
             RendererList list = GetRendererList(depthNormalTag, SortingCriteria.CommonOpaque, RenderQueueRange.opaque);
 
+            TriggerEvent(PixRenderEventName.BeforeEarlyZ);
+
             if (list.isValid)
                 renderer.cmb.DrawRendererList(list);
 
             PixInstance.DrawPass(renderer, 3, renderer.frustum);
+
+            TriggerEvent(PixRenderEventName.AfterEarlyZ);
 
             renderer.cmb.GetTemporaryRT(downSample, renderer.size.z, renderer.size.w, 0, FilterMode.Point, RenderTextureFormat.ARGB32, renderer.colorSpace);
             renderer.cmb.SetRenderTarget(downSample);

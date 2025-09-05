@@ -137,6 +137,7 @@ void evaluateAll(MaterialData matData, half2 screenUV, inout half3 result){
     if(matData.shadingModel == SHADING_MODEL_UNLIT){
         result = matData.albedo;
     }else{
+
         evaluateIBL(matData, screenUV, result);
     
         if(PIX_LIGHT_COUNT > 0){
@@ -158,7 +159,6 @@ void evaluateAll(MaterialData matData, half2 screenUV, inout half3 result){
     result = HDR2LDR(result);
 
     #ifdef PP_SUN_VOLUME
-       
         evaluateSunVolume(result, screenUV);
     #endif
 }
